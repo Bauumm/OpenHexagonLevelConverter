@@ -3,6 +3,7 @@ from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
+import shutil
 import log
 import sys
 import os
@@ -63,6 +64,10 @@ def convert_pack(path, newpath):
                       files.get("pack.json")]
         for file in copy_files:
             file.save(os.path.relpath(file.path, path))
+        for file in os.listdir(os.path.join(path, "Music")):
+            if not file.endswith(".json"):
+                shutil.copyfile(os.path.join(path, "Music", file),
+                                "Music/" + file)
         log.info("Done")
 
 

@@ -72,7 +72,7 @@ NOT_SET_IN_ONINIT = [
 
 def convert(level_json, level_lua):
     if level_lua.get_function("onInit") is None:
-        level_lua.mixin_line("function onInit()\nend", line=-1)
+        level_lua.mixin_line("\nfunction onInit()\nend", line=-1)
     # 1.92 doesnt have this, so with that call we can overwrite the users
     # setting to behave like 1.92
     level_lua.mixin_line("a_syncMusicToDM(false)", "onInit")
@@ -83,6 +83,9 @@ def convert(level_json, level_lua):
             level_json.rename(key, PROPERTY_NAME_MAPPING[key])
             key = PROPERTY_NAME_MAPPING[key]
         if key in NOT_SET_IN_ONINIT:
+            if key == "luaFile":
+                # steam version starts from pack folder
+                level_json[key] = "Scripts/" + level_json[key]
             continue
         if key in required_defaults:
             del required_defaults[key]

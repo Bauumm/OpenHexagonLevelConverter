@@ -25,7 +25,6 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
     "3D_alpha_multiplier": ["s_get3dAlphaMult", "s_set3dAlphaMult"],
     "3D_alpha_falloff": ["s_get3dAlphaFalloff", "s_set3dAlphaFalloff"],
 })
-
 DIRECT_REPLACEMENTS = {
     "log": "u_log",
     "wall": "w_wall",
@@ -60,14 +59,16 @@ def convert_level_lua(level_lua):
     for function, newfunction in DIRECT_REPLACEMENTS.items():
         level_lua.replace_function_calls(function, newfunction)
     if not reimplementations.saved:
-        reimplementations.mixin_line(CONVERTER_PREFIX +
-                                     "LEVEL_PROPERTY_MAPPING=" +
+        reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
                                      LEVEL_PROPERTY_MAPPING.to_table() + "\n")
-        reimplementations.mixin_line(CONVERTER_PREFIX +
-                                     "STYLE_PROPERTY_MAPPING=" +
+        reimplementations.mixin_line("STYLE_PROPERTY_MAPPING=" +
                                      STYLE_PROPERTY_MAPPING.to_table() + "\n")
         reimplementations.replace("_getField(", CONVERTER_PREFIX + "getField(")
         reimplementations.replace("_setField(", CONVERTER_PREFIX + "setField(")
+        reimplementations.replace("LEVEL_PROPERTY_MAPPING", CONVERTER_PREFIX +
+                                  "LEVEL_PROPERTY_MAPPING")
+        reimplementations.replace("STYLE_PROPERTY_MAPPING", CONVERTER_PREFIX +
+                                  "STYLE_PROPERTY_MAPPING")
         reimplementations.save("Scripts/" + CONVERTER_PREFIX +
                                "lua_reimplementations.lua")
 
