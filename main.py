@@ -23,7 +23,7 @@ def get_files(folder):
     return structure
 
 
-def convert_level_jsons_and_luas(files):
+def convert_level_jsons_and_luas(files, sounds):
     log.info("Converting level json and lua files...")
     levels = files.get("Levels")
     level_luas = []
@@ -52,7 +52,7 @@ def convert_level_jsons_and_luas(files):
                      "reusing the script.")
         level_luas.append(lua_file.path)
         level_properties.convert(level_json, lua_file)
-        lua_functions.convert_level_lua(lua_file)
+        lua_functions.convert_level_lua(lua_file, sounds)
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
     return level_luas
@@ -68,7 +68,16 @@ def convert_pack(path, newpath):
         log.error("No pack.json found in", path)
         exit(1)
     else:
-        level_luas = convert_level_jsons_and_luas(files)
+        sounds = []
+        try:
+            sounds = os.listdir("Sounds")
+            log.info("Processing custom sounds...")
+        except FileNotFoundError:
+            pass
+        for sound in sounds:
+            shutil.copyfile(os.path.join(path, "Sounds", sound),
+                            "Sounds/" + sound)
+        level_luas = convert_level_jsons_and_luas(files, sounds)
         log.info("Converting other lua files...")
         scripts = files.get("Scripts")
         if scripts is not None:

@@ -1,6 +1,7 @@
 from level_properties import LEVEL_PROPERTY_MAPPING
 from extended_dict import ExtendedDict
 from lua_file import LuaFile
+from slpp import slpp
 
 
 # not including color objects due to 1.92 only being able to get/set strings,
@@ -34,7 +35,6 @@ DIRECT_REPLACEMENTS = {
     "getDifficultyMult": "u_getDifficultyMult",
     "execScript": "u_execScript",
     "wait": "t_wait",
-    "playSound": "u_playSound",
     "forceIncrement": "u_forceIncrement",
     "messageAdd": "e_messageAdd",
     "messageImportantAdd": "e_messageAddImportant",
@@ -54,11 +54,12 @@ def convert_lua(lua_file):
     lua_file.replace("math.randomseed(os.time())", "")
 
 
-def convert_level_lua(level_lua):
+def convert_level_lua(level_lua, sounds):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
                          "lua_reimplementations.lua\")")
     convert_lua(level_lua)
     if not reimplementations.saved:
+        reimplementations.mixin_line("SOUNDS=" + slpp.encode(sounds) + "\n")
         reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
                                      LEVEL_PROPERTY_MAPPING.to_table() + "\n")
         reimplementations.mixin_line("STYLE_PROPERTY_MAPPING=" +
@@ -69,6 +70,7 @@ def convert_level_lua(level_lua):
                                   "LEVEL_PROPERTY_MAPPING")
         reimplementations.replace("STYLE_PROPERTY_MAPPING", CONVERTER_PREFIX +
                                   "STYLE_PROPERTY_MAPPING")
+        reimplementations.replace("SOUNDS", CONVERTER_PREFIX + "SOUNDS")
         reimplementations.save("Scripts/" + CONVERTER_PREFIX +
                                "lua_reimplementations.lua")
 
