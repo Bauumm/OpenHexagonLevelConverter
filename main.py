@@ -4,9 +4,19 @@ import level_properties
 import lua_functions
 import dpath.util
 import shutil
+import events
 import log
 import sys
 import os
+
+
+def all_dict_values(dictionary):
+    for value in dictionary.values():
+        if type(value) == dict:
+            for new_value in all_dict_values(value):
+                yield new_value
+        else:
+            yield value
 
 
 def get_files(folder):
@@ -23,7 +33,7 @@ def get_files(folder):
     return structure
 
 
-def convert_level_jsons_and_luas(files, sounds):
+def convert_level(files, sounds):
     log.info("Converting level json and lua files...")
     levels = files.get("Levels")
     level_luas = []
@@ -51,11 +61,42 @@ def convert_level_jsons_and_luas(files, sounds):
             log.info("Created", lua_path, "due to", level_json.path,
                      "reusing the script.")
         level_luas.append(lua_file.path)
+        events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         lua_functions.convert_level_lua(lua_file, sounds)
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
     return level_luas
+
+
+def convert_sound(path):
+    sounds = []
+    try:
+        sounds = os.listdir(os.path.join(path, "Sounds"))
+        log.info("Processing custom sounds...")
+    except FileNotFoundError:
+        pass
+    for sound in sounds:
+        shutil.copyfile(os.path.join(path, "Sounds", sound), "Sounds/" + sound)
+    return sounds
+
+
+def convert_event(files):
+    event_files = files.get("Events")
+    if event_files is not None:
+        log.info("Converting Events...")
+        for event in event_files:
+            events.convert_external(event_files[event])
+
+
+def convert_lua(files, level_luas, path):
+    log.info("Converting other lua files...")
+    scripts = files.get("Scripts")
+    if scripts is not None:
+        for script in all_dict_values(scripts):
+            if script.path not in level_luas:
+                lua_functions.convert_lua(script)
+                script.save(os.path.relpath(script.path, path))
 
 
 def convert_pack(path, newpath):
@@ -68,34 +109,13 @@ def convert_pack(path, newpath):
         log.error("No pack.json found in", path)
         exit(1)
     else:
-        sounds = []
-        try:
-            sounds = os.listdir("Sounds")
-            log.info("Processing custom sounds...")
-        except FileNotFoundError:
-            pass
-        for sound in sounds:
-            shutil.copyfile(os.path.join(path, "Sounds", sound),
-                            "Sounds/" + sound)
-        level_luas = convert_level_jsons_and_luas(files, sounds)
-        log.info("Converting other lua files...")
-        scripts = files.get("Scripts")
-        if scripts is not None:
-
-            def convert_scripts(script_files):
-                for script in script_files.values():
-                    if type(script) == dict:
-                        convert_scripts(script)
-                        continue
-                    if script.path in level_luas:
-                        continue
-
-                    lua_functions.convert_lua(script)
-                    script.save(os.path.relpath(script.path, path))
-            convert_scripts(scripts)
-        log.info("Copying Music and Styles and pack.json...")
-        copy_files = [*files.get("Music", {}).values(),
-                      *files.get("Styles", {}).values(),
+        sounds = convert_sound(path)
+        level_luas = convert_level(files, sounds)
+        convert_event(files)
+        convert_lua(files, level_luas, path)
+        log.info("Copying Music, Styles and pack.json...")
+        copy_files = [*all_dict_values(files.get("Music", {})),
+                      *all_dict_values(files.get("Styles", {})),
                       files.get("pack.json")]
         for file in copy_files:
             file.save(os.path.relpath(file.path, path))

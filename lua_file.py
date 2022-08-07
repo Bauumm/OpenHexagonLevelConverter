@@ -66,6 +66,10 @@ class LuaFile(BaseFile):
                 new_function + self._text[node.func.stop_char + 1:]
         self._ast_tree = ast.parse(self._text)
 
+    def replace(self, text, newtext):
+        super().replace(text, newtext)
+        self._ast_tree = ast.parse(self._text)
+
     def save(self, path):
         super().save(path)
         if shutil.which("stylua") is None:

@@ -75,7 +75,3 @@ def convert_level_lua(level_lua, sounds):
         reimplementations.replace("SOUNDS", CONVERTER_PREFIX + "SOUNDS")
         reimplementations.save("Scripts/" + CONVERTER_PREFIX +
                                "lua_reimplementations.lua")
-
-# unhandled:
-#   execEvent
-#   enqueueEvent
