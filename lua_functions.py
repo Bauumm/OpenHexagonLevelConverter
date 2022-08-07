@@ -2,6 +2,7 @@ from level_properties import LEVEL_PROPERTY_MAPPING
 from extended_dict import ExtendedDict
 from lua_file import LuaFile
 from slpp import slpp
+import os
 
 
 # not including color objects due to 1.92 only being able to get/set strings,
@@ -30,8 +31,8 @@ DIRECT_REPLACEMENTS = {
     "log": "u_log",
     "wall": "w_wall",
     "getSides": "l_getSides",
-    "getSpeedMult": "l_getSpeedMult",
-    "getDelayMult": "l_getDelayMult",
+    "getSpeedMult": "l_getSpeedMultDM",
+    "getDelayMult": "l_getDelayMultDM",
     "getDifficultyMult": "u_getDifficultyMult",
     "execScript": "u_execScript",
     "wait": "t_wait",
@@ -45,7 +46,8 @@ DIRECT_REPLACEMENTS = {
 }
 CONVERTER_PREFIX = \
     "_converter_internal_do_not_use_unless_you_know_what_you_are_doing_"
-reimplementations = LuaFile("lua_functions.lua")
+reimplementations = LuaFile(os.path.join(os.path.dirname(__file__),
+                                         "lua_functions.lua"))
 
 
 def convert_lua(lua_file):
