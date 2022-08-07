@@ -1,6 +1,7 @@
 from json_file import JsonFile
 from lua_file import LuaFile
 import level_properties
+import lua_functions
 import dpath.util
 import log
 import sys
@@ -36,6 +37,7 @@ def convert_pack(path, newpath):
             lua_path = os.path.join("Scripts", level_json.get("lua_file"))
             lua_file = dpath.util.get(files, lua_path)
             level_properties.convert(level_json, lua_file)
+            lua_functions.convert(lua_file)
             level_json.save("Levels/" + level)
             lua_file.save(lua_path)
             exit()

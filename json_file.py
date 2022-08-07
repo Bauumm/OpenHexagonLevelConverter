@@ -1,10 +1,10 @@
-from slpp import slpp
+from extended_dict import ExtendedDict
 import chardet
 import json
 import os
 
 
-class JsonFile:
+class JsonFile(ExtendedDict):
     def __init__(self, path):
 
         def line_has_symbol(line, symbol):
@@ -41,26 +41,12 @@ class JsonFile:
                     if stop_comment is not None:
                         content += line[stop_comment + 2:] + "\n"
                         write = True
-        self._json = json.loads(content)
-
-    def get_keys(self):
-        return list(self._json.keys())
-
-    def get(self, value_name):
-        return self._json.get(value_name)
-
-    def delete(self, value_name):
-        if value_name in self._json:
-            del self._json[value_name]
-
-    def as_table(self):
-        return slpp.encode(self._json)
-
-    def mixin(self, value_name, value):
-        self._json[value_name] = value
+        json_dict = json.loads(content)
+        for key in json_dict:
+            self[key] = json_dict[key]
 
     def save(self, path):
         if "/" in path:
             os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
-            json.dump(self._json, file, indent=4)
+            json.dump(self, file, indent=4)

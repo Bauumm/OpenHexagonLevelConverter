@@ -1,3 +1,31 @@
+from level_properties import LEVEL_PROPERTY_MAPPING
+from extended_dict import ExtendedDict
+from lua_file import LuaFile
+
+
+# not including color objects due to 1.92 only being able to get/set strings,
+# ints, floats and bools in json
+STYLE_PROPERTY_MAPPING = ExtendedDict({
+    "hue_min": ["s_getHueMin", "s_setHueMin"],
+    "hue_max": ["s_getHueMax", "s_setHueMax"],
+    "hue_ping_pong": ["s_getHuePingPong", "s_setHuePingPong"],
+    "hue_increment": ["s_getHueIncrement", "s_setHueIncrement"],
+    "pulse_min": ["s_getPulseMin", "s_setPulseMin"],
+    "pulse_max": ["s_getPulseMax", "s_setPulseMax"],
+    "pulse_increment": ["s_getPulseIncrement", "s_setPulseIncrement"],
+    "3D_depth": ["s_get3dDepth", "s_set3dDepth"],
+    "3D_skew": ["s_get3dSkew", "s_set3dSkew"],
+    "3D_pulse_min": ["s_get3dPulseMin", "s_set3dPulseMin"],
+    "3D_pulse_max": ["s_get3dPulseMax", "s_set3dPulseMax"],
+    "3D_pulse_speed": ["s_get3dPulseSpeed", "s_set3dPulseSpeed"],
+    "3D_spacing": ["s_get3dSpacing", "s_set3dSpacing"],
+    "3D_perspective_multiplier": ["s_get3dPerspectiveMult",
+                                  "s_set3dPerspectiveMult"],
+    "3D_darken_multiplier": ["s_get3dDarkenMult", "s_set3dDarkenMult"],
+    "3D_alpha_multiplier": ["s_get3dAlphaMult", "s_set3dAlphaMult"],
+    "3D_alpha_falloff": ["s_get3dAlphaFalloff", "s_set3dAlphaFalloff"],
+})
+
 DIRECT_REPLACEMENTS = {
     "log": "u_log",
     "wall": "w_wall",
@@ -16,34 +44,29 @@ DIRECT_REPLACEMENTS = {
     "wallAdj": "w_wallAdj",
     "wallAcc": "w_wallAcc"
 }
-VAR_PREFIX = "_converter_internal_variable_do_not_use_"
+CONVERTER_PREFIX = \
+    "_converter_internal_do_not_use_unless_you_know_what_you_are_doing_"
+reimplementations = LuaFile("lua_functions.lua")
+reimplementations_saved = False
 
 
-# has to be called before level property conversion
-def convert(level_json, style_json, lua_file):
-    lua_file.mixin_line(VAR_PREFIX + "level_json=" + level_json.to_table())
-    lua_file.mixin_line(VAR_PREFIX + "style_json=" + style_json.to_table())
+def convert(level_lua):
+    level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
+                         "lua_reimplementations.lua\")")
     for function, newfunction in DIRECT_REPLACEMENTS.items():
-        lua_file.replace_function_calls(function, newfunction)
-    # TODO: Add Implementations for level and style property getters and
-    #        setters which will need to compromise in some places
+        level_lua.replace_function_calls(function, newfunction)
+    if not reimplementations_saved:
+        reimplementations.mixin_line(CONVERTER_PREFIX +
+                                     "LEVEL_PROPERTY_MAPPING=" +
+                                     LEVEL_PROPERTY_MAPPING.to_table() + "\n")
+        reimplementations.mixin_line(CONVERTER_PREFIX +
+                                     "STYLE_PROPERTY_MAPPING=" +
+                                     STYLE_PROPERTY_MAPPING.to_table() + "\n")
+        reimplementations.replace("_getField(", CONVERTER_PREFIX + "getField(")
+        reimplementations.replace("_setField(", CONVERTER_PREFIX + "setField(")
+        reimplementations.save("Scripts/" + CONVERTER_PREFIX +
+                               "lua_reimplementations.lua")
 
 # unhandled:
 #   execEvent
 #   enqueueEvent
-#   getLevelValueInt
-#   getLevelValueFloat
-#   getLevelValueString
-#   getLevelValueBool
-#   setLevelValueInt
-#   setLevelValueFloat
-#   setLevelValueString
-#   setLevelValueBool
-#   getStyleValueInt
-#   getStyleValueFloat
-#   getStyleValueString
-#   getStyleValueBool
-#   setStyleValueInt
-#   setStyleValueFloat
-#   setStyleValueString
-#   setStyleValueBool
