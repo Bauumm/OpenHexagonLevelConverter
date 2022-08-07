@@ -40,6 +40,25 @@ def convert_pack(path, newpath):
             level_json = levels[level]
             lua_path = os.path.join("Scripts", level_json.get("lua_file"))
             lua_file = dpath.util.get(files, lua_path)
+            if lua_file.saved and level_json.saved:
+                continue
+            if lua_file.saved and not level_json.saved:
+                # There is a 2nd level using the same lua file, so since level
+                # parameters have been moved into lua, a new lua file needs to
+                # be created
+                lua_file = LuaFile(lua_file.path)
+                count = 0
+                while True:
+                    lua_path = lua_path[:-4] + str(count) + ".lua"
+                    count += 1
+                    try:
+                        dpath.util.get(files, lua_path)
+                    except KeyError:
+                        break
+                dpath.util.new(files, lua_path, lua_file)
+                level_json["lua_file"] = lua_path
+                log.info("Created", lua_path, "due to", level_json.path,
+                         "reusing the script.")
             level_luas.append(lua_file.path)
             level_properties.convert(level_json, lua_file)
             lua_functions.convert_level_lua(lua_file)
