@@ -24,6 +24,7 @@ def get_files(folder):
 
 def convert_pack(path, newpath):
     path = os.path.abspath(path)
+    log.info("Parsing files...")
     files = get_files(path)
     os.makedirs(newpath, exist_ok=True)
     os.chdir(newpath)
@@ -32,15 +33,37 @@ def convert_pack(path, newpath):
         exit(1)
     else:
         levels = files.get("Levels")
+        level_luas = []
+        log.info("Converting level json and lua files...")
         for level in levels:
             level_json = levels[level]
             lua_path = os.path.join("Scripts", level_json.get("lua_file"))
             lua_file = dpath.util.get(files, lua_path)
+            level_luas.append(lua_file.path)
             level_properties.convert(level_json, lua_file)
-            lua_functions.convert(lua_file)
+            lua_functions.convert_level_lua(lua_file)
             level_json.save("Levels/" + level)
             lua_file.save(lua_path)
-            exit()
+        scripts = files.get("Scripts")
+        log.info("Converting other lua files...")
+        if scripts is not None:
+            def convert_scripts(script_files):
+                for script in script_files.values():
+                    if type(script) == dict:
+                        convert_scripts(script)
+                        continue
+                    if script.path in level_luas:
+                        continue
+                    lua_functions.convert_lua(script)
+                    script.save(os.path.relpath(script.path, path))
+            convert_scripts(scripts)
+        log.info("Copying Music and Styles and pack.json...")
+        copy_files = [*files.get("Music", {}).values(),
+                      *files.get("Styles", {}).values(),
+                      files.get("pack.json")]
+        for file in copy_files:
+            file.save(os.path.relpath(file.path, path))
+        log.info("Done")
 
 
 if __name__ == "__main__":

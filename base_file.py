@@ -1,10 +1,12 @@
 import chardet
+import log
 import os
 
 
 class BaseFile:
     def __init__(self, path):
         self.path = path
+        self.saved = False
         with open(path, "rb") as file:
             encoding = chardet.detect(file.read())["encoding"]
         with open(path, encoding=encoding) as file:
@@ -31,7 +33,10 @@ class BaseFile:
         self._text = self._text.replace(text, newtext)
 
     def save(self, path):
+        if self.saved:
+            log.warn("Saving", os.path.basename(self.path), "twice!")
         if "/" in path:
             os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
             file.write(self._text)
+        self.saved = True

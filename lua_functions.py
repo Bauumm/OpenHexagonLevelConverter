@@ -47,15 +47,19 @@ DIRECT_REPLACEMENTS = {
 CONVERTER_PREFIX = \
     "_converter_internal_do_not_use_unless_you_know_what_you_are_doing_"
 reimplementations = LuaFile("lua_functions.lua")
-reimplementations_saved = False
 
 
-def convert(level_lua):
+def convert_lua(lua_file):
+    for function, newfunction in DIRECT_REPLACEMENTS.items():
+        lua_file.replace_function_calls(function, newfunction)
+
+
+def convert_level_lua(level_lua):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
                          "lua_reimplementations.lua\")")
     for function, newfunction in DIRECT_REPLACEMENTS.items():
         level_lua.replace_function_calls(function, newfunction)
-    if not reimplementations_saved:
+    if not reimplementations.saved:
         reimplementations.mixin_line(CONVERTER_PREFIX +
                                      "LEVEL_PROPERTY_MAPPING=" +
                                      LEVEL_PROPERTY_MAPPING.to_table() + "\n")

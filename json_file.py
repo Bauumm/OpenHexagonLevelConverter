@@ -1,6 +1,7 @@
 from extended_dict import ExtendedDict
 import chardet
 import json
+import log
 import os
 
 
@@ -19,6 +20,7 @@ class JsonFile(ExtendedDict):
                     return pos + len(part.split(symbol)[0])
                 pos += len(part) + 1
 
+        self.saved = False
         self.path = path
         content = ""
         with open(path, "rb") as file:
@@ -46,6 +48,8 @@ class JsonFile(ExtendedDict):
             self[key] = json_dict[key]
 
     def save(self, path):
+        if self.saved:
+            log.warn("Saving", os.path.basename(self.path), "twice!")
         if "/" in path:
             os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
