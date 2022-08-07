@@ -51,13 +51,13 @@ reimplementations = LuaFile("lua_functions.lua")
 def convert_lua(lua_file):
     for function, newfunction in DIRECT_REPLACEMENTS.items():
         lua_file.replace_function_calls(function, newfunction)
+    lua_file.replace("math.randomseed(os.time())", "")
 
 
 def convert_level_lua(level_lua):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
                          "lua_reimplementations.lua\")")
-    for function, newfunction in DIRECT_REPLACEMENTS.items():
-        level_lua.replace_function_calls(function, newfunction)
+    convert_lua(level_lua)
     if not reimplementations.saved:
         reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
                                      LEVEL_PROPERTY_MAPPING.to_table() + "\n")
