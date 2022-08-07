@@ -49,6 +49,22 @@ class LuaFile(BaseFile):
         pos = self._get_pos_from_line(line, source)
         self.mixin("\n" + code, function, pos)
 
+    def _get_function_call_nodes(self, name):
+        nodes = []
+        for node in ast.walk(self._ast_tree):
+            if isinstance(node, astnodes.Call) and \
+                    isinstance(node.func, astnodes.Name):
+                if node.func.id == name:
+                    nodes.append(node)
+        return nodes
+
+    def replace_function_calls(self, function, new_function):
+        nodes = self._get_function_call_nodes(function)
+        nodes.reverse()
+        for node in nodes:
+            self._text = self._text[:node.func.start_char] + \
+                new_function + self._text[node.func.stop_char + 1:]
+
     def save(self, path):
         super().save(path)
         if shutil.which("stylua") is None:

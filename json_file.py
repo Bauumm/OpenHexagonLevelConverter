@@ -1,6 +1,7 @@
 from slpp import slpp
 import chardet
 import json
+import os
 
 
 class JsonFile:
@@ -59,5 +60,7 @@ class JsonFile:
         self._json[value_name] = value
 
     def save(self, path):
+        if "/" in path:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
             json.dump(self._json, file, indent=4)

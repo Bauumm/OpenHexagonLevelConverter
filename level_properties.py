@@ -40,6 +40,7 @@ LEVEL_PROPERTY_DEFAULTS = {
 }
 
 
+# TODO: either check and or manually add defaults
 def convert(level_json, level_lua):
     if level_lua.get_function("onInit") is None:
         level_lua.mixin_line("function onInit()\nend", line=-1)

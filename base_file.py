@@ -1,4 +1,5 @@
 import chardet
+import os
 
 
 class BaseFile:
@@ -30,5 +31,7 @@ class BaseFile:
         self._text = self._text.replace(text, newtext)
 
     def save(self, path):
+        if "/" in path:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
             file.write(self._text)
