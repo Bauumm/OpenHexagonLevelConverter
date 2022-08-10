@@ -7,4 +7,4 @@ A tool to automatically port Open Hexagon 1.92 Levels to the new Open Hexagon
 - styles seem to look different
 - pulse and beatpulse initial delay are off
 # Usage
-`python main.py <path/to/1.92/pack/folder> <path/to/where/the/port/will/be/created`
+`python main.py <path/to/1.92/pack/folder> <path/to/where/the/port/will/be/created>`
