@@ -7,13 +7,17 @@ import os
 
 EVENT_TYPES = {
     "level_change": None,
-    "menu": None,
-    "message_add": "messageAdd(\"<message>\", <duration>)",
-    "message_important_add": "messageImportantAdd(\"<message>\", <duration>)",
+    "menu": "e_kill()",  # There is no way to exit to menu in steam version
+    "message_add": "e_messageAdd(\"<message>\", <duration>)",
+    "message_important_add":
+        "e_messageAddImportant(\"<message>\", <duration>)",
     "message_clear": "e_clearMessages()",
     "time_stop": "e_stopTime(<duration>)",
     "timeline_wait": "t_wait(<duration>)",
     "timeline_clear": "t_clear()",
+    "level_float_set": "setLevelValueFloat(\"<valueName>\", <value>)",
+    "level_float_add": "setLevelValueFloat(\"<valueName>\", \
+getLevelValueFloat(\"<valueName>\") + <value>)",
     "level_float_subtract": "setLevelValueFloat(\"<valueName>\", \
 getLevelValueFloat(\"<valueName>\") - <value>)",
     "level_float_multiply": "setLevelValueFloat(\"<valueName>\", \
@@ -57,7 +61,7 @@ getLevelValueFloat(\"<valueName>\") / <value>)",
     "increment_start": "l_setIncEnabled(true)",
     "event_exec": "execEevent(\"<id>\")",
     "event_enqueue": "enqueueEvent(\"<id>\")",
-    "script_exec": "execScript(\"<valueName>\")",
+    "script_exec": "u_execScript(\"<valueName>\")",
     "play_sound": "playSound(\"<id>\")"
 }
 
@@ -111,13 +115,14 @@ def convert_external(json_file):
 
 def convert_level(level_json, level_lua):
     level_lua.mixin_line(CONVERTER_PREFIX + "MAIN_EVENTS=" +
-                         convert_events(level_json.get("events"), [])
+                         convert_events(level_json.get("events", []))
                          .to_table() + "\n")
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX + "events.lua" +
                          "\")\n")
     if level_lua.get_function("onUpdate") is None:
         level_lua.mixin_line("function onUpdate()\nend", line=-1)
     level_lua.mixin_line(CONVERTER_PREFIX + "update_events()", "onUpdate")
+    level_json.delete("events")
 
 
 def save():

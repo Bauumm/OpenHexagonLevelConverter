@@ -76,6 +76,8 @@ def convert_sound(path):
         log.info("Processing custom sounds...")
     except FileNotFoundError:
         pass
+    if len(sounds) > 0:
+        os.makedirs("Sounds", exist_ok=True)
     for sound in sounds:
         shutil.copyfile(os.path.join(path, "Sounds", sound), "Sounds/" + sound)
     return sounds
@@ -87,6 +89,7 @@ def convert_event(files):
         log.info("Converting Events...")
         for event in event_files:
             events.convert_external(event_files[event])
+    events.save()
 
 
 def convert_lua(files, level_luas, path):

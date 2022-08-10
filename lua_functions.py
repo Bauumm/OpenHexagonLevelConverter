@@ -31,11 +31,10 @@ DIRECT_REPLACEMENTS = {
     "log": "u_log",
     "wall": "w_wall",
     "getSides": "l_getSides",
-    "getSpeedMult": "l_getSpeedMultDM",
-    "getDelayMult": "l_getDelayMultDM",
+    "getSpeedMult": "u_getSpeedMultDM",
+    "getDelayMult": "u_getDelayMultDM",
     "getDifficultyMult": "u_getDifficultyMult",
     "execScript": "u_execScript",
-    "wait": "t_wait",
     "forceIncrement": "u_forceIncrement",
     "messageAdd": "e_messageAdd",
     "messageImportantAdd": "e_messageAddImportant",
@@ -59,6 +58,10 @@ def convert_lua(lua_file):
 def convert_level_lua(level_lua, sounds):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
                          "lua_reimplementations.lua\")")
+    if level_lua.get_function("onStep") is None:
+        level_lua.mixin_line("\nfunction onStep()\nend", line=-1)
+    level_lua.mixin_line(CONVERTER_PREFIX + "timeline_wait_until=nil",
+                         "onStep")
     convert_lua(level_lua)
     if not reimplementations.saved:
         reimplementations.mixin_line("SOUNDS=" + slpp.encode(sounds) + "\n")
@@ -73,5 +76,7 @@ def convert_level_lua(level_lua, sounds):
         reimplementations.replace("STYLE_PROPERTY_MAPPING", CONVERTER_PREFIX +
                                   "STYLE_PROPERTY_MAPPING")
         reimplementations.replace("SOUNDS", CONVERTER_PREFIX + "SOUNDS")
+        reimplementations.replace("timeline_wait_until", CONVERTER_PREFIX +
+                                  "timeline_wait_until")
         reimplementations.save("Scripts/" + CONVERTER_PREFIX +
                                "lua_reimplementations.lua")

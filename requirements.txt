@@ -1,0 +1,5 @@
+chardet
+slpp
+coloredlogs
+luaparser
+dpath
