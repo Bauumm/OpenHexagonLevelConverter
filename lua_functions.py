@@ -43,6 +43,13 @@ DIRECT_REPLACEMENTS = {
     "wallAdj": "w_wallAdj",
     "wallAcc": "w_wallAcc"
 }
+CORE_FUNCTIONS = [
+    "onUnload",
+    "onLoad",
+    "onIncrement",
+    "onUpdate",
+    "onStep"
+]
 CONVERTER_PREFIX = \
     "_converter_internal_do_not_use_unless_you_know_what_you_are_doing_"
 reimplementations = LuaFile(os.path.join(os.path.dirname(__file__),
@@ -63,6 +70,28 @@ def convert_level_lua(level_lua, sounds):
     level_lua.mixin_line(CONVERTER_PREFIX + "timeline_wait_until=nil",
                          "onStep")
     convert_lua(level_lua)
+    for function in CORE_FUNCTIONS:
+        function_source = level_lua.get_function(function)
+        if function_source is None:
+            continue
+        parameters = function_source \
+            .split("function " + function + "(")[1] \
+            .split(")")[0]
+        new_source = function_source.replace(
+            "function " + function + "(" + parameters + ")",
+            "function " + CONVERTER_PREFIX + function + "(" + parameters + ")"
+        )
+        level_lua.replace(function_source, new_source)
+        seperator = ", "
+        if parameters \
+                .replace("\n", "") \
+                .replace("\t", "") \
+                .replace(" ", "") == "":
+            seperator = ""
+        level_lua.mixin_line("function " + function + "(" + parameters + ")\n \
+                             xpcall(" + CONVERTER_PREFIX + function +
+                             ", print" + seperator + parameters + ")\nend",
+                             line=-1)
     if not reimplementations.saved:
         reimplementations.mixin_line("SOUNDS=" + slpp.encode(sounds) + "\n")
         reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
