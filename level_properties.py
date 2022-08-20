@@ -45,7 +45,6 @@ LEVEL_PROPERTY_DEFAULTS = {
     "beatpulse_max": 0,
     "beatpulse_delay_max": 0,
     "radius_min": 72,
-    # "difficulty_multipliers": [1] this property isnt set in lua
 }
 
 PROPERTY_NAME_MAPPING = {
@@ -105,3 +104,5 @@ def convert(level_json, level_lua):
         level_lua.mixin_line(function + "(" +
                              str(LEVEL_PROPERTY_DEFAULTS[key]) + ")", "onInit",
                              -1)
+    level_lua.mixin_line("l_setRotationSpeed(l_getRotationSpeed() * \
+                         (math.random(0, 1) * 2 - 1))", "onInit", -1)

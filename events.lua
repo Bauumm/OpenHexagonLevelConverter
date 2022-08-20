@@ -26,9 +26,9 @@ end
 function prefix_update_event(event)
 	if event.current_time == nil then
 		event.current_time = 0
-		event.start_time = l_getLevelTime()
+		event.start_time = prefix_get_actual_time()
 	end
-	event.current_time = l_getLevelTime() - event.start_time
+	event.current_time = prefix_get_actual_time() - event.start_time
 	prefix_execute_events(event, event.current_time)
 	for time, _ in pairs(event) do
 		if type(time) == "number" then
@@ -50,5 +50,5 @@ function prefix_update_events()
 			table.remove(prefix_queuedEvents, 1)
 		end
 	end
-	prefix_execute_events(prefix_MAIN_EVENTS, l_getLevelTime())
+	prefix_execute_events(prefix_MAIN_EVENTS, prefix_get_actual_time())
 end

@@ -8,13 +8,13 @@ import os
 EVENT_TYPES = {
     "level_change": None,
     "menu": "e_kill()",  # There is no way to exit to menu in steam version
-    "message_add": "e_messageAdd(\"<message>\", <duration>)",
+    "message_add": "messageAdd(\"<message>\", <duration>)",
     "message_important_add":
-        "e_messageAddImportant(\"<message>\", <duration>)",
-    "message_clear": "e_clearMessages()",
-    "time_stop": "e_stopTime(<duration>)",
-    "timeline_wait": "t_wait(<duration>)",
-    "timeline_clear": "t_clear()",
+        "messageImportantAdd(\"<message>\", <duration>)",
+    "message_clear": "e_messageAddImportantSilent(\"\", 0)",
+    "time_stop": "e_stopTime(<duration>)",  # TODO: make stopTime work the same
+    "timeline_wait": "wait(<duration>)",
+    "timeline_clear": CONVERTER_PREFIX + "timeline = {}",
     "level_float_set": "setLevelValueFloat(\"<valueName>\", <value>)",
     "level_float_add": "setLevelValueFloat(\"<valueName>\", \
 getLevelValueFloat(\"<valueName>\") + <value>)",

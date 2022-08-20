@@ -3,6 +3,7 @@ from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
+import timeline
 import shutil
 import events
 import log
@@ -64,6 +65,7 @@ def convert_level(files, sounds):
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         lua_functions.convert_level_lua(lua_file, sounds)
+        timeline.convert(lua_file)
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
     return level_luas

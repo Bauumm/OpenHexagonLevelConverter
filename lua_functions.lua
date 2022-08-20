@@ -80,12 +80,3 @@ function playSound(id)
 		a_playPackSound(id)
 	end
 end
-
-timeline_wait_until = nil
-function wait(delay)
-	if(timeline_wait_until == nil) then
-		timeline_wait_until = l_getLevelTime()
-	end
-	timeline_wait_until = timeline_wait_until + delay / 60
-	t_waitUntilS(timeline_wait_until)
-end

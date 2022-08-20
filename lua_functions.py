@@ -29,19 +29,14 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
 })
 DIRECT_REPLACEMENTS = {
     "log": "u_log",
-    "wall": "w_wall",
     "getSides": "l_getSides",
     "getSpeedMult": "u_getSpeedMultDM",
     "getDelayMult": "u_getDelayMultDM",
     "getDifficultyMult": "u_getDifficultyMult",
     "execScript": "u_execScript",
     "forceIncrement": "u_forceIncrement",
-    "messageAdd": "e_messageAdd",
-    "messageImportantAdd": "e_messageAddImportant",
     "isKeyPressed": "u_isKeyPressed",
-    "isFastSpinning": "u_isFastSpinning",
-    "wallAdj": "w_wallAdj",
-    "wallAcc": "w_wallAcc"
+    "isFastSpinning": "u_isFastSpinning"
 }
 CORE_FUNCTIONS = [
     "onUnload",
@@ -65,10 +60,6 @@ def convert_lua(lua_file):
 def convert_level_lua(level_lua, sounds):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
                          "lua_reimplementations.lua\")")
-    if level_lua.get_function("onStep") is None:
-        level_lua.mixin_line("\nfunction onStep()\nend", line=-1)
-    level_lua.mixin_line(CONVERTER_PREFIX + "timeline_wait_until=nil",
-                         "onStep")
     convert_lua(level_lua)
     for function in CORE_FUNCTIONS:
         function_source = level_lua.get_function(function)
@@ -92,6 +83,11 @@ def convert_level_lua(level_lua, sounds):
                              xpcall(" + CONVERTER_PREFIX + function +
                              ", print" + seperator + parameters + ")\nend",
                              line=-1)
+    # Remove onStep if it exists since the copied function should only be
+    # called from the timeline implementation in lua
+    on_step_source = level_lua.get_function("onStep")
+    if on_step_source is not None:
+        level_lua.replace(on_step_source, "")
     if not reimplementations.saved:
         reimplementations.mixin_line("SOUNDS=" + slpp.encode(sounds) + "\n")
         reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
@@ -107,5 +103,8 @@ def convert_level_lua(level_lua, sounds):
         reimplementations.replace("SOUNDS", CONVERTER_PREFIX + "SOUNDS")
         reimplementations.replace("timeline_wait_until", CONVERTER_PREFIX +
                                   "timeline_wait_until")
+        reimplementations.replace("_getTime", CONVERTER_PREFIX + "getTime")
+        reimplementations.replace("_time_offset", CONVERTER_PREFIX +
+                                  "time_offset")
         reimplementations.save("Scripts/" + CONVERTER_PREFIX +
                                "lua_reimplementations.lua")
