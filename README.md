@@ -3,9 +3,8 @@ A tool to automatically port Open Hexagon 1.92 Levels to the new Open Hexagon
 # Issues
 - This tool does not support all events it could
 - Certain things that were possible in 1.92 cannot be done in the new version
-- timings may feel very slightly different
-- styles seem to look different
-- pulse and beatpulse initial delay are off
+- timings may feel different, due to 1.92 being framerate dependant
+- styles look different
 # Usage
 You may need to set `LD_LIBRARY_PATH` to `/usr/local/lib` then you can execute:
 `python3 main.py <path/to/1.92/pack/folder> <path/to/where/the/port/will/be/created>`
