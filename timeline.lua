@@ -1,14 +1,29 @@
 prefix_timeline = {}
 prefix_actual_time = -50
 prefix_initial_time = nil
-prefix_wait_until = nil
+prefix_wait_delay = nil
 prefix_wait_first_call = true
+prefix_timeline_ready = true
+prefix_last_increment = 0
+prefix_is_incrementing = false
 
 function prefix_get_actual_time()
 	return (prefix_actual_time + 50) / 60
 end
 
+function prefix_update_increment()
+	if not l_getIncEnabled() then
+		return
+	end
+	local incTime = l_getLevelTime() - prefix_last_increment
+	if incTime >= l_getIncTime() then
+		prefix_last_increment = l_getLevelTime()
+		prefix_is_incrementing = true
+	end
+end
+
 function prefix_update_timeline(frametime)
+	prefix_update_increment()
 	prefix_update_messages()
 	if prefix_actual_time < 0 then
 		prefix_actual_time = prefix_actual_time + frametime
@@ -20,30 +35,28 @@ function prefix_update_timeline(frametime)
 		end
 		prefix_actual_time = prefix_initial_time + l_getLevelTime() * 60
 	end
-	if prefix_timeline[1] == nil then
-		xpcall(prefix_onStep, print)
-	else
-		while prefix_timeline[1]() do
-			table.remove(prefix_timeline, 1)
-			if prefix_timeline[1] == nil then
-				prefix_wait_until = prefix_actual_time
+	prefix_timeline_ready = true
+	repeat
+		if prefix_timeline[1] == nil then
+			if not prefix_is_incrementing then
 				xpcall(prefix_onStep, print)
-				break
 			end
+			prefix_timeline_ready = false
+		elseif prefix_timeline[1](frametime) then
+			table.remove(prefix_timeline, 1)
 		end
-	end
+	until not prefix_timeline_ready
 end
 
 function wait(delay)
-	table.insert(prefix_timeline, function()
-		if prefix_wait_until == nil then
-			prefix_wait_until = prefix_actual_time
-		end
+	table.insert(prefix_timeline, function(frametime)
+		prefix_timeline_ready = false
 		if prefix_wait_first_call then
 			prefix_wait_first_call = false
-			prefix_wait_until = prefix_wait_until + delay
+			prefix_wait_delay = delay
 		end
-		local done = prefix_wait_until <= prefix_actual_time
+		prefix_wait_delay = prefix_wait_delay - frametime
+		local done = not (prefix_wait_delay - frametime > frametime)
 		if done then
 			prefix_wait_first_call = true
 		end

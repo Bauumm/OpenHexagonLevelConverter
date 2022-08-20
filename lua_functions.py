@@ -88,6 +88,11 @@ def convert_level_lua(level_lua, sounds):
     on_step_source = level_lua.get_function("onStep")
     if on_step_source is not None:
         level_lua.replace(on_step_source, "")
+    on_increment_source = level_lua.get_function("onIncrement")
+    if on_increment_source is None:
+        level_lua.mixin_line("\nfunction onIncrement()\nend", line=-1)
+    level_lua.mixin_line(CONVERTER_PREFIX + "is_incrementing = false",
+                         "onIncrement")
     if not reimplementations.saved:
         reimplementations.mixin_line("SOUNDS=" + slpp.encode(sounds) + "\n")
         reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
