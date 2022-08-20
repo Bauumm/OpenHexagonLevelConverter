@@ -1,7 +1,7 @@
 prefix_timeline = {}
 prefix_actual_time = -50
 prefix_initial_time = nil
-prefix_wait_until = 0
+prefix_wait_until = nil
 prefix_wait_first_call = true
 
 function prefix_get_actual_time()
@@ -12,11 +12,11 @@ function prefix_update_timeline(frametime)
 	prefix_update_messages()
 	if prefix_actual_time < 0 then
 		prefix_actual_time = prefix_actual_time + frametime
+		l_resetTime()
+		u_haltTime(-6)
 	else
 		if prefix_initial_time == nil then
 			prefix_initial_time = prefix_actual_time
-			l_resetTime()
-			u_haltTime(-6)
 		end
 		prefix_actual_time = prefix_initial_time + l_getLevelTime() * 60
 	end
@@ -36,6 +36,9 @@ end
 
 function wait(delay)
 	table.insert(prefix_timeline, function()
+		if prefix_wait_until == nil then
+			prefix_wait_until = prefix_actual_time
+		end
 		if prefix_wait_first_call then
 			prefix_wait_first_call = false
 			prefix_wait_until = prefix_wait_until + delay
