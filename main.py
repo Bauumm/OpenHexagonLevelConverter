@@ -6,6 +6,7 @@ import dpath.util
 import timeline
 import shutil
 import events
+import styles
 import log
 import sys
 import os
@@ -118,9 +119,12 @@ def convert_pack(path, newpath):
         level_luas = convert_level(files, sounds)
         convert_event(files)
         convert_lua(files, level_luas, path)
-        log.info("Copying Music, Styles and pack.json...")
+        log.info("Converting styles")
+        for file in all_dict_values(files.get("Styles", {})):
+            styles.convert(file)
+            file.save(os.path.relpath(file.path, path))
+        log.info("Copying Music and pack.json...")
         copy_files = [*all_dict_values(files.get("Music", {})),
-                      *all_dict_values(files.get("Styles", {})),
                       files.get("pack.json")]
         for file in copy_files:
             file.save(os.path.relpath(file.path, path))
