@@ -17,12 +17,20 @@ colors3D = ExtendedDict()
 
 
 def convert_color(color):
+    # set dynamic_darkness to 0 by default
     color["dynamic_darkness"] = color.get("dynamic_darkness", 0)
+    if color.get("dynamic", False) and \
+       color.get("dynamic_offset", False) and \
+       not color.get("main", False) and \
+       color.get("offset", 0) == 0:
+        # If these values are set this way the original color is due to
+        # division by 0 (except for the alpha component) reset to black
+        for i in range(3):
+            color["value"][i] = 0
     return color
 
 
 def convert_style(style_json):
-    # set dynamic_darkness to 0 by default
     for color in COLOR_OBJECTS:
         if color in style_json:
             style_json[color] = convert_color(style_json[color])
@@ -50,7 +58,7 @@ def convert_lua(level_lua, level_json):
     if level_lua.get_function("onLoad") is None:
         level_lua.mixin_line("\nfunction onLoad()\nend", line=-1)
     level_lua.mixin_line(CONVERTER_PREFIX + "initStyle()", "onLoad")
-    level_lua.mixin_line(CONVERTER_PREFIX + "currentStyle=\"" +
+    level_lua.mixin_line(CONVERTER_PREFIX + "current_style=\"" +
                          level_json["styleId"] + "\"", "onLoad")
     level_lua.mixin_line("u_execScript(\"" + CONVERTER_PREFIX + "styles.lua\" \
                          )")

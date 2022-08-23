@@ -93,22 +93,14 @@ def convert_level_lua(level_lua, sounds):
     level_lua.mixin_line(CONVERTER_PREFIX + "is_incrementing = false",
                          "onIncrement")
     if not reimplementations.saved:
-        reimplementations.mixin_line("SOUNDS=" + slpp.encode(sounds) + "\n")
-        reimplementations.mixin_line("LEVEL_PROPERTY_MAPPING=" +
+        reimplementations.mixin_line(CONVERTER_PREFIX + "SOUNDS=" +
+                                     slpp.encode(sounds) + "\n")
+        reimplementations.mixin_line(CONVERTER_PREFIX +
+                                     "LEVEL_PROPERTY_MAPPING=" +
                                      LEVEL_PROPERTY_MAPPING.to_table() + "\n")
-        reimplementations.mixin_line("STYLE_PROPERTY_MAPPING=" +
+        reimplementations.mixin_line(CONVERTER_PREFIX +
+                                     "STYLE_PROPERTY_MAPPING=" +
                                      STYLE_PROPERTY_MAPPING.to_table() + "\n")
-        reimplementations.replace("_getField(", CONVERTER_PREFIX + "getField(")
-        reimplementations.replace("_setField(", CONVERTER_PREFIX + "setField(")
-        reimplementations.replace("LEVEL_PROPERTY_MAPPING", CONVERTER_PREFIX +
-                                  "LEVEL_PROPERTY_MAPPING")
-        reimplementations.replace("STYLE_PROPERTY_MAPPING", CONVERTER_PREFIX +
-                                  "STYLE_PROPERTY_MAPPING")
-        reimplementations.replace("SOUNDS", CONVERTER_PREFIX + "SOUNDS")
-        reimplementations.replace("timeline_wait_until", CONVERTER_PREFIX +
-                                  "timeline_wait_until")
-        reimplementations.replace("_getTime", CONVERTER_PREFIX + "getTime")
-        reimplementations.replace("_time_offset", CONVERTER_PREFIX +
-                                  "time_offset")
+        reimplementations.replace("prefix_", CONVERTER_PREFIX)
         reimplementations.save("Scripts/" + CONVERTER_PREFIX +
                                "lua_reimplementations.lua")

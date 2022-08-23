@@ -59,7 +59,7 @@ getLevelValueFloat(\"<valueName>\") / <value>)",
     "side_changing_start": "l_enableRndSideChanges(true)",
     "increment_stop": "l_setIncEnabled(false)",
     "increment_start": "l_setIncEnabled(true)",
-    "event_exec": "execEevent(\"<id>\")",
+    "event_exec": "execEvent(\"<id>\")",
     "event_enqueue": "enqueueEvent(\"<id>\")",
     "script_exec": "u_execScript(\"<valueName>\")",
     "play_sound": "playSound(\"<id>\")"
