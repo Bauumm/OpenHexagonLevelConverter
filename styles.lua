@@ -15,6 +15,7 @@ end
 
 
 function prefix_initStyle()
+	-- 3D alpha fixes
 	for i=1,3 do  -- 1,2,3 are the RenderStages for the 3D layers
 		shdr_setActiveFragmentShader(i, prefix_shdr_wall3D)
 	end
@@ -26,6 +27,11 @@ function prefix_initStyle()
 	shdr_setUniformF(prefix_shdr_wall3D, "alpha_falloff", s_get3dAlphaFalloff())
 	s_set3dAlphaMult(1)
 	s_set3dAlphaFalloff(1)
+
+	-- DM adjust negations
+	local mult = u_getDifficultyMult() ^ 0.8
+	s_setMaxSwapTime(s_getMaxSwapTime() * mult)
+	s_setHueInc(s_getHueInc() / mult)
 end
 
 
