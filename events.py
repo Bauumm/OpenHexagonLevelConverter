@@ -1,5 +1,5 @@
-from lua_functions import CONVERTER_PREFIX
 from extended_dict import ExtendedDict
+from config import CONVERTER_PREFIX
 from lua_file import LuaFile
 import log
 import os
@@ -54,7 +54,7 @@ getLevelValueFloat(\"<valueName>\") / <value>)",
     "music_set": "a_setMusic(\"<id>\")",
     "music_set_segment": "a_setMusicSegment(\"<id>\", \"<segment_index>\")",
     "music_set_seconds": "a_setMusicSeconds(\"<id>\", \"<seconds>\")",
-    "style_set": "s_setStyle(\"<id>\")",
+    "style_set": CONVERTER_PREFIX + "setStyle(\"<id>\")",
     "side_changing_stop": "l_enableRndSideChanges(false)",
     "side_changing_start": "l_enableRndSideChanges(true)",
     "increment_stop": "l_setIncEnabled(false)",

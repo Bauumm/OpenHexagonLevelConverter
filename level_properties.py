@@ -1,4 +1,5 @@
 from extended_dict import ExtendedDict
+from config import CONVERTER_PREFIX
 import log
 
 
@@ -31,8 +32,8 @@ LEVEL_PROPERTY_MAPPING = ExtendedDict({
     "wall_angle_right": ["l_getWallAngleRight", "l_setWallAngleRight"],
 
     # keys that arent set in onInit but may be set with lua in the actual level
-    "styleId": [None, "a_setMusic"],
-    "musicId": [None, "s_setStyle"]
+    "styleId": [None, CONVERTER_PREFIX + "setStyle"],
+    "musicId": [None, "s_setMusic"]
 })
 
 LEVEL_PROPERTY_DEFAULTS = {

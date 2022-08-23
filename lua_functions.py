@@ -1,5 +1,6 @@
 from level_properties import LEVEL_PROPERTY_MAPPING
 from extended_dict import ExtendedDict
+from config import CONVERTER_PREFIX
 from lua_file import LuaFile
 from slpp import slpp
 import os
@@ -45,8 +46,6 @@ CORE_FUNCTIONS = [
     "onUpdate",
     "onStep"
 ]
-CONVERTER_PREFIX = \
-    "_converter_internal_do_not_use_unless_you_know_what_you_are_doing_"
 reimplementations = LuaFile(os.path.join(os.path.dirname(__file__),
                                          "lua_functions.lua"))
 

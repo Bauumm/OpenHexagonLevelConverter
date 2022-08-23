@@ -67,6 +67,7 @@ def convert_level(files, sounds):
         level_properties.convert(level_json, lua_file)
         lua_functions.convert_level_lua(lua_file, sounds)
         timeline.convert(lua_file)
+        styles.convert_lua(lua_file, level_json)
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
     return level_luas
@@ -121,8 +122,9 @@ def convert_pack(path, newpath):
         convert_lua(files, level_luas, path)
         log.info("Converting styles")
         for file in all_dict_values(files.get("Styles", {})):
-            styles.convert(file)
+            styles.convert_style(file)
             file.save(os.path.relpath(file.path, path))
+        styles.save()
         log.info("Copying Music and pack.json...")
         copy_files = [*all_dict_values(files.get("Music", {})),
                       files.get("pack.json")]

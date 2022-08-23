@@ -1,4 +1,4 @@
-from lua_functions import CONVERTER_PREFIX
+from config import CONVERTER_PREFIX
 from lua_file import LuaFile
 
 
