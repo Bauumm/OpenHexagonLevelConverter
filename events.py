@@ -89,7 +89,7 @@ def convert_event(event_json):
             return ""
         for prop in event:
             function = function.replace("<" + prop + ">", str(event[prop]))
-        return function
+        return function.replace("\n", "\\\\n")
     else:
         return "u_log(\"unkown event type: " + event["type"] + "\")"
 
@@ -97,18 +97,23 @@ def convert_event(event_json):
 def convert_events(events):
     event_dict = ExtendedDict()
     for event in events:
-        event_function = convert_event(event)
-        event_list = event_dict.get(event.get("time", 0), [])
-        event_list.append(event_function)
-        event_dict[event.get("time", 0)] = event_list
+        if event is not None:  # this can happen with faulty json
+            event_function = convert_event(event)
+            event_list = event_dict.get(event.get("time", 0), [])
+            event_list.append(event_function)
+            event_dict[event.get("time", 0)] = event_list
     return event_dict
 
 
 def convert_external(json_file):
     if "id" in json_file:
-        event_lua.mixin_line(CONVERTER_PREFIX + json_file["id"] + "_EVENTS=" +
-                             convert_events(json_file.get("events", []))
-                             .to_table() + "\n")
+        new_event_lua = LuaFile()
+        new_event_lua.set_text("_G[\"" + CONVERTER_PREFIX + json_file["id"] +
+                               "_EVENTS\"]=" + convert_events(
+                                   json_file.get("events", []))
+                               .to_table() + "\n")
+        new_event_lua.save("Scripts/" + CONVERTER_PREFIX + "Events/" +
+                           json_file["id"] + ".lua")
     else:
         log.error("Event file", json_file.path, "has no id!")
 

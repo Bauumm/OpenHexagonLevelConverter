@@ -2,10 +2,16 @@ prefix_executingEvents = {}
 prefix_queuedEvents = {}
 
 function execEvent(event_id)
+	if _G["prefix_" .. event_id .. "_EVENTS"] == nil then
+		u_execScript("prefix_Events/" .. event_id .. ".lua")
+	end
 	table.insert(prefix_executingEvents, _G["prefix_" .. event_id .. "_EVENTS"])
 end
 
 function enqueueEvent(event_id)
+	if _G["prefix_" .. event_id .. "_EVENTS"] == nil then
+		u_execScript("prefix_Events/" .. event_id .. ".lua")
+	end
 	table.insert(prefix_queuedEvents, _G["prefix_" .. event_id .. "_EVENTS"])
 end
 

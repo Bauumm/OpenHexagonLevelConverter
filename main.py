@@ -127,7 +127,7 @@ def convert_pack(path, newpath):
         convert_event(files)
         convert_lua(files, level_luas, path)
         convert_timeline()
-        log.info("Converting styles")
+        log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)
             file.save(os.path.relpath(file.path, path))

@@ -9,7 +9,12 @@ class JsonFile(ExtendedDict):
     def __init__(self, path):
         self.saved = False
         self.path = path
-        content = fix_json(path)
+        content = fix_json(path) \
+            .replace("\n", "\\n") \
+            .replace(":inf,", ":Infinity,") \
+            .replace(":-inf,", ":-Infinity,")
+        while content[-1] != "}":
+            content = content[:-1]
         json_dict = json.loads(content)
         for key in json_dict:
             self[key] = json_dict[key]

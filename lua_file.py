@@ -7,13 +7,15 @@ import os
 
 
 class LuaFile(BaseFile):
-    def __init__(self, path):
+    def __init__(self, path=None):
         super().__init__(path)
         self._ast_tree = ast.parse(self._text)
 
     def _get_function_node(self, name):
         for node in ast.walk(self._ast_tree):
             if isinstance(node, astnodes.Function):
+                if isinstance(node.name, astnodes.Index):
+                    continue
                 if node.name.id == name:
                     return node
 

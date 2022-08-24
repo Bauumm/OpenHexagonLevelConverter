@@ -75,7 +75,7 @@ def convert(level_json, level_lua):
         level_lua.mixin_line("\nfunction onInit()\nend", line=-1)
     # 1.92 doesnt have this, so with that call we can overwrite the users
     # setting to behave like 1.92
-    level_lua.mixin_line("a_syncMusicToDM(false)", "onInit")
+    code = "a_syncMusicToDM(false)"
     required_defaults = LEVEL_PROPERTY_DEFAULTS.copy()
     keys = list(level_json.keys())
     for key in keys:
@@ -95,15 +95,11 @@ def convert(level_json, level_lua):
                      "could not be set!")
         else:
             function = functions[1]
-            level_lua.mixin_line(
-                function + "(" + str(level_json.get(key)) + ")",
-                "onInit", -1
-            )
+            code += "\n" + function + "(" + str(level_json.get(key)) + ")"
             level_json.delete(key)
     for key in required_defaults.keys():
         function = LEVEL_PROPERTY_MAPPING.get(key)[1]
-        level_lua.mixin_line(function + "(" +
-                             str(LEVEL_PROPERTY_DEFAULTS[key]) + ")", "onInit",
-                             -1)
-    level_lua.mixin_line("l_setRotationSpeed(l_getRotationSpeed() * \
-                         (math.random(0, 1) * 2 - 1))", "onInit", -1)
+        code += "\n" + function + "(" + str(LEVEL_PROPERTY_DEFAULTS[key]) + ")"
+    code += "\nl_setRotationSpeed(l_getRotationSpeed() * \
+        (math.random(0, 1) * 2 - 1))"
+    level_lua.mixin_line(code, "onInit")

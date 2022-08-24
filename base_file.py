@@ -4,13 +4,16 @@ import os
 
 
 class BaseFile:
-    def __init__(self, path):
+    def __init__(self, path=None):
         self.path = path
         self.saved = False
-        with open(path, "rb") as file:
-            encoding = chardet.detect(file.read())["encoding"]
-        with open(path, encoding=encoding) as file:
-            self._text = file.read()
+        if path is None:
+            self._text = ""
+        else:
+            with open(path, "rb") as file:
+                encoding = chardet.detect(file.read())["encoding"]
+            with open(path, encoding=encoding) as file:
+                self._text = file.read()
 
     def mixin(self, text, pos):
         self._text = self._text[:pos] + text + self._text[pos:]
@@ -25,6 +28,9 @@ class BaseFile:
                 break
             pos += len(lines[i]) + 1
         return pos
+
+    def set_text(self, text):
+        self._text = text
 
     def mixin_line(self, text, line):
         self.mixin(text + "\n", self._get_pos_from_line(line, self._text))

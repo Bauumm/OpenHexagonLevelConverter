@@ -15,6 +15,11 @@ end
 
 
 function prefix_initStyle()
+	if prefix_3D_depth == nil then
+		prefix_3D_depth = s_get3dDepth()
+	else
+		s_set3dDepth(prefix_3D_depth)
+	end
 	-- 3D alpha fixes
 	for i=1,3 do  -- 1,2,3 are the RenderStages for the 3D layers
 		shdr_setActiveFragmentShader(i, prefix_shdr_wall3D)

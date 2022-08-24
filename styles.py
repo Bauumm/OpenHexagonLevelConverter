@@ -36,7 +36,10 @@ def convert_style(style_json):
         if color in style_json:
             style_json[color] = convert_color(style_json[color])
     for i in range(len(style_json.get("colors", []))):
-        style_json["colors"][i] = convert_color(style_json["colors"][i])
+        if style_json["colors"][i] is None:
+            del style_json["colors"][i]
+        else:
+            style_json["colors"][i] = convert_color(style_json["colors"][i])
 
     # save fixed 3D override colors for use in lua
     color = style_json.get("3D_override_color")
