@@ -1,9 +1,9 @@
+from config import CONVERTER_PREFIX
 from json_file import JsonFile
 from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
-import timeline
 import shutil
 import events
 import styles
@@ -63,10 +63,9 @@ def convert_level(files, sounds):
             log.info("Created", lua_path, "due to", level_json.path,
                      "reusing the script.")
         level_luas.append(lua_file.path)
+        lua_functions.convert_level_lua(lua_file, sounds)
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
-        lua_functions.convert_level_lua(lua_file, sounds)
-        timeline.convert(lua_file)
         styles.convert_lua(lua_file, level_json)
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
@@ -106,6 +105,13 @@ def convert_lua(files, level_luas, path):
                 script.save(os.path.relpath(script.path, path))
 
 
+def convert_timeline():
+    lua_timeline = LuaFile(os.path.join(os.path.dirname(__file__),
+                                        "timeline.lua"))
+    lua_timeline.replace("prefix_", CONVERTER_PREFIX)
+    lua_timeline.save("Scripts/" + CONVERTER_PREFIX + "timeline.lua")
+
+
 def convert_pack(path, newpath):
     path = os.path.abspath(path)
     log.info("Parsing files...")
@@ -120,6 +126,7 @@ def convert_pack(path, newpath):
         level_luas = convert_level(files, sounds)
         convert_event(files)
         convert_lua(files, level_luas, path)
+        convert_timeline()
         log.info("Converting styles")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)

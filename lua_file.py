@@ -43,10 +43,13 @@ class LuaFile(BaseFile):
         self._ast_tree = ast.parse(self._text)
 
     def mixin_line(self, code, function=None, line=0):
-        source = self.get_function(function, with_definition=False)
-        if source is None:
-            source = self._text
-        pos = self._get_pos_from_line(line, source)
+        if function is None:
+            pos = self._get_pos_from_line(line, self._text)
+        else:
+            source = self.get_function(function, with_definition=False)
+            if source is None:
+                return
+            pos = self._get_pos_from_line(line, source)
         self.mixin("\n" + code, function, pos)
 
     def _get_function_call_nodes(self, name):

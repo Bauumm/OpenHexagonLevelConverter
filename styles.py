@@ -24,7 +24,8 @@ def convert_color(color):
        not color.get("main", False) and \
        color.get("offset", 0) == 0:
         # If these values are set this way the original color is due to
-        # division by 0 (except for the alpha component) reset to black
+        # division by 0 which results in inf being added to the main color
+        # (except for the alpha component) reset to black
         for i in range(3):
             color["value"][i] = 0
     return color
@@ -54,17 +55,10 @@ def convert_style(style_json):
 
 
 def convert_lua(level_lua, level_json):
+    level_lua.mixin_line("if " + CONVERTER_PREFIX + "was_defined == nil then\n"
+                         + CONVERTER_PREFIX + "current_style=\"" +
+                         level_json["styleId"] + "\"\nend")
     # 3D alpha falloff overflow reimplementation using shaders
-    if level_lua.get_function("onLoad") is None:
-        level_lua.mixin_line("\nfunction onLoad()\nend", line=-1)
-    level_lua.mixin_line(CONVERTER_PREFIX + "initStyle()", "onLoad")
-    level_lua.mixin_line(CONVERTER_PREFIX + "current_style=\"" +
-                         level_json["styleId"] + "\"", "onLoad")
-    level_lua.mixin_line("u_execScript(\"" + CONVERTER_PREFIX + "styles.lua\" \
-                         )")
-    if level_lua.get_function("onUpdate") is None:
-        level_lua.mixin_line("\nfunction onUpdate()\nend", line=-1)
-    level_lua.mixin_line(CONVERTER_PREFIX + "updateStyle()", "onUpdate")
     if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
         os.makedirs("Shaders")
         shutil.copyfile(os.path.join(os.path.dirname(__file__), "wall3D.frag"),

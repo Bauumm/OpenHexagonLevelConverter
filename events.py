@@ -114,14 +114,10 @@ def convert_external(json_file):
 
 
 def convert_level(level_json, level_lua):
-    level_lua.mixin_line(CONVERTER_PREFIX + "MAIN_EVENTS=" +
+    level_lua.mixin_line("if " + CONVERTER_PREFIX + "was_defined == nil then\n"
+                         + CONVERTER_PREFIX + "MAIN_EVENTS=" +
                          convert_events(level_json.get("events", []))
-                         .to_table() + "\n")
-    level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX + "events.lua" +
-                         "\")\n")
-    if level_lua.get_function("onUpdate") is None:
-        level_lua.mixin_line("function onUpdate()\nend", line=-1)
-    level_lua.mixin_line(CONVERTER_PREFIX + "update_events()", "onUpdate")
+                         .to_table() + "\nend")
     level_json.delete("events")
 
 

@@ -48,50 +48,39 @@ CORE_FUNCTIONS = [
 ]
 reimplementations = LuaFile(os.path.join(os.path.dirname(__file__),
                                          "lua_functions.lua"))
+core_wrapper = LuaFile(os.path.join(os.path.dirname(__file__),
+                                    "core_wrapper.lua"))
 
 
-def convert_lua(lua_file):
+def convert_lua(lua_file, is_level_lua=False):
     for function, newfunction in DIRECT_REPLACEMENTS.items():
         lua_file.replace_function_calls(function, newfunction)
     lua_file.replace("math.randomseed(os.time())", "")
+    rename_core_functions(lua_file)
+
+
+def rename_core_functions(lua_file):
+    for function in CORE_FUNCTIONS:
+        function_source = lua_file.get_function(function)
+        if function_source is None:
+            continue
+        actual_name = function_source \
+            .split("function")[1] \
+            .split("(")[0]
+        new_source = function_source.replace(
+            "function" + actual_name + "(",
+            "function " + CONVERTER_PREFIX + function + "("
+        )
+        lua_file.replace(function_source, new_source)
 
 
 def convert_level_lua(level_lua, sounds):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
-                         "lua_reimplementations.lua\")")
-    convert_lua(level_lua)
-    for function in CORE_FUNCTIONS:
-        function_source = level_lua.get_function(function)
-        if function_source is None:
-            continue
-        parameters = function_source \
-            .split("function " + function + "(")[1] \
-            .split(")")[0]
-        new_source = function_source.replace(
-            "function " + function + "(" + parameters + ")",
-            "function " + CONVERTER_PREFIX + function + "(" + parameters + ")"
-        )
-        level_lua.replace(function_source, new_source)
-        seperator = ", "
-        if parameters \
-                .replace("\n", "") \
-                .replace("\t", "") \
-                .replace(" ", "") == "":
-            seperator = ""
-        level_lua.mixin_line("function " + function + "(" + parameters + ")\n \
-                             xpcall(" + CONVERTER_PREFIX + function +
-                             ", print" + seperator + parameters + ")\nend",
-                             line=-1)
-    # Remove onStep if it exists since the copied function should only be
-    # called from the timeline implementation in lua
-    on_step_source = level_lua.get_function("onStep")
-    if on_step_source is not None:
-        level_lua.replace(on_step_source, "")
-    on_increment_source = level_lua.get_function("onIncrement")
-    if on_increment_source is None:
-        level_lua.mixin_line("\nfunction onIncrement()\nend", line=-1)
-    level_lua.mixin_line(CONVERTER_PREFIX + "is_incrementing = false",
-                         "onIncrement")
+                         "core_wrapper.lua\")")
+    convert_lua(level_lua, True)
+    if not core_wrapper.saved:
+        core_wrapper.replace("prefix_", CONVERTER_PREFIX)
+        core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")
     if not reimplementations.saved:
         reimplementations.mixin_line(CONVERTER_PREFIX + "SOUNDS=" +
                                      slpp.encode(sounds) + "\n")
