@@ -47,11 +47,14 @@ def convert_style(style_json):
         colors3D[style_json["id"]] = color
     style_json["3D_override_color"] = [0, 0, 0, 255]
 
-    # Limit depth to 100 like 1.92 does with unmodified config
-    depth = style_json.get("3D_depth")
-    if depth is not None:
-        if depth > 100:
-            style_json["3D_depth"] = 100
+    # Limit depth to 100 like 1.92 does with unmodified config and subtract 1
+    # because the steam version adds one too much
+    depth = style_json.get("3D_depth", 15) - 1
+    if depth < 0:
+        depth = 0
+    if depth > 100:
+        depth = 100
+    style_json["3D_depth"] = depth
 
     # Divide 3D_spacing by 1.4 because the steam version multiplies it by 1.4
     style_json["3D_spacing"] = style_json.get("3D_spacing", 1) / 1.4
