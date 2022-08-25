@@ -71,6 +71,9 @@ prefix_wall_module = {
 			cw_setVertexColor(wall.cw, i, s_getMainColor())
 		end
 	end,
+	empty = function(self)
+		return #self.walls == 0
+	end,
 	update_walls = function(self, frametime)
 		local delete_queue = {}
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65

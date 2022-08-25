@@ -37,7 +37,6 @@ DIRECT_REPLACEMENTS = {
     "execScript": "u_execScript",
     "forceIncrement": "u_forceIncrement",
     "isKeyPressed": "u_isKeyPressed",
-    "isFastSpinning": "u_isFastSpinning"
 }
 CORE_FUNCTIONS = [
     "onUnload",

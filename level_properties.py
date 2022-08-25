@@ -73,9 +73,10 @@ NOT_SET_IN_ONINIT = [
 def convert(level_json, level_lua):
     if level_lua.get_function("onInit") is None:
         level_lua.mixin_line("\nfunction onInit()\nend", line=-1)
-    # 1.92 doesnt have this, so with that call we can overwrite the users
-    # setting to behave like 1.92
-    code = "a_syncMusicToDM(false)"
+    # 1.92 doesnt have music DM sync, so with that call we can overwrite the
+    # users preference to behave like 1.92. Increments are disabled because the
+    # system can't deal with custom walls
+    code = "a_syncMusicToDM(false)\nl_setIncEnabled(false)"
     required_defaults = LEVEL_PROPERTY_DEFAULTS.copy()
     keys = list(level_json.keys())
     for key in keys:

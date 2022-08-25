@@ -33,7 +33,6 @@ if prefix_was_defined == nil then
 	end
 
 	function onIncrement()
-		prefix_is_incrementing = false
 		prefix_function_wrapper(prefix_onIncrement)
 	end
 end

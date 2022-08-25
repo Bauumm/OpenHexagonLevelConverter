@@ -1,11 +1,3 @@
-prefix_RAD = {
-	wall_angle_left=true,
-	wall_angle_right=true,
-	wall_skew_left=true,
-	wall_skew_right=true
-}
-
-
 function prefix_setField(file, field, value)
 	local functions
 	if file == "level" then
@@ -16,11 +8,7 @@ function prefix_setField(file, field, value)
 	if functions == nil then
 		u_log("Could not set " .. field .. "!!!")
 	else
-		if prefix_RAD[field] then
-			_G[functions[2]](math.rad(value))
-		else
-			_G[functions[2]](value)
-		end
+		_G[functions[2]](value)
 	end
 end
 
@@ -34,11 +22,7 @@ function prefix_getField(file, field)
 	if functions == nil then
 		u_log("Could not get " .. field .. "!!!")
 	else
-		if prefix_RAD[field] then
-			return math.deg(_G[functions[1]]())
-		else
-			return _G[functions[1]]()
-		end
+		return _G[functions[1]]()
 	end
 end
 
