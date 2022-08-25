@@ -6,8 +6,21 @@ A tool to automatically port Open Hexagon 1.92 Levels to the new Open Hexagon
 - timings may feel different, due to 1.92 being framerate dependant
 - styles look different
 # Usage
-You may need to set `LD_LIBRARY_PATH` to `/usr/local/lib` then you can execute:
-`python3 main.py <path/to/1.92/pack/folder> <path/to/where/the/port/will/be/created>`
+You may need to set `LD_LIBRARY_PATH` to `/usr/local/lib` for it to find SSVUtilsJson
+```
+usage: main.py [-h] [--fps-limit level fps_limit] source_pack destination_folder
+
+Convert packs for Open Hexagon 1.92 to be compatible with the steam version.
+
+positional arguments:
+  source_pack           the 1.92 pack to be converted
+  destination_folder    the path the converted pack will be created at
+
+options:
+  -h, --help            show this help message and exit
+  --fps-limit level fps_limit
+                        limit fps for a level that may depend on it
+```
 # Installation
 ## From source
 ### Building the JSON fixer

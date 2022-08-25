@@ -4,11 +4,11 @@ from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
+import argparse
 import shutil
 import events
 import styles
 import log
-import sys
 import os
 
 
@@ -35,7 +35,7 @@ def get_files(folder):
     return structure
 
 
-def convert_level(files, sounds):
+def convert_level(files, sounds, args):
     log.info("Converting level json and lua files...")
     levels = files.get("Levels")
     level_luas = []
@@ -67,6 +67,10 @@ def convert_level(files, sounds):
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         styles.convert_lua(lua_file, level_json)
+        for fps_limit in args.fps_limit:
+            if level_json["id"] == fps_limit[0]:
+                lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" +
+                                    str(fps_limit[1]))
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
     return level_luas
@@ -118,18 +122,18 @@ def convert_walls():
     wall_module.save("Scripts/" + CONVERTER_PREFIX + "walls.lua")
 
 
-def convert_pack(path, newpath):
-    path = os.path.abspath(path)
+def convert_pack(args):
+    path = os.path.abspath(args.source_pack)
     log.info("Parsing files...")
     files = get_files(path)
-    os.makedirs(newpath, exist_ok=True)
-    os.chdir(newpath)
+    os.makedirs(args.destination_folder, exist_ok=True)
+    os.chdir(args.destination_folder)
     if files.get("pack.json") is None:
         log.error("No pack.json found in", path)
         exit(1)
     else:
         sounds = convert_sound(path)
-        level_luas = convert_level(files, sounds)
+        level_luas = convert_level(files, sounds, args)
         convert_event(files)
         convert_lua(files, level_luas, path)
         convert_timeline()
@@ -152,4 +156,19 @@ def convert_pack(path, newpath):
 
 
 if __name__ == "__main__":
-    convert_pack(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description="Convert packs for Open \
+                                     Hexagon 1.92 to be compatible with the \
+                                     steam version.")
+    parser.add_argument("source_pack", type=str, help="the 1.92 pack to be \
+                        converted")
+    parser.add_argument("destination_folder", type=str, help="the path the \
+                        converted pack will be created at")
+    parser.add_argument("--fps-limit", nargs=2, metavar=("level", "fps_limit"),
+                        help="limit fps for a level that may depend on it",
+                        action="append")
+    args = parser.parse_args()
+    if not os.path.exists(args.source_pack):
+        log.error("Source pack doesn't exist!")
+    if os.path.exists(args.destination_folder):
+        log.error("Destination path exists!")
+    convert_pack(args)
