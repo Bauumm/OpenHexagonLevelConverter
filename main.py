@@ -112,6 +112,12 @@ def convert_timeline():
     lua_timeline.save("Scripts/" + CONVERTER_PREFIX + "timeline.lua")
 
 
+def convert_walls():
+    wall_module = LuaFile(os.path.join(os.path.dirname(__file__), "walls.lua"))
+    wall_module.replace("prefix_", CONVERTER_PREFIX)
+    wall_module.save("Scripts/" + CONVERTER_PREFIX + "walls.lua")
+
+
 def convert_pack(path, newpath):
     path = os.path.abspath(path)
     log.info("Parsing files...")
@@ -127,6 +133,7 @@ def convert_pack(path, newpath):
         convert_event(files)
         convert_lua(files, level_luas, path)
         convert_timeline()
+        convert_walls()
         log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)

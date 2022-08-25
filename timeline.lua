@@ -66,21 +66,21 @@ end
 
 function wall(side, thickness)
 	table.insert(prefix_timeline, function()
-		w_wall(side, thickness)
+		prefix_wall_module:wall(side, thickness)
 		return true
 	end)
 end
 
 function wallAdj(side, thickness, speedAdj)
 	table.insert(prefix_timeline, function()
-		w_wallAdj(side, thickness, speedAdj)
+		prefix_wall_module:wallAdj(side, thickness, speedAdj)
 		return true
 	end)
 end
 
 function wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
 	table.insert(prefix_timeline, function()
-		w_wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
+		prefix_wall_module:wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
 		return true
 	end)
 end
