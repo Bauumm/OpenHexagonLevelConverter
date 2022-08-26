@@ -64,8 +64,8 @@ def convert_level(files, args):
                      "reusing the script.")
         level_luas.append(lua_file.path)
         lua_functions.convert_level_lua(lua_file)
-        events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
+        events.convert_level(level_json, lua_file)
         styles.convert_lua(lua_file, level_json)
         if args.fps_limit is not None:
             for fps_limit in args.fps_limit:

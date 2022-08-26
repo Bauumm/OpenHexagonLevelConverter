@@ -1,6 +1,5 @@
 from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
-import log
 
 
 LEVEL_PROPERTY_MAPPING = ExtendedDict({
@@ -79,6 +78,7 @@ def convert(level_json, level_lua):
     code = "a_syncMusicToDM(false)\nl_setIncEnabled(false)"
     required_defaults = LEVEL_PROPERTY_DEFAULTS.copy()
     keys = list(level_json.keys())
+    custom_keys = ExtendedDict()
     for key in keys:
         if key in PROPERTY_NAME_MAPPING:
             level_json.rename(key, PROPERTY_NAME_MAPPING[key])
@@ -92,8 +92,7 @@ def convert(level_json, level_lua):
             del required_defaults[key]
         functions = LEVEL_PROPERTY_MAPPING.get(key)
         if functions is None or functions[1] is None:
-            log.warn("Level value", key, "of", level_json.path,
-                     "could not be set!")
+            custom_keys[key] = level_json[key]
         else:
             function = functions[1]
             code += "\n" + function + "(" + str(level_json.get(key)) + ")"
@@ -103,4 +102,5 @@ def convert(level_json, level_lua):
         code += "\n" + function + "(" + str(LEVEL_PROPERTY_DEFAULTS[key]) + ")"
     code += "\nl_setRotationSpeed(l_getRotationSpeed() * \
         (math.random(0, 1) * 2 - 1))"
+    code += "\n" + CONVERTER_PREFIX + "custom_keys=" + custom_keys.to_table()
     level_lua.mixin_line(code, "onInit")

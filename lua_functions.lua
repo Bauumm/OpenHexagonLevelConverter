@@ -6,7 +6,11 @@ function prefix_setField(file, field, value)
 		functions = prefix_STYLE_PROPERTY_MAPPING[field]
 	end
 	if functions == nil then
-		u_log("Could not set " .. field .. "!!!")
+		if file == "level" then
+			prefix_custom_keys[field] = value
+		else
+			u_log("Could not set " .. field .. "!!!")
+		end
 	else
 		_G[functions[2]](value)
 	end
@@ -20,7 +24,14 @@ function prefix_getField(file, field)
 		functions = prefix_STYLE_PROPERTY_MAPPING[field]
 	end
 	if functions == nil then
-		u_log("Could not get " .. field .. "!!!")
+		local value
+		if file == "level" then
+			value = prefix_custom_keys[field]
+		end
+		if value == nil then
+			u_log("Could not get " .. field .. "!!!")
+		end
+		return value
 	else
 		return _G[functions[1]]()
 	end

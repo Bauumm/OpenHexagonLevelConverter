@@ -61,9 +61,8 @@ def convert_style(style_json):
 
 
 def convert_lua(level_lua, level_json):
-    level_lua.mixin_line("if " + CONVERTER_PREFIX + "was_defined == nil then\n"
-                         + CONVERTER_PREFIX + "current_style=\"" +
-                         level_json["styleId"] + "\"\nend")
+    level_lua.mixin_line(CONVERTER_PREFIX + "current_style=\"" +
+                         level_json["styleId"] + "\"", "onInit")
     # 3D alpha falloff overflow reimplementation using shaders
     if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
         os.makedirs("Shaders")
