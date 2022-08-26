@@ -28,16 +28,6 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
     "3D_alpha_multiplier": ["s_get3dAlphaMult", "s_set3dAlphaMult"],
     "3D_alpha_falloff": ["s_get3dAlphaFalloff", "s_set3dAlphaFalloff"],
 })
-DIRECT_REPLACEMENTS = {
-    "log": "u_log",
-    "getSides": "l_getSides",
-    "getSpeedMult": "u_getSpeedMultDM",
-    "getDelayMult": "u_getDelayMultDM",
-    "getDifficultyMult": "u_getDifficultyMult",
-    "execScript": "u_execScript",
-    "forceIncrement": "u_forceIncrement",
-    "isKeyPressed": "u_isKeyPressed",
-}
 CORE_FUNCTIONS = [
     "onUnload",
     "onLoad",
@@ -52,7 +42,6 @@ core_wrapper = LuaFile(os.path.join(os.path.dirname(__file__),
 
 
 def convert_lua(lua_file):
-    lua_file.replace_function_calls_multiple(DIRECT_REPLACEMENTS)
     lua_file.replace("math.randomseed(os.time())", "")
     rename_core_functions(lua_file)
 
@@ -73,7 +62,7 @@ def rename_core_functions(lua_file):
 
 
 def convert_level_lua(level_lua):
-    level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
+    level_lua.mixin_line("u_execScript(\"" + CONVERTER_PREFIX +
                          "core_wrapper.lua\")")
     convert_lua(level_lua)
 

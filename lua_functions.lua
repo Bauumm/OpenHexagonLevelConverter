@@ -1,3 +1,13 @@
+log = u_log
+getSides = l_getSides
+getSpeedMult = u_getSpeedMultDM
+getDelayMult = u_getDelayMultDM
+getDifficultyMult = u_getDifficultyMult
+execScript = u_execScript
+forceIncrement = u_forceIncrement
+isKeyPressed = u_isKeyPressed
+
+
 function prefix_setField(file, field, value)
 	local functions
 	if file == "level" then

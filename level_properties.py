@@ -95,7 +95,11 @@ def convert(level_json, level_lua):
             custom_keys[key] = level_json[key]
         else:
             function = functions[1]
-            code += "\n" + function + "(" + str(level_json.get(key)) + ")"
+            if level_json.get(key) == float("inf"):
+                str_key = "1/0"
+            else:
+                str_key = str(level_json.get(key))
+            code += "\n" + function + "(" + str_key + ")"
             level_json.delete(key)
     for key in required_defaults.keys():
         function = LEVEL_PROPERTY_MAPPING.get(key)[1]
