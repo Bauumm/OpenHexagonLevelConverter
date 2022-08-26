@@ -1,18 +1,13 @@
 prefix_executingEvents = {}
 prefix_queuedEvents = {}
-prefix_event_timeline = ct_create()
 
 function execEvent(event_id)
-	if _G["prefix_" .. event_id .. "_EVENTS"] == nil then
-		u_execScript("prefix_Events/" .. event_id .. ".lua")
-	end
+	u_execScript("prefix_Events/" .. event_id .. ".lua")
 	table.insert(prefix_executingEvents, _G["prefix_" .. event_id .. "_EVENTS"])
 end
 
 function enqueueEvent(event_id)
-	if _G["prefix_" .. event_id .. "_EVENTS"] == nil then
-		u_execScript("prefix_Events/" .. event_id .. ".lua")
-	end
+	u_execScript("prefix_Events/" .. event_id .. ".lua")
 	table.insert(prefix_queuedEvents, _G["prefix_" .. event_id .. "_EVENTS"])
 end
 
@@ -22,7 +17,7 @@ function prefix_execute_events(event_table, current_time)
 			for i = 1, #events, 1 do
 				local event = events[i]
 				if event ~= nil and time <= current_time then
-					ct_eval(prefix_event_timeline, event)
+					loadstring(event)()
 					events[i] = nil
 				end
 			end

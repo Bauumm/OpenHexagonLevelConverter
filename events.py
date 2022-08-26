@@ -6,7 +6,7 @@ import os
 
 
 EVENT_TYPES = {
-    "level_change": None,
+    "level_change": None,  # TODO
     "menu": "e_kill()",  # There is no way to exit to menu in steam version
     "message_add": "messageAdd(\"<message>\", <duration>)",
     "message_important_add":
