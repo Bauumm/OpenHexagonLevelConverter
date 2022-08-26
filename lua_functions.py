@@ -45,15 +45,14 @@ CORE_FUNCTIONS = [
     "onUpdate",
     "onStep"
 ]
-reimplementations = LuaFile(os.path.join(os.path.dirname(__file__),
-                                         "lua_functions.lua"))
+lua_functions = LuaFile(os.path.join(os.path.dirname(__file__),
+                                     "lua_functions.lua"))
 core_wrapper = LuaFile(os.path.join(os.path.dirname(__file__),
                                     "core_wrapper.lua"))
 
 
-def convert_lua(lua_file, is_level_lua=False):
-    for function, newfunction in DIRECT_REPLACEMENTS.items():
-        lua_file.replace_function_calls(function, newfunction)
+def convert_lua(lua_file):
+    lua_file.replace_function_calls_multiple(DIRECT_REPLACEMENTS)
     lua_file.replace("math.randomseed(os.time())", "")
     rename_core_functions(lua_file)
 
@@ -73,22 +72,20 @@ def rename_core_functions(lua_file):
         lua_file.replace(function_source, new_source)
 
 
-def convert_level_lua(level_lua, sounds):
+def convert_level_lua(level_lua):
     level_lua.mixin_line("execScript(\"" + CONVERTER_PREFIX +
                          "core_wrapper.lua\")")
-    convert_lua(level_lua, True)
-    if not core_wrapper.saved:
-        core_wrapper.replace("prefix_", CONVERTER_PREFIX)
-        core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")
-    if not reimplementations.saved:
-        reimplementations.mixin_line(CONVERTER_PREFIX + "SOUNDS=" +
-                                     slpp.encode(sounds) + "\n")
-        reimplementations.mixin_line(CONVERTER_PREFIX +
-                                     "LEVEL_PROPERTY_MAPPING=" +
-                                     LEVEL_PROPERTY_MAPPING.to_table() + "\n")
-        reimplementations.mixin_line(CONVERTER_PREFIX +
-                                     "STYLE_PROPERTY_MAPPING=" +
-                                     STYLE_PROPERTY_MAPPING.to_table() + "\n")
-        reimplementations.replace("prefix_", CONVERTER_PREFIX)
-        reimplementations.save("Scripts/" + CONVERTER_PREFIX +
-                               "lua_reimplementations.lua")
+    convert_lua(level_lua)
+
+
+def save(sounds):
+    lua_functions.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + slpp.encode(sounds)
+                             + "\n" + CONVERTER_PREFIX +
+                             "LEVEL_PROPERTY_MAPPING=" +
+                             LEVEL_PROPERTY_MAPPING.to_table() + "\n" +
+                             CONVERTER_PREFIX + "STYLE_PROPERTY_MAPPING=" +
+                             STYLE_PROPERTY_MAPPING.to_table() + "\n")
+    lua_functions.replace("prefix_", CONVERTER_PREFIX)
+    lua_functions.save("Scripts/" + CONVERTER_PREFIX + "lua_functions.lua")
+    core_wrapper.replace("prefix_", CONVERTER_PREFIX)
+    core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")

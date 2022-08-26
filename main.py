@@ -35,7 +35,7 @@ def get_files(folder):
     return structure
 
 
-def convert_level(files, sounds, args):
+def convert_level(files, args):
     log.info("Converting level json and lua files...")
     levels = files.get("Levels")
     level_luas = []
@@ -63,14 +63,15 @@ def convert_level(files, sounds, args):
             log.info("Created", lua_path, "due to", level_json.path,
                      "reusing the script.")
         level_luas.append(lua_file.path)
-        lua_functions.convert_level_lua(lua_file, sounds)
+        lua_functions.convert_level_lua(lua_file)
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         styles.convert_lua(lua_file, level_json)
-        for fps_limit in args.fps_limit:
-            if level_json["id"] == fps_limit[0]:
-                lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" +
-                                    str(fps_limit[1]))
+        if args.fps_limit is not None:
+            for fps_limit in args.fps_limit:
+                if level_json["id"] == fps_limit[0]:
+                    lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" +
+                                        str(fps_limit[1]))
         level_json.save("Levels/" + level)
         lua_file.save(lua_path)
     return level_luas
@@ -109,17 +110,20 @@ def convert_lua(files, level_luas, path):
                 script.save(os.path.relpath(script.path, path))
 
 
-def convert_timeline():
-    lua_timeline = LuaFile(os.path.join(os.path.dirname(__file__),
-                                        "timeline.lua"))
-    lua_timeline.replace("prefix_", CONVERTER_PREFIX)
-    lua_timeline.save("Scripts/" + CONVERTER_PREFIX + "timeline.lua")
+def convert_custom_lua(name):
+    lua_file = LuaFile(os.path.join(os.path.dirname(__file__), name))
+    lua_file.replace("prefix_", CONVERTER_PREFIX)
+    lua_file.save("Scripts/" + CONVERTER_PREFIX + name)
 
 
-def convert_walls():
-    wall_module = LuaFile(os.path.join(os.path.dirname(__file__), "walls.lua"))
-    wall_module.replace("prefix_", CONVERTER_PREFIX)
-    wall_module.save("Scripts/" + CONVERTER_PREFIX + "walls.lua")
+def convert_music(music_files, path):
+    for music in music_files:
+        for i in range(len(music.get("segments", []))):
+            if music["segments"][i] is None:
+                del music["segments"][i]
+                continue
+            music["segments"][i]["time"] = int(music["segments"][i]["time"])
+        music.save(os.path.relpath(music.path, path))
 
 
 def convert_pack(args):
@@ -133,23 +137,24 @@ def convert_pack(args):
         exit(1)
     else:
         sounds = convert_sound(path)
-        level_luas = convert_level(files, sounds, args)
+        lua_functions.save(sounds)
+        level_luas = convert_level(files, args)
         convert_event(files)
         convert_lua(files, level_luas, path)
-        convert_timeline()
-        convert_walls()
+        convert_custom_lua("timeline.lua")
+        convert_custom_lua("increment.lua")
+        convert_custom_lua("message_timeline.lua")
+        convert_custom_lua("walls.lua")
         log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)
             file.save(os.path.relpath(file.path, path))
         styles.save()
         log.info("Copying Music and pack.json...")
-        copy_files = [*all_dict_values(files.get("Music", {})),
-                      files.get("pack.json")]
-        for file in copy_files:
-            file.save(os.path.relpath(file.path, path))
+        convert_music(all_dict_values(files.get("Music", {})), path)
+        files["pack.json"].save(os.path.relpath(files["pack.json"].path, path))
         for file in os.listdir(os.path.join(path, "Music")):
-            if not file.endswith(".json"):
+            if file.endswith(".ogg"):
                 shutil.copyfile(os.path.join(path, "Music", file),
                                 "Music/" + file)
         log.info("Done")

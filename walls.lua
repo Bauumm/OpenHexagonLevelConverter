@@ -1,6 +1,7 @@
+-- small utility class to automatically round numbers like floats
 prefix_float = {}
 prefix_float.round = function(num)
-	--return math.floor(num * 10 ^ 6 + 0.5) / 10 ^ 6
+	-- this could be done with something like `return math.floor(num * 10 ^ 6 + 0.5) / 10 ^ 6` but I'm not 100% sure if it's accurate
 	local speedMult = l_getSpeedMult()
 	l_setSpeedMult(num)
 	local num = l_getSpeedMult()

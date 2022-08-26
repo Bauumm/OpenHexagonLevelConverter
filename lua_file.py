@@ -59,21 +59,38 @@ class LuaFile(BaseFile):
         for node in ast.walk(self._ast_tree):
             if isinstance(node, astnodes.Call) and \
                     isinstance(node.func, astnodes.Name):
-                if node.func.id == name:
-                    nodes.append(node)
+                if type(name) == str:
+                    if node.func.id == name:
+                        nodes.append(node)
+                else:
+                    if node.func.id in name:
+                        nodes.append(node)
         return nodes
+
+    def replace_function_calls_multiple(self, function_dict):
+        nodes = self._get_function_call_nodes(function_dict.keys())
+        if len(nodes) > 0:
+            nodes.reverse()
+            for node in nodes:
+                self._text = self._text[:node.func.start_char] + \
+                    function_dict[node.func.id] + \
+                    self._text[node.func.stop_char + 1:]
+            self._ast_tree = ast.parse(self._text)
 
     def replace_function_calls(self, function, new_function):
         nodes = self._get_function_call_nodes(function)
-        nodes.reverse()
-        for node in nodes:
-            self._text = self._text[:node.func.start_char] + \
-                new_function + self._text[node.func.stop_char + 1:]
-        self._ast_tree = ast.parse(self._text)
+        if len(nodes) > 0:
+            nodes.reverse()
+            for node in nodes:
+                self._text = self._text[:node.func.start_char] + \
+                    new_function + self._text[node.func.stop_char + 1:]
+            self._ast_tree = ast.parse(self._text)
 
     def replace(self, text, newtext):
+        old_text = self._text
         super().replace(text, newtext)
-        self._ast_tree = ast.parse(self._text)
+        if old_text != self._text:
+            self._ast_tree = ast.parse(self._text)
 
     def save(self, path):
         super().save(path)
