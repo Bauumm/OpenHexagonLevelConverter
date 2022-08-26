@@ -1,5 +1,6 @@
 prefix_executingEvents = {}
 prefix_queuedEvents = {}
+prefix_event_timeline = ct_create()
 
 function execEvent(event_id)
 	if _G["prefix_" .. event_id .. "_EVENTS"] == nil then
@@ -21,7 +22,7 @@ function prefix_execute_events(event_table, current_time)
 			for i = 1, #events, 1 do
 				local event = events[i]
 				if event ~= nil and time <= current_time then
-					e_eval(event)
+					ct_eval(prefix_event_timeline, event)
 					events[i] = nil
 				end
 			end
@@ -29,12 +30,11 @@ function prefix_execute_events(event_table, current_time)
 	end
 end
 
-function prefix_update_event(event)
+function prefix_update_event(event, frametime)
 	if event.current_time == nil then
 		event.current_time = 0
-		event.start_time = prefix_get_actual_time()
 	end
-	event.current_time = prefix_get_actual_time() - event.start_time
+	event.current_time = event.current_time + frametime / 60
 	prefix_execute_events(event, event.current_time)
 	for time, _ in pairs(event) do
 		if type(time) == "number" then
@@ -46,12 +46,12 @@ function prefix_update_event(event)
 	event.done = true
 end
 
-function prefix_update_events()
+function prefix_update_events(frametime)
 	for _, event in pairs(prefix_executingEvents) do
-		prefix_update_event(event)
+		prefix_update_event(event, frametime)
 	end
 	if #prefix_queuedEvents ~= 0 then
-		prefix_update_event(prefix_queuedEvents[1])
+		prefix_update_event(prefix_queuedEvents[1], frametime)
 		if prefix_queuedEvents[1].done then
 			table.remove(prefix_queuedEvents, 1)
 		end

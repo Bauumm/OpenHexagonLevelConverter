@@ -93,3 +93,7 @@ function playSound(id)
 		a_playPackSound(id)
 	end
 end
+
+-- make os.clock work as expected, even if the os module worked it would be windows specific
+os = {}
+os.clock = prefix_get_actual_time

@@ -2,7 +2,6 @@ u_execScript("prefix_increment.lua")
 u_execScript("prefix_message_timeline.lua")
 prefix_timeline = {}
 prefix_actual_time = -50
-prefix_initial_time = nil
 prefix_wait_delay = nil
 prefix_wait_first_call = true
 prefix_timeline_ready = true
@@ -12,17 +11,12 @@ function prefix_get_actual_time()
 end
 
 function prefix_update_timeline(frametime)
+	prefix_actual_time = prefix_actual_time + frametime
 	prefix_update_increment(frametime)
 	prefix_update_messages()
 	if prefix_actual_time < 0 then
-		prefix_actual_time = prefix_actual_time + frametime
 		l_resetTime()
 		u_haltTime(-6)
-	else
-		if prefix_initial_time == nil then
-			prefix_initial_time = prefix_actual_time
-		end
-		prefix_actual_time = prefix_initial_time + l_getLevelTime() * 60
 	end
 	prefix_timeline_ready = true
 	repeat
@@ -35,6 +29,11 @@ function prefix_update_timeline(frametime)
 			table.remove(prefix_timeline, 1)
 		end
 	until not prefix_timeline_ready
+end
+
+function prefix_timeline_clear()
+	prefix_timeline = {}
+	prefix_wait_first_call = true
 end
 
 function wait(delay)
