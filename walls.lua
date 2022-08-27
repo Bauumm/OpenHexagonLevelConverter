@@ -98,27 +98,22 @@ prefix_wall_module = {
 				end
 				if wall.speed < wall.minSpeed then
 					wall.speed = wall.minSpeed
-					if wall.speed == 0 and wall.accel < 0 then
-						skip = true
-					end
 				end
 			end
-			if not skip then
-				local points_on_center = 0
-				for vertex=0,3 do
-					local x, y = cw_getVertexPos(wall.cw, vertex)
-					if math.abs(x) < radius and math.abs(y) < radius then
-						points_on_center = points_on_center + 1
-					else
-						local magnitude = math.sqrt(x ^ 2 + y ^ 2)
-						local move_dist = wall.speed * 5 * frametime
-						cw_setVertexPos(wall.cw, vertex, x - x / magnitude * move_dist, y - y / magnitude * move_dist)
-					end
+			local points_on_center = 0
+			for vertex=0,3 do
+				local x, y = cw_getVertexPos(wall.cw, vertex)
+				if math.abs(x) < radius and math.abs(y) < radius then
+					points_on_center = points_on_center + 1
+				else
+					local magnitude = math.sqrt(x ^ 2 + y ^ 2)
+					local move_dist = wall.speed * 5 * frametime
+					cw_setVertexPos(wall.cw, vertex, x - x / magnitude * move_dist, y - y / magnitude * move_dist)
 				end
-				if points_on_center > 3 then
-					cw_destroy(wall.cw)
-					table.insert(delete_queue, 1, i)
-				end
+			end
+			if points_on_center > 3 then
+				cw_destroy(wall.cw)
+				table.insert(delete_queue, 1, i)
 			end
 		end
 		for _, i in pairs(delete_queue) do
