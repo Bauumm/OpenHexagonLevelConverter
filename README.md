@@ -60,7 +60,7 @@ sudo make install
 #### 3. Building the python lib
 In a bash shell execute this command in the source directory
 ```bash
-g++ -O3 -Wall -shared -std=c++11 -fPIC $(python3 -m pybind11 --includes) json_fixer.cpp -o json_fixer$(python3-config --extension-suffix) -lSSVJsonCpp -lSSVUtilsJson
+g++ -O3 -Wall -shared -std=c++11 -fPIC $(python3 -m pybind11 --includes) json_fixer.cpp -o json_fixer$(python3-config --extension-suffix) -ISSVUtilsJson/extlibs/SSVJsonCpp/include -lSSVJsonCpp -lSSVUtilsJson
 ```
 ### Installing the python dependencies
 ```sh
