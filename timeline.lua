@@ -36,8 +36,33 @@ function prefix_timeline_clear()
 	prefix_wait_first_call = true
 end
 
-function wait(delay)
-	table.insert(prefix_timeline, function(frametime)
+function prefix_timeline_insert_do(index, func, args)
+	if index > #prefix_timeline then
+		index = #prefix_timeline
+	end
+	table.insert(prefix_timeline, index, function()
+		if args == nil then
+			func()
+		else
+			func(unpack(args))
+		end
+		return true
+	end)
+end
+
+function prefix_timeline_append_do(func, args)
+	table.insert(prefix_timeline, function()
+		if args == nil then
+			func()
+		else
+			func(unpack(args))
+		end
+		return true
+	end)
+end
+
+function prefix_get_wait_function(delay)
+	return function(frametime)
 		prefix_timeline_ready = false
 		if prefix_wait_first_call then
 			prefix_wait_first_call = false
@@ -49,26 +74,29 @@ function wait(delay)
 			prefix_wait_first_call = true
 		end
 		return done
-	end)
+	end
+end
+
+function prefix_timeline_insert_wait(index, delay)
+	if index > #prefix_timeline then
+		index = #prefix_timeline
+	end
+	table.insert(prefix_timeline, index, prefix_get_wait_function(delay))
+end
+
+function wait(delay)
+	table.insert(prefix_timeline, prefix_get_wait_function(delay))
 end
 
 function wall(side, thickness)
-	table.insert(prefix_timeline, function()
-		prefix_wall_module:wall(side, thickness)
-		return true
-	end)
+	prefix_timeline_append_do(prefix_wall_module.wall, {nil, side, thickness})
 end
 
 function wallAdj(side, thickness, speedAdj)
-	table.insert(prefix_timeline, function()
-		prefix_wall_module:wallAdj(side, thickness, speedAdj)
-		return true
-	end)
+	prefix_timeline_append_do(prefix_wall_module.wallAdj, {nil, side, thickness, speedAdj})
 end
 
 function wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
-	table.insert(prefix_timeline, function()
-		prefix_wall_module:wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
-		return true
-	end)
+	prefix_timeline_append_do(prefix_wall_module.wallAcc, {nil, side, thickness, speedAdj, acceleration, minSpeed, maxSpeed})
+	
 end

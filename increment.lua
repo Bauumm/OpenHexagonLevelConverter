@@ -34,19 +34,27 @@ function prefix_update_increment(frametime)
 			l_setRotationSpeed(l_getRotationSpeedMax() * prefix_sign(l_getRotationSpeed()))
 		end
 		prefix_fast_spin = l_getFastSpin()
+		prefix_timeline_insert_do(2, prefix_side_change, {math.random(l_getSidesMin(), l_getSidesMax())})
 	end
 	if prefix_fast_spin > 0 then
 		l_setRotation(l_getRotation() + math.abs((prefix_get_smoother_step(0, l_getFastSpin(), prefix_fast_spin) / 3.5) * frametime * 17))
 		prefix_fast_spin = prefix_fast_spin - frametime
 	end
-	if prefix_is_incrementing and prefix_wall_module:empty() then
-		onIncrement()
-		prefix_is_incrementing = false
-		l_setSpeedMult(l_getSpeedMult() + l_getSpeedInc())
-		l_setDelayMult(l_getDelayMult() + l_getDelayInc())
-		if prefix_enable_rnd_side_changes then
-			a_playSound("beep.ogg")
-			l_setSides(math.random(l_getSidesMin(), l_getSidesMax()))
-		end
+end
+
+function prefix_side_change(sides)
+	if not prefix_wall_module:empty() then
+		prefix_timeline_insert_do(2, prefix_timeline_clear)
+		prefix_timeline_insert_do(2, prefix_side_change, {sides})
+		prefix_timeline_insert_wait(2, 1)
+		return
+	end
+	onIncrement()
+	prefix_is_incrementing = false
+	l_setSpeedMult(l_getSpeedMult() + l_getSpeedInc())
+	l_setDelayMult(l_getDelayMult() + l_getDelayInc())
+	if prefix_enable_rnd_side_changes then
+		a_playSound("beep.ogg")
+		l_setSides(sides)
 	end
 end

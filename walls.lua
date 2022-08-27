@@ -43,13 +43,22 @@ prefix_wall_module = {
 	WALL_SPAWN_DIST = 1600,
 	walls = {},
 
+	find_self = function(self)
+		if self == nil then
+			return prefix_wall_module
+		end
+		return self
+	end,
 	wallAcc = function(self, side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
+		self = prefix_wall_module.find_self(self)
 		self:_wall(side, thickness, speedAdj * u_getSpeedMultDM(), acceleration, minSpeed * u_getSpeedMultDM(), maxSpeed * u_getSpeedMultDM())
 	end,
 	wallAdj = function(self, side, thickness, speedAdj)
+		self = prefix_wall_module.find_self(self)
 		self:_wall(side, thickness, speedAdj * u_getSpeedMultDM(), 0, 0, 0)
 	end,
 	wall = function(self, side, thickness)
+		self = prefix_wall_module.find_self(self)
 		self:_wall(side, thickness, u_getSpeedMultDM(), 0, 0, 0)
 	end,
 	_wall = function(self, side, thickness, speed, acceleration, minSpeed, maxSpeed)
