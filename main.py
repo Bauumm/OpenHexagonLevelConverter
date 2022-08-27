@@ -59,7 +59,7 @@ def convert_level(files, args):
                 except KeyError:
                     break
             dpath.util.new(files, lua_path, lua_file)
-            level_json["lua_file"] = lua_path
+            level_json["lua_file"] = lua_path[7:]
             log.info("Created", lua_path, "due to", level_json.path,
                      "reusing the script.")
         level_luas.append(lua_file.path)

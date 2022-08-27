@@ -1,5 +1,6 @@
 if prefix_was_defined == nil then
 	prefix_was_defined = true
+	prefix_time_stop = 0
 	if prefix_limit_fps ~= nil then
 		prefix_target_tickrate = prefix_limit_fps / 240
 		prefix_remainder = 0
@@ -28,6 +29,10 @@ if prefix_was_defined == nil then
 			end
 		else
 			prefix_call_onUpdate(frametime)
+		end
+		if prefix_time_stop > 0 then
+			prefix_time_stop = prefix_time_stop - frametime
+			u_haltTime(frametime)
 		end
 	end
 

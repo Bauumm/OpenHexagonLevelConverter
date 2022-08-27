@@ -58,5 +58,5 @@ function prefix_update_events(frametime)
 			table.remove(prefix_queuedEvents, 1)
 		end
 	end
-	prefix_execute_events(prefix_MAIN_EVENTS, math.max(prefix_get_actual_time() - 50, 0))
+	prefix_execute_events(prefix_MAIN_EVENTS, l_getLevelTime())
 end
