@@ -45,6 +45,19 @@ core_wrapper = LuaFile(os.path.join(os.path.dirname(__file__),
 
 def convert_lua(lua_file):
     lua_file.replace("math.randomseed(os.time())", "")
+    script_path = lua_file.path
+    while os.path.basename(script_path) != "Scripts":
+        script_path = os.path.dirname(script_path)
+    for node in lua_file._get_function_call_nodes("execScript"):
+        path = node.args[0].s
+        if not os.path.exists(path):
+            for script in os.listdir(os.path.join(script_path,
+                                                  os.path.dirname(path))):
+                if script.upper() == os.path.basename(path).upper():
+                    old = lua_file._text[node.start_char:node.stop_char + 1]
+                    new = "execScript(\"" + os.path.join(os.path.dirname(path),
+                                                         script) + "\")"
+                    lua_file.replace(old, new)
     rename_core_functions(lua_file)
 
 
