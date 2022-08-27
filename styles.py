@@ -13,6 +13,7 @@ COLOR_OBJECTS = [
 ]
 
 styles_lua = LuaFile(os.path.join(os.path.dirname(__file__), "styles.lua"))
+filepath = os.path.realpath(__file__)
 colors3D = ExtendedDict()
 
 
@@ -66,7 +67,7 @@ def convert_lua(level_lua, level_json):
     # 3D alpha falloff overflow reimplementation using shaders
     if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
         os.makedirs("Shaders")
-        shutil.copyfile(os.path.join(os.path.dirname(__file__), "wall3D.frag"),
+        shutil.copyfile(os.path.join(os.path.dirname(filepath), "wall3D.frag"),
                         "Shaders/" + CONVERTER_PREFIX + "wall3D.frag")
 
 

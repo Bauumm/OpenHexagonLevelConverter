@@ -12,6 +12,9 @@ import log
 import os
 
 
+filepath = os.path.realpath(__file__)
+
+
 def all_dict_values(dictionary):
     for value in dictionary.values():
         if type(value) == dict:
@@ -111,7 +114,7 @@ def convert_lua(files, level_luas, path):
 
 
 def convert_custom_lua(name):
-    lua_file = LuaFile(os.path.join(os.path.dirname(__file__), name))
+    lua_file = LuaFile(os.path.join(os.path.dirname(filepath), name))
     lua_file.replace("prefix_", CONVERTER_PREFIX)
     lua_file.save("Scripts/" + CONVERTER_PREFIX + name)
 

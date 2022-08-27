@@ -97,7 +97,7 @@ def save(sounds, level_jsons):
         for prop in level_json:
             if type(level_json[prop]) == str:
                 level_json[prop] = level_json[prop].replace("\n", "\\n") \
-                    .replace("\t", "\\t")
+                    .replace("\t", "\\t").replace("\r", "\\r")
         level_json["luaFile"] = level_json["luaFile"][8:]
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"
