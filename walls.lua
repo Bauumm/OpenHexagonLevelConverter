@@ -84,6 +84,13 @@ prefix_wall_module = {
 	empty = function(self)
 		return #self.walls == 0
 	end,
+	clear = function(self)
+		local length = #self.walls
+		for i=1,length do
+			cw_destroy(self.walls[1].cw)
+			table.remove(self.walls, 1)
+		end
+	end,
 	update_walls = function(self, frametime)
 		local delete_queue = {}
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65

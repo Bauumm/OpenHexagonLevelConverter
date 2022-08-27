@@ -82,7 +82,7 @@ def convert_level_lua(level_lua):
     convert_lua(level_lua)
 
 
-def save(sounds):
+def save(sounds, level_jsons):
     lua_functions.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + slpp.encode(sounds)
                              + "\n" + CONVERTER_PREFIX +
                              "LEVEL_PROPERTY_MAPPING=" +
@@ -92,4 +92,14 @@ def save(sounds):
     lua_functions.replace("prefix_", CONVERTER_PREFIX)
     lua_functions.save("Scripts/" + CONVERTER_PREFIX + "lua_functions.lua")
     core_wrapper.replace("prefix_", CONVERTER_PREFIX)
+    code = ""
+    for level_json in level_jsons:
+        for prop in level_json:
+            if type(level_json[prop]) == str:
+                level_json[prop] = level_json[prop].replace("\n", "\\n") \
+                    .replace("\t", "\\t")
+        level_json["luaFile"] = level_json["luaFile"][8:]
+        code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
+            + "\"]=" + level_json.to_table() + "\n"
+    core_wrapper.mixin_line(code)
     core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")

@@ -59,7 +59,7 @@ def convert_level(files, args):
                 except KeyError:
                     break
             dpath.util.new(files, lua_path, lua_file)
-            level_json["lua_file"] = lua_path[7:]
+            level_json["lua_file"] = lua_path[8:]
             log.info("Created", lua_path, "due to", level_json.path,
                      "reusing the script.")
         level_luas.append(lua_file.path)
@@ -137,8 +137,8 @@ def convert_pack(args):
         exit(1)
     else:
         sounds = convert_sound(path)
-        lua_functions.save(sounds)
         level_luas = convert_level(files, args)
+        lua_functions.save(sounds, all_dict_values(files["Levels"]))
         convert_event(files)
         convert_lua(files, level_luas, path)
         convert_custom_lua("timeline.lua")

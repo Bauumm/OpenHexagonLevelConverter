@@ -6,7 +6,7 @@ import os
 
 
 EVENT_TYPES = {
-    "level_change": None,  # TODO
+    "level_change": CONVERTER_PREFIX + "change_level(\"<id>\")",
     "menu": "e_kill()",  # There is no way to exit to menu in steam version
     "message_add": "messageAdd(\"<message>\", <duration>)",
     "message_important_add":
@@ -87,6 +87,8 @@ def convert_event(event_json):
         if function is None:
             log.error("Unimplemented event:", event["type"])
             return ""
+        if event["type"] == "level_change":
+            event["id"] = os.path.basename(event["id"])
         for prop in event:
             function = function.replace("<" + prop + ">", str(event[prop]))
         return function.replace("\n", "\\\\n")

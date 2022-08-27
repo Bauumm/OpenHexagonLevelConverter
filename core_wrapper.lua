@@ -57,4 +57,22 @@ if prefix_was_defined == nil then
 	function onIncrement()
 		prefix_function_wrapper(prefix_onIncrement)
 	end
+
+	function prefix_change_level(id)
+		prefix_first_play = true
+		prefix_was_defined = nil
+		prefix_3D_depth = nil
+		prefix_limit_fps = nil
+		e_messageAddImportantSilent("", 0)
+		onUnload()
+		prefix_wall_module:clear()
+		local level_json = _G["prefix_level_json_" .. id]
+		s_setStyle(level_json.styleId)
+		u_execScript(level_json.luaFile)
+		onInit()
+		a_playSound("go.ogg")
+		a_setMusic(level_json.musicId)
+		l_resetTime()
+		onLoad()
+	end
 end
