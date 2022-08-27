@@ -9,6 +9,19 @@ import os
 class LuaFile(BaseFile):
     def __init__(self, path=None):
         super().__init__(path)
+        parse_error_split = self._text.split("^-")
+        if len(parse_error_split) == 1:
+            parse_error_split = self._text.split("^ -")
+        if len(parse_error_split) != 1:
+            count = 1
+            try:
+                while float(parse_error_split[1][:count]):
+                    count += 1
+            except ValueError:
+                count -= 1
+            self._text = parse_error_split[0] + "^(-" + \
+                parse_error_split[1][:count] + ")" + \
+                parse_error_split[1][count:]
         self._ast_tree = ast.parse(self._text)
 
     def _get_function_node(self, name):
