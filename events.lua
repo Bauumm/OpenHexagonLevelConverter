@@ -42,8 +42,15 @@ function prefix_update_event(event, frametime)
 end
 
 function prefix_update_events(frametime)
-	for _, event in pairs(prefix_executingEvents) do
-		prefix_update_event(event, frametime)
+	local del_queue = {}
+	for i=1, #prefix_executingEvents do
+		prefix_update_event(prefix_executingEvents[i], frametime)
+		if prefix_executingEvents[i].done then
+			table.insert(del_queue, 1, i)
+		end
+	end
+	for _, i in pairs(del_queue) do
+		table.remove(prefix_executingEvents, i)
 	end
 	if #prefix_queuedEvents ~= 0 then
 		prefix_update_event(prefix_queuedEvents[1], frametime)

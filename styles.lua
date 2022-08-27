@@ -1,6 +1,5 @@
 prefix_shdr_wall3D = shdr_getShaderId("prefix_wall3D.frag")
 
-
 function prefix_darken_color(r, g, b, a)
 	local darken_mult = s_get3dDarkenMult()
 	if darken_mult == 0 then
@@ -13,6 +12,22 @@ function prefix_darken_color(r, g, b, a)
 	return r / 255, g / 255, b / 255, a / 255  -- pass the color into the shader properly
 end
 
+function prefix_set_3d_depth(depth)
+	prefix_3D_depth = depth - 1
+	s_set3dDepth(depth - 1)
+end
+
+function prefix_get_3d_depth()
+	return prefix_3D_depth
+end
+
+function prefix_set_3d_spacing(spacing)
+	s_set3dSpacing(spacing / 1.4)
+end
+
+function prefix_get_3d_spacing()
+	return s_get3dSpacing() * 1.4
+end
 
 function prefix_initStyle()
 	if prefix_3D_depth == nil then
@@ -39,13 +54,11 @@ function prefix_initStyle()
 	s_setHueInc(s_getHueInc() / mult)
 end
 
-
 function prefix_updateStyle()
 	if prefix_3D_colors[prefix_current_style] == nil then
 		shdr_setUniformFVec4(prefix_shdr_wall3D, "color", prefix_darken_color(s_getMainColor()))
 	end
 end
-
 
 function prefix_setStyle(id)
 	prefix_current_style = id
