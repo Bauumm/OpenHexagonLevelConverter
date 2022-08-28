@@ -144,7 +144,7 @@ def convert_music(music_files, path):
 
 def convert_pack(args):
     args.source_pack = os.path.abspath(args.source_pack)
-    log.info("Parsing files...")
+    log.info("Parsing files in", args.source_pack + "...")
     files = get_files(args.source_pack)
     os.makedirs(args.destination_folder, exist_ok=True)
     os.chdir(args.destination_folder)

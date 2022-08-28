@@ -66,7 +66,7 @@ def _count_keyword(code, keyword):
     return matches
 
 
-def _parse_line(line, ends, openings):
+def _parse_line(line, ends, openings, needs_do):
     # Counting openings and end keywords
     end_add = _count_keyword(line, "end")
     opening_add = 0
@@ -85,17 +85,22 @@ def _parse_line(line, ends, openings):
         line = line.replace("elseif", "if")
         openings += 1
         opening_add += 1
+    dos = _count_keyword(line, "do")
+    if has_loop and dos == 0:
+        needs_do = True
     # Remove lines without loop but with do,
     #              with "elseif >",
     #              with ", )" or
     #              with more ends than openings
-    if (not has_loop and _count_keyword(line, "do") > 0) or \
-            "elseif >" in line or ", )" in line or ends > openings:
+    if (not has_loop and not needs_do and dos > 0) \
+            or "elseif >" in line or ", )" in line or ends > openings:
         log.warn("Removing wrong line of lua:", line)
         line = ""
         ends -= end_add
         openings -= opening_add
-    return line, ends, openings
+    if dos > 0:
+        needs_do = False
+    return line, ends, openings, needs_do
 
 
 def _parse_code(code):
@@ -105,6 +110,7 @@ def _parse_code(code):
     lines = code.split("\n")
     code = ""
     is_comment = False
+    needs_do = False
     for i in range(len(lines)):
         # Ignoring but readding comments
         swap = False
@@ -122,7 +128,7 @@ def _parse_code(code):
                 swap = True
                 is_comment = False
         if not is_comment:
-            line, ends, openings = _parse_line(line, ends, openings)
+            line, ends, openings, needs_do = _parse_line(line, ends, openings, needs_do)
         if comment[:4] == "--[[" or comment[:7] == "--[===[":
             is_comment = True
         if swap:
