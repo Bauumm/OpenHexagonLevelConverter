@@ -11,7 +11,6 @@ import os
 class LuaFile(BaseFile):
     def __init__(self, path=None):
         super().__init__(path)
-        print(path)
         parse_error_split = self._text.split("^-")
         if len(parse_error_split) == 1:
             parse_error_split = self._text.split("^ -")
@@ -29,16 +28,19 @@ class LuaFile(BaseFile):
         try:
             self._ast_tree = ast.parse(self._text)
         except luaparser.builder.SyntaxException as error:
-            # Try inserting an end if the luaparser is missing one, this is a hacky faulty lua fix
+            # Try inserting an end if the luaparser is missing one,
+            # this is a hacky faulty lua fix
             if "Expecting one of 'end' at line" in str(error):
                 log.warn("Auto inserting missing end!")
-                line = int(str(error).split("Expecting one of 'end' at line ")[1].split(",")[0])
+                line = int(str(error)
+                           .split("Expecting one of 'end' at line ")[1]
+                           .split(",")[0])
                 self.mixin_line("end", line=line)
             else:
                 raise error
 
     def _get_function_node(self, name):
-        if name == None:
+        if name is None:
             return
         for node in ast.walk(self._ast_tree):
             if isinstance(node, astnodes.Function):
