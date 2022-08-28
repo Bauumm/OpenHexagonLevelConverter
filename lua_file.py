@@ -1,6 +1,8 @@
 from base_file import BaseFile
 from luaparser import astnodes
 from luaparser import ast
+import luaparser
+import fix_utils
 import shutil
 import log
 import os
@@ -9,6 +11,7 @@ import os
 class LuaFile(BaseFile):
     def __init__(self, path=None):
         super().__init__(path)
+        print(path)
         parse_error_split = self._text.split("^-")
         if len(parse_error_split) == 1:
             parse_error_split = self._text.split("^ -")
@@ -22,9 +25,21 @@ class LuaFile(BaseFile):
             self._text = parse_error_split[0] + "^(-" + \
                 parse_error_split[1][:count] + ")" + \
                 parse_error_split[1][count:]
-        self._ast_tree = ast.parse(self._text)
+        self._text = fix_utils.fix_lua(self._text)
+        try:
+            self._ast_tree = ast.parse(self._text)
+        except luaparser.builder.SyntaxException as error:
+            # Try inserting an end if the luaparser is missing one, this is a hacky faulty lua fix
+            if "Expecting one of 'end' at line" in str(error):
+                log.warn("Auto inserting missing end!")
+                line = int(str(error).split("Expecting one of 'end' at line ")[1].split(",")[0])
+                self.mixin_line("end", line=line)
+            else:
+                raise error
 
     def _get_function_node(self, name):
+        if name == None:
+            return
         for node in ast.walk(self._ast_tree):
             if isinstance(node, astnodes.Function):
                 if isinstance(node.name, astnodes.Index):

@@ -91,12 +91,14 @@ def convert_event(event_json):
             event["id"] = os.path.basename(event["id"])
         for prop in event:
             function = function.replace("<" + prop + ">", str(event[prop]))
-        return function.replace("\n", "\\\\n")
+        return function.replace("\n", "\\n").replace("\\", "\\\\")
     else:
         return "u_log(\"unkown event type: " + event["type"] + "\")"
 
 
 def convert_events(events):
+    if events is None:
+        events = []
     event_dict = ExtendedDict()
     for event in events:
         if event is not None:  # this can happen with faulty json

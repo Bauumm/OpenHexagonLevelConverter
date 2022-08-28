@@ -4,6 +4,7 @@ from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
+import fix_utils
 import argparse
 import shutil
 import events
@@ -45,7 +46,19 @@ def convert_level(files, args):
     for level in levels:
         level_json = levels[level]
         lua_path = os.path.join("Scripts", level_json.get("lua_file"))
-        lua_file = dpath.util.get(files, lua_path)
+        try:
+            lua_file = dpath.util.get(files, lua_path)
+        except KeyError:
+            # check for another file with different capitalization
+            original_path = os.path.join(args.source_pack, lua_path)
+            new_path_abs = fix_utils.match_capitalization(original_path)
+            if new_path_abs is None:
+                lua_file = LuaFile()
+                lua_file.path = original_path
+            else:
+                lua_path = os.path.relpath(new_path_abs, args.source_pack)
+                level_json["lua_file"] = lua_path[8:]
+                lua_file = dpath.util.get(files, lua_path)
         if lua_file.saved and level_json.saved:
             continue
         if lua_file.saved and not level_json.saved:
@@ -130,20 +143,20 @@ def convert_music(music_files, path):
 
 
 def convert_pack(args):
-    path = os.path.abspath(args.source_pack)
+    args.source_pack = os.path.abspath(args.source_pack)
     log.info("Parsing files...")
-    files = get_files(path)
+    files = get_files(args.source_pack)
     os.makedirs(args.destination_folder, exist_ok=True)
     os.chdir(args.destination_folder)
     if files.get("pack.json") is None:
-        log.error("No pack.json found in", path)
+        log.error("No pack.json found in", args.source_pack)
         exit(1)
     else:
-        sounds = convert_sound(path)
+        sounds = convert_sound(args.source_pack)
         level_luas = convert_level(files, args)
         lua_functions.save(sounds, all_dict_values(files["Levels"]))
         convert_event(files)
-        convert_lua(files, level_luas, path)
+        convert_lua(files, level_luas, args.source_pack)
         convert_custom_lua("timeline.lua")
         convert_custom_lua("increment.lua")
         convert_custom_lua("message_timeline.lua")
@@ -151,14 +164,14 @@ def convert_pack(args):
         log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)
-            file.save(os.path.relpath(file.path, path))
+            file.save(os.path.relpath(file.path, args.source_pack))
         styles.save()
         log.info("Copying Music and pack.json...")
-        convert_music(all_dict_values(files.get("Music", {})), path)
-        files["pack.json"].save(os.path.relpath(files["pack.json"].path, path))
-        for file in os.listdir(os.path.join(path, "Music")):
+        convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
+        files["pack.json"].save(os.path.relpath(files["pack.json"].path, args.source_pack))
+        for file in os.listdir(os.path.join(args.source_pack, "Music")):
             if file.endswith(".ogg"):
-                shutil.copyfile(os.path.join(path, "Music", file),
+                shutil.copyfile(os.path.join(args.source_pack, "Music", file),
                                 "Music/" + file)
         log.info("Done")
 

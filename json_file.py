@@ -1,5 +1,6 @@
 from extended_dict import ExtendedDict
-from json_fixer import fix_json
+from json_fixer import fix_json_string
+import chardet
 import json
 import log
 import os
@@ -9,10 +10,18 @@ class JsonFile(ExtendedDict):
     def __init__(self, path):
         self.saved = False
         self.path = path
-        content = fix_json(path) \
-            .replace("\n", "\\n") \
-            .replace(":inf,", ":Infinity,") \
-            .replace(":-inf,", ":-Infinity,")
+        with open(path, "rb") as file:
+            encoding = chardet.detect(file.read())["encoding"]
+        with open(path, encoding=encoding) as json_file:
+            json_string = json_file.read()
+            if len(json_string) == 0:
+                json_string = "{}"
+            content = fix_json_string(json_string) \
+                .replace("\n", "\\n") \
+                .replace(":inf", ":Infinity") \
+                .replace(":-inf", ":-Infinity") \
+                .replace(",inf", ",Infinity") \
+                .replace(",-inf", ",-Infinity")
         while content[-1] != "}":
             content = content[:-1]
         json_dict = json.loads(content)

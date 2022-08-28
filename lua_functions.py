@@ -3,6 +3,7 @@ from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 from lua_file import LuaFile
 from slpp import slpp
+import fix_utils
 import os
 
 
@@ -49,15 +50,13 @@ def convert_lua(lua_file):
     while os.path.basename(script_path) != "Scripts":
         script_path = os.path.dirname(script_path)
     for node in lua_file._get_function_call_nodes("execScript"):
-        path = node.args[0].s
+        path = os.path.join(script_path, node.args[0].s)
         if not os.path.exists(path):
-            for script in os.listdir(os.path.join(script_path,
-                                                  os.path.dirname(path))):
-                if script.upper() == os.path.basename(path).upper():
-                    old = lua_file._text[node.start_char:node.stop_char + 1]
-                    new = "execScript(\"" + os.path.join(os.path.dirname(path),
-                                                         script) + "\")"
-                    lua_file.replace(old, new)
+            path = fix_utils.match_capitalization(path)
+            if path is not None:
+                old = lua_file._text[node.start_char:node.stop_char + 1]
+                new = "execScript(\"" + os.path.relpath(path, script_path) + "\")"
+                lua_file.replace(old, new)
     rename_core_functions(lua_file)
 
 
@@ -96,8 +95,8 @@ def save(sounds, level_jsons):
     for level_json in level_jsons:
         for prop in level_json:
             if type(level_json[prop]) == str:
-                level_json[prop] = level_json[prop].replace("\n", "\\n") \
-                    .replace("\t", "\\t").replace("\r", "\\r")
+                level_json[prop] = level_json[prop].replace("\\", "\\\\") \
+                        .replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")
         level_json["luaFile"] = level_json["luaFile"][8:]
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"
