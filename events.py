@@ -70,8 +70,9 @@ event_lua.replace("prefix_", CONVERTER_PREFIX)
 
 
 def convert_event(event_json):
+    # set default values
     event = {
-        "type": event_json.get("type", ""),
+        "type": event_json.get("type"),
         "duration": event_json.get("duration", 0),
         "valueName": event_json.get("value_name", ""),
         "value": event_json.get("value", 0),
@@ -82,6 +83,8 @@ def convert_event(event_json):
         "segment_index": event_json.get("segment_index", None),
         "seconds": event_json.get("seconds", None)
     }
+    if event["type"] is None:
+        return  # Probably issues with json parsing
     if event["type"] in EVENT_TYPES:
         function = EVENT_TYPES[event["type"]]
         if function is None:
@@ -103,9 +106,10 @@ def convert_events(events):
     for event in events:
         if event is not None:  # this can happen with faulty json
             event_function = convert_event(event)
-            event_list = event_dict.get(event.get("time", 0), [])
-            event_list.append(event_function)
-            event_dict[event.get("time", 0)] = event_list
+            if event_function is not None:
+                event_list = event_dict.get(event.get("time", 0), [])
+                event_list.append(event_function)
+                event_dict[event.get("time", 0)] = event_list
     return event_dict
 
 
