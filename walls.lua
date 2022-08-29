@@ -78,7 +78,7 @@ prefix_wall_module = {
 	end,
 	_set_color = function(cw)
 		for i=0,3 do
-			cw_setVertexColor(cw, i, s_getMainColor())
+			cw_setVertexColor(cw, i, prefix_get_3d_adjusted_main_color())
 		end
 	end,
 	empty = function(self)
