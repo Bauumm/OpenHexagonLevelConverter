@@ -28,8 +28,10 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
     "3D_perspective_multiplier": ["s_get3dPerspectiveMult",
                                   "s_set3dPerspectiveMult"],
     "3D_darken_multiplier": ["s_get3dDarkenMult", "s_set3dDarkenMult"],
-    "3D_alpha_multiplier": ["s_get3dAlphaMult", "s_set3dAlphaMult"],
-    "3D_alpha_falloff": ["s_get3dAlphaFalloff", "s_set3dAlphaFalloff"],
+    "3D_alpha_multiplier": [CONVERTER_PREFIX + "get_3d_alpha_mult",
+                            CONVERTER_PREFIX + "set_3d_alpha_mult"],
+    "3D_alpha_falloff": [CONVERTER_PREFIX + "get_3d_alpha_falloff",
+                         CONVERTER_PREFIX + "set_3d_alpha_falloff"],
 })
 CORE_FUNCTIONS = [
     "onUnload",
@@ -55,7 +57,8 @@ def convert_lua(lua_file):
             path = fix_utils.match_capitalization(path)
             if path is not None:
                 old = lua_file._text[node.start_char:node.stop_char + 1]
-                new = "execScript(\"" + os.path.relpath(path, script_path) + "\")"
+                new = "execScript(\"" + os.path.relpath(path, script_path) + \
+                    "\")"
                 lua_file.replace(old, new)
     rename_core_functions(lua_file)
 
@@ -96,7 +99,8 @@ def save(sounds, level_jsons):
         for prop in level_json:
             if type(level_json[prop]) == str:
                 level_json[prop] = level_json[prop].replace("\\", "\\\\") \
-                        .replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")
+                    .replace("\n", "\\n").replace("\t", "\\t") \
+                    .replace("\r", "\\r")
         level_json["luaFile"] = level_json["luaFile"][8:]
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"

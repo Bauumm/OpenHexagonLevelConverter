@@ -69,16 +69,17 @@ prefix_wall_module = {
 		cw_setVertexPos(wall.cw, 1, self._getOrbit(angle + div * 0.5, self.WALL_SPAWN_DIST))
 		cw_setVertexPos(wall.cw, 2, self._getOrbit(angle + div * 0.5 + l_getWallAngleLeft(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewLeft()))
 		cw_setVertexPos(wall.cw, 3, self._getOrbit(angle - div * 0.5 + l_getWallAngleRight(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewRight()))
-		self._set_color(wall.cw)
+		self:_set_color(wall.cw)
 		wall.speed = speed
 		wall.accel = acceleration
 		wall.minSpeed = minSpeed
 		wall.maxSpeed = maxSpeed
 		table.insert(self.walls, wall)
 	end,
-	_set_color = function(cw)
+	_adjusted_main_color = {0, 0, 0, 0},
+	_set_color = function(self, cw)
 		for i=0,3 do
-			cw_setVertexColor(cw, i, prefix_get_3d_adjusted_main_color())
+			cw_setVertexColor(cw, i, unpack(self._adjusted_main_color))
 		end
 	end,
 	empty = function(self)
@@ -92,11 +93,12 @@ prefix_wall_module = {
 		end
 	end,
 	update_walls = function(self, frametime)
+		self._adjusted_main_color = prefix_get_3d_adjusted_main_color()
 		local delete_queue = {}
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65
 		for i=1,#self.walls do
 			local wall = self.walls[i]
-			self._set_color(wall.cw)
+			self:_set_color(wall.cw)
 			if wall.accel ~= 0 then
 				wall.speed = wall.speed + wall.accel * frametime
 				if wall.speed > wall.maxSpeed then

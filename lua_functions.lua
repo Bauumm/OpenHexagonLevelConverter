@@ -26,7 +26,7 @@ function prefix_setField(file, field, value)
 	end
 end
 
-function prefix_getField(file, field)
+function prefix_getField(file, field, default)
 	local functions
 	if file == "level" then
 		functions = prefix_LEVEL_PROPERTY_MAPPING[field]
@@ -39,7 +39,7 @@ function prefix_getField(file, field)
 			value = prefix_custom_keys[field]
 		end
 		if value == nil then
-			u_log("Could not get " .. field .. "!!!")
+			value = default
 		end
 		return value
 	else
@@ -48,16 +48,16 @@ function prefix_getField(file, field)
 end
 
 function getLevelValueInt(field)
-	return prefix_getField("level", field)
+	return prefix_getField("level", field, 0)
 end
 function getLevelValueFloat(field)
-	return prefix_getField("level", field)
+	return prefix_getField("level", field, 0)
 end
 function getLevelValueString(field)
-	return prefix_getField("level", field)
+	return prefix_getField("level", field, "")
 end
 function getLevelValueBool(field)
-	return prefix_getField("level", field)
+	return prefix_getField("level", field, false)
 end
 function setLevelValueInt(field, value)
 	return prefix_setField("level", field, value)
@@ -72,16 +72,16 @@ function setLevelValueBool(field, value)
 	return prefix_setField("level", field, value)
 end
 function getStyleValueInt(field)
-	return prefix_getField("style", field)
+	return prefix_getField("style", field, 0)
 end
 function getStyleValueFloat(field)
-	return prefix_getField("style", field)
+	return prefix_getField("style", field, 0)
 end
 function getStyleValueString(field)
-	return prefix_getField("style", field)
+	return prefix_getField("style", field, "")
 end
 function getStyleValueBool(field)
-	return prefix_getField("style", field)
+	return prefix_getField("style", field, false)
 end
 function setStyleValueInt(field, value)
 	return prefix_setField("style", field, value)
