@@ -76,10 +76,9 @@ prefix_wall_module = {
 		wall.maxSpeed = maxSpeed
 		table.insert(self.walls, wall)
 	end,
-	_adjusted_main_color = {0, 0, 0, 0},
 	_set_color = function(self, cw)
 		for i=0,3 do
-			cw_setVertexColor(cw, i, unpack(self._adjusted_main_color))
+			cw_setVertexColor(cw, i, s_getMainColor())
 		end
 	end,
 	empty = function(self)
@@ -93,7 +92,6 @@ prefix_wall_module = {
 		end
 	end,
 	update_walls = function(self, frametime)
-		self._adjusted_main_color = prefix_get_3d_adjusted_main_color()
 		local delete_queue = {}
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65
 		for i=1,#self.walls do

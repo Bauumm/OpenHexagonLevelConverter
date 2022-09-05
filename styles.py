@@ -59,6 +59,10 @@ def convert_style(style_json):
     # Divide 3D_spacing by 1.4 because the steam version multiplies it by 1.4
     style_json["3D_spacing"] = style_json.get("3D_spacing", 1) / 1.4
 
+    # This way the first 3D layer is rendered inside the main layer just like
+    # in 1.92
+    style_json["3D_layer_offset"] = -1
+
 
 def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "current_style=\"" +

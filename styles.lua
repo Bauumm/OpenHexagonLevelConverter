@@ -16,38 +16,9 @@ function prefix_shader_scaling(color)
 	return color[1] / 255, color[2] / 255, color[3] / 255, color[4] / 255
 end
 
-function prefix_get_3d_adjusted_main_color()
-	if prefix_3D_depth >= 1 then
-		-- the first layer exists which in 1.92 is blending directly with the main color
-		local main_color = {s_getMainColor()}
-		local layer_color = {
-			prefix_3d_override_color[1],
-			prefix_3d_override_color[2],
-			prefix_3d_override_color[3],
-			prefix_3d_override_color[4] / prefix_3d_alpha_mult % 256
-		}
-		print("mix")
-		print(unpack(main_color))
-		print(unpack(layer_color))
-		local factor_main = main_color[4] / 255
-		local factor_3d = 1 - factor_main
-		local new_color = {}
-		for i=1,4 do
-			new_color[i] = main_color[i] * factor_main + layer_color[i] * factor_3d
-		end
-		return new_color
-	else
-		return {s_getMainColor()}
-	end
-end
-
 function prefix_set_3d_depth(depth)
 	prefix_3D_depth = depth
-	if depth > 0 then
-		s_set3dDepth(depth - 1)
-	else
-		s_set3dDepth(depth)
-	end
+	s_set3dDepth(depth)
 end
 
 function prefix_get_3d_depth()
@@ -83,11 +54,8 @@ end
 function prefix_initStyle()
 	if prefix_3D_depth == nil then
 		prefix_3D_depth = s_get3dDepth()
-		prefix_set_3d_depth(prefix_3D_depth)
 	else
-		if prefix_3D_depth > 0 then
-			s_set3dDepth(prefix_3D_depth - 1)
-		end
+		s_set3dDepth(prefix_3D_depth)
 	end
 	-- 3D alpha fixes
 	for i=1,3 do  -- 1,2,3 are the RenderStages for the 3D layers
