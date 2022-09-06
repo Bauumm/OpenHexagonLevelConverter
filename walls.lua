@@ -65,10 +65,10 @@ prefix_wall_module = {
 		local wall = {cw=cw_create()}
 		local div = prefix_float:new(360 / l_getSides())
 		local angle = div * side
-		cw_setVertexPos(wall.cw, 0, self._getOrbit(angle - div * 0.5, self.WALL_SPAWN_DIST))
-		cw_setVertexPos(wall.cw, 1, self._getOrbit(angle + div * 0.5, self.WALL_SPAWN_DIST))
-		cw_setVertexPos(wall.cw, 2, self._getOrbit(angle + div * 0.5 + l_getWallAngleLeft(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewLeft()))
-		cw_setVertexPos(wall.cw, 3, self._getOrbit(angle - div * 0.5 + l_getWallAngleRight(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewRight()))
+		cw_setVertexPos(wall.cw, 3, self._getOrbit(angle - div * 0.5, self.WALL_SPAWN_DIST))
+		cw_setVertexPos(wall.cw, 2, self._getOrbit(angle + div * 0.5, self.WALL_SPAWN_DIST))
+		cw_setVertexPos(wall.cw, 1, self._getOrbit(angle + div * 0.5 + l_getWallAngleLeft(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewLeft()))
+		cw_setVertexPos(wall.cw, 0, self._getOrbit(angle - div * 0.5 + l_getWallAngleRight(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewRight()))
 		self:_set_color(wall.cw)
 		wall.speed = speed
 		wall.accel = acceleration
