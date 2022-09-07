@@ -29,6 +29,10 @@ def convert_color(color):
         # (except for the alpha component) reset to black
         for i in range(3):
             color["value"][i] = 0
+    # Let pulse values underflow/overflow like in 1.92
+    if color.get("pulse") is not None:
+        for i in range(4):
+            color["pulse"][i] = color["pulse"][i] % 256
     return color
 
 
