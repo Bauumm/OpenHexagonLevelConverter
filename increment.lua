@@ -37,7 +37,7 @@ function prefix_update_increment(frametime)
 		prefix_timeline_insert_do(2, prefix_side_change, {math.random(l_getSidesMin(), l_getSidesMax())})
 	end
 	if prefix_fast_spin > 0 then
-		l_setRotation(l_getRotation() + math.abs((prefix_get_smoother_step(0, l_getFastSpin(), prefix_fast_spin) / 3.5) * frametime * 17))
+		l_setRotation(l_getRotation() + (math.abs((prefix_get_smoother_step(0, l_getFastSpin(), prefix_fast_spin) / 3.5) * frametime * 17)) * prefix_sign(l_getRotationSpeed()))
 		prefix_fast_spin = prefix_fast_spin - frametime
 	end
 end
