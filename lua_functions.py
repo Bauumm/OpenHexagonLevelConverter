@@ -2,7 +2,6 @@ from level_properties import LEVEL_PROPERTY_MAPPING
 from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 from lua_file import LuaFile
-from slpp import slpp
 import fix_utils
 import os
 
@@ -85,7 +84,7 @@ def convert_level_lua(level_lua):
 
 
 def save(sounds, level_jsons):
-    lua_functions.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + slpp.encode(sounds)
+    lua_functions.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + sounds.to_table()
                              + "\n" + CONVERTER_PREFIX +
                              "LEVEL_PROPERTY_MAPPING=" +
                              LEVEL_PROPERTY_MAPPING.to_table() + "\n" +

@@ -1,3 +1,4 @@
+from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 from json_file import JsonFile
 from lua_file import LuaFile
@@ -102,9 +103,12 @@ def convert_sound(path):
         pass
     if len(sounds) > 0:
         os.makedirs("Sounds", exist_ok=True)
+    dict_sounds = ExtendedDict()
     for sound in sounds:
-        shutil.copyfile(os.path.join(path, "Sounds", sound), "Sounds/" + sound)
-    return sounds
+        shutil.copyfile(os.path.join(path, "Sounds", sound), "Sounds/" +
+                        os.path.basename(path) + "_" + sound)
+        dict_sounds[os.path.basename(path) + "_" + sound] = True
+    return dict_sounds
 
 
 def convert_event(files):
@@ -167,8 +171,10 @@ def convert_pack(args):
             file.save(os.path.relpath(file.path, args.source_pack))
         styles.save()
         log.info("Copying Music and pack.json...")
-        convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
-        files["pack.json"].save(os.path.relpath(files["pack.json"].path, args.source_pack))
+        convert_music(all_dict_values(files.get("Music", {})),
+                      args.source_pack)
+        files["pack.json"].save(os.path.relpath(files["pack.json"].path,
+                                                args.source_pack))
         for file in os.listdir(os.path.join(args.source_pack, "Music")):
             if file.endswith(".ogg"):
                 shutil.copyfile(os.path.join(args.source_pack, "Music", file),
