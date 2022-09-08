@@ -44,14 +44,21 @@ if prefix_was_defined == nil then
 		prefix_wall_module:update_walls(frametime)
 	end
 
-	function onUnload()
+	function onPreUnload()
+		prefix_is_unloading = true
 		prefix_function_wrapper(prefix_onUnload)
+		prefix_update_events(0)
+		if not u_inMenu() and prefix_level_changed then
+			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\")")
+		end
 	end
 
 	function onLoad()
-		u_haltTime(-6)  -- undo timehalt the steam version adds by default
-		prefix_initStyle()
-		prefix_function_wrapper(prefix_onLoad)
+		if not u_inMenu() then
+			u_haltTime(-6)  -- undo timehalt the steam version adds by default
+			prefix_initStyle()
+			prefix_function_wrapper(prefix_onLoad)
+		end
 	end
 
 	function onIncrement()
@@ -59,20 +66,25 @@ if prefix_was_defined == nil then
 	end
 
 	function prefix_change_level(id)
-		prefix_first_play = true
-		prefix_was_defined = nil
-		prefix_3D_depth = nil
-		prefix_limit_fps = nil
-		e_messageAddImportantSilent("", 0)
-		onUnload()
-		prefix_wall_module:clear()
-		local level_json = _G["prefix_level_json_" .. id]
-		s_setStyle(level_json.styleId)
-		u_execScript(level_json.luaFile)
-		onInit()
-		a_playSound("go.ogg")
-		a_setMusic(level_json.musicId)
-		l_resetTime()
-		onLoad()
+		prefix_level_changed = true
+		if prefix_is_unloading then
+			prefix_level_id = id
+		else
+			prefix_first_play = true
+			prefix_was_defined = nil
+			prefix_3D_depth = nil
+			prefix_limit_fps = nil
+			e_messageAddImportantSilent("", 0)
+			prefix_onUnload()
+			prefix_wall_module:clear()
+			local level_json = _G["prefix_level_json_" .. id]
+			s_setStyle(level_json.styleId)
+			u_execScript(level_json.luaFile)
+			onInit()
+			a_playSound("go.ogg")
+			a_setMusic(level_json.musicId)
+			l_resetTime()
+			onLoad()
+		end
 	end
 end

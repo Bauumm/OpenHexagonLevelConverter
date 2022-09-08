@@ -81,6 +81,8 @@ def convert_level(files, args):
                      "reusing the script.")
         level_luas.append(lua_file.path)
         lua_functions.convert_level_lua(lua_file)
+        lua_file.mixin_line(CONVERTER_PREFIX + "level_id=\"" + level_json["id"]
+                            + "\"")
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         styles.convert_lua(lua_file, level_json)
