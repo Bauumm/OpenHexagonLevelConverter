@@ -63,6 +63,11 @@ if prefix_was_defined == nil then
 	function onLoad()
 		if not u_inMenu() then
 			u_haltTime(-6)  -- undo timehalt the steam version adds by default
+
+			-- make font the same as 1.92
+			u_setMessageFont("imagine.ttf")
+			u_setMessageFontSize(40)
+
 			prefix_initStyle()
 			prefix_function_wrapper(prefix_onLoad)
 		end

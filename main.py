@@ -40,6 +40,23 @@ def get_files(folder):
     return structure
 
 
+def get_lua_file(files, level_json, lua_path):
+    try:
+        lua_file = dpath.util.get(files, lua_path)
+    except KeyError:
+        # check for another file with different capitalization
+        original_path = os.path.join(args.source_pack, lua_path)
+        new_path_abs = fix_utils.match_capitalization(original_path)
+        if new_path_abs is None:
+            lua_file = LuaFile()
+            lua_file.path = original_path
+        else:
+            lua_path = os.path.relpath(new_path_abs, args.source_pack)
+            level_json["lua_file"] = lua_path[8:]
+            lua_file = dpath.util.get(files, lua_path)
+    return lua_file
+
+
 def convert_level(files, args):
     log.info("Converting level json and lua files...")
     levels = files.get("Levels")
@@ -47,19 +64,7 @@ def convert_level(files, args):
     for level in levels:
         level_json = levels[level]
         lua_path = os.path.join("Scripts", level_json.get("lua_file"))
-        try:
-            lua_file = dpath.util.get(files, lua_path)
-        except KeyError:
-            # check for another file with different capitalization
-            original_path = os.path.join(args.source_pack, lua_path)
-            new_path_abs = fix_utils.match_capitalization(original_path)
-            if new_path_abs is None:
-                lua_file = LuaFile()
-                lua_file.path = original_path
-            else:
-                lua_path = os.path.relpath(new_path_abs, args.source_pack)
-                level_json["lua_file"] = lua_path[8:]
-                lua_file = dpath.util.get(files, lua_path)
+        lua_file = get_lua_file(files, level_json, lua_path)
         if lua_file.saved and level_json.saved:
             continue
         if lua_file.saved and not level_json.saved:
@@ -113,6 +118,12 @@ def convert_sound(path):
     return dict_sounds
 
 
+def convert_font(path):
+    os.makedirs("Fonts")
+    shutil.copyfile(os.path.join(os.path.dirname(filepath), "imagine.ttf"),
+                    "Fonts/imagine.ttf")
+
+
 def convert_event(files):
     event_files = files.get("Events")
     if event_files is not None:
@@ -163,6 +174,7 @@ def convert_pack(args):
         lua_functions.save(sounds, all_dict_values(files["Levels"]))
         convert_event(files)
         convert_lua(files, level_luas, args.source_pack)
+        convert_font(args.source_pack)
         convert_custom_lua("timeline.lua")
         convert_custom_lua("increment.lua")
         convert_custom_lua("message_timeline.lua")
