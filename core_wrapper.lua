@@ -46,11 +46,18 @@ if prefix_was_defined == nil then
 
 	function onPreUnload()
 		prefix_is_unloading = true
+		prefix_executingEvents = {}
+		prefix_queuedEvents = {}
+		prefix_timeline_clear()
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
-			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\")")
+			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
 		end
+	end
+
+	function onUnload()
+		prefix_is_retry = true
 	end
 
 	function onLoad()
@@ -65,7 +72,10 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onIncrement)
 	end
 
-	function prefix_change_level(id)
+	function prefix_change_level(id, from_retry)
+		if from_retry and not prefix_is_retry then
+			return
+		end
 		prefix_level_changed = true
 		if prefix_is_unloading then
 			prefix_level_id = id
