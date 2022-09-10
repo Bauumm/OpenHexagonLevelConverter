@@ -28,12 +28,10 @@ function setMessage(str)
 		return
 	end
 	e_messageAdd(str, 1)
-	ct_wait(prefix_message_clear_timeline, 1)
 	ct_eval(prefix_message_clear_timeline, "e_clearMessages()")
 end
 
 function setMessageImportant(str)
 	e_messageAddImportant(str, 1)
-	ct_wait(prefix_message_clear_timeline, 1)
 	ct_eval(prefix_message_clear_timeline, "e_clearMessages()")
 end

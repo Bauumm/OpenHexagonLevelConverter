@@ -19,7 +19,7 @@ if prefix_was_defined == nil then
 	end
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
-	function onUpdate(frametime)
+	function onInput(frametime)
 		if prefix_limit_fps ~= nil then
 			local calls = prefix_target_tickrate + prefix_remainder
 			local actual_calls = math.floor(calls)
