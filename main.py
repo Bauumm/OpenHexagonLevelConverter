@@ -96,7 +96,10 @@ def convert_level(files, args):
                 if level_json["id"] == fps_limit[0]:
                     lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" +
                                         str(fps_limit[1]))
-        level_json.save("Levels/" + level)
+        if level_json.get("selectable", True):
+            level_json.save("Levels/" + level)
+        else:
+            level_json.save("Levels/" + level + ".notselectable")
         lua_file.save(lua_path)
     return level_luas
 
