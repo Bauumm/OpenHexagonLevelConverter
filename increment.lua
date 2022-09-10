@@ -5,7 +5,7 @@ prefix_enable_rnd_side_changes = true
 prefix_increment_enabled = true
 
 function prefix_sign(number)
-    return number > 0 and 1 or (number == 0 and 0 or -1)
+    return number > 0 and 1 or -1
 end
 
 -- don't ask what this does, i just copied it from 1.92 code
