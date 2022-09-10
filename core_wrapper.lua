@@ -30,10 +30,6 @@ if prefix_was_defined == nil then
 		else
 			prefix_call_onUpdate(frametime)
 		end
-		if prefix_time_stop > 0 then
-			prefix_time_stop = prefix_time_stop - frametime
-			u_haltTime(frametime)
-		end
 	end
 
 	function prefix_call_onUpdate(frametime)
@@ -42,6 +38,13 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onUpdate, frametime)
 		prefix_update_timeline(frametime)
 		prefix_wall_module:update_walls(frametime)
+	end
+
+	function onUpdate(frametime)
+		if prefix_time_stop > 0 then
+			prefix_time_stop = prefix_time_stop - frametime
+			u_haltTime(frametime)
+		end
 	end
 
 	function onPreUnload()
