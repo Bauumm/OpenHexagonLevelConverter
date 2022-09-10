@@ -1,6 +1,6 @@
 prefix_last_increment = 0
 prefix_is_incrementing = false
-prefix_fast_spin = -1
+prefix_fast_spin = 0
 prefix_enable_rnd_side_changes = true
 prefix_increment_enabled = true
 
