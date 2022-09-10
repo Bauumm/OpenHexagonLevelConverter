@@ -14,7 +14,7 @@ EVENT_TYPES = {
     "message_clear": "e_messageAddImportantSilent(\"\", 0)",
     "time_stop": CONVERTER_PREFIX + "time_stop = <duration>",
     "timeline_wait": "wait(<duration>)",
-    "timeline_clear": CONVERTER_PREFIX + "timeline_clear()",
+    "timeline_clear": CONVERTER_PREFIX + "clear_and_reset_timeline()",
     "level_float_set": "setLevelValueFloat(\"<valueName>\", <value>)",
     "level_float_add": "setLevelValueFloat(\"<valueName>\", \
 getLevelValueFloat(\"<valueName>\") + <value>)",

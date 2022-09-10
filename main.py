@@ -176,6 +176,7 @@ def convert_pack(args):
         convert_lua(files, level_luas, args.source_pack)
         convert_font(args.source_pack)
         convert_custom_lua("timeline.lua")
+        convert_custom_lua("main_timeline.lua")
         convert_custom_lua("increment.lua")
         convert_custom_lua("message_timeline.lua")
         convert_custom_lua("walls.lua")

@@ -1,102 +1,123 @@
-u_execScript("prefix_increment.lua")
-u_execScript("prefix_message_timeline.lua")
-prefix_timeline = {}
-prefix_actual_time = -50
-prefix_wait_delay = nil
-prefix_wait_first_call = true
-prefix_timeline_ready = true
+function prefix_get_timeline_module()
+	local Timeline = {}
+	Timeline.__index = Timeline
 
-function prefix_get_actual_time()
-	return (prefix_actual_time + 50) / 60
-end
-
-function prefix_update_timeline(frametime)
-	prefix_actual_time = prefix_actual_time + frametime
-	prefix_update_increment(frametime)
-	prefix_update_messages()
-	if prefix_actual_time < 0 then
-		l_resetTime()
-		u_haltTime(-6)
+	function Timeline:new()
+		return setmetatable({ready = true, finished = false, commands = {}, current_command = nil, current_index = 1}, Timeline)
 	end
-	prefix_timeline_ready = true
-	repeat
-		if prefix_timeline[1] == nil then
-			if not prefix_is_incrementing then
-				xpcall(prefix_onStep, print)
+
+	function Timeline:update(frametime)
+		if self.finished then
+			return
+		end
+		self.ready = true
+		repeat
+			if self.current_command == nil then
+				self.finished = true
+				self.ready = false
+				break
 			end
-			prefix_timeline_ready = false
-		elseif prefix_timeline[1](frametime) then
-			table.remove(prefix_timeline, 1)
-		end
-	until not prefix_timeline_ready
-end
-
-function prefix_timeline_clear()
-	prefix_timeline = {}
-	prefix_wait_first_call = true
-end
-
-function prefix_timeline_insert_do(index, func, args)
-	if index > #prefix_timeline then
-		index = #prefix_timeline
+			self.current_command:update(frametime)
+		until not self.ready
 	end
-	table.insert(prefix_timeline, index, function()
-		if args == nil then
-			func()
+
+	function Timeline:append(command)
+		table.insert(self.commands, command)
+		if self.current_command == nil then
+			self.current_command = command
+			self.current_index = #self.commands
+		end
+	end
+
+	function Timeline:insert(index, command)
+		table.insert(self.commands, index, command)
+		if self.current_command == nil then
+			self.current_command = command
+			self.current_index = index
+		end
+	end
+
+	function Timeline:reset()
+		self:start()
+		for _, command in pairs(self.commands) do
+			command:reset()
+		end
+		if #self.commands ~= 0 then
+			self.current_command = self.commands[1]
 		else
-			func(unpack(args))
+			self.current_command = nil
 		end
-		return true
-	end)
-end
+		self.current_index = 1
+	end
 
-function prefix_timeline_append_do(func, args)
-	table.insert(prefix_timeline, function()
-		if args == nil then
-			func()
+	function Timeline:clear()
+		self.current_command = nil
+		self.current_index = 1
+		self.commands = {}
+		self.finished = true
+	end
+
+	function Timeline:start()
+		self.finished = false
+		self.ready = true
+	end
+
+	function Timeline:next()
+		if self.current_command == nil then
+			return
+		end
+		self.current_index = self.current_index + 1
+		self.current_command = self.commands[self.current_index]
+	end
+
+	function Timeline:get_current_index()
+		if self.current_command == nil then
+			return 1
 		else
-			func(unpack(args))
+			if self.current_index > #self.commands then
+				return -1
+			end
+			return self.current_index
 		end
-		return true
-	end)
-end
-
-function prefix_get_wait_function(delay)
-	return function(frametime)
-		prefix_timeline_ready = false
-		if prefix_wait_first_call then
-			prefix_wait_first_call = false
-			prefix_wait_delay = delay
-		end
-		prefix_wait_delay = prefix_wait_delay - frametime
-		local done = not (prefix_wait_delay - frametime > frametime)
-		if done then
-			prefix_wait_first_call = true
-		end
-		return done
 	end
-end
 
-function prefix_timeline_insert_wait(index, delay)
-	if index > #prefix_timeline then
-		index = #prefix_timeline
+
+	local Wait = {}
+	Wait.__index = Wait
+
+	function Wait:new(timeline, time)
+		return setmetatable({timeline = timeline, time = time, current_time = time}, Wait)
 	end
-	table.insert(prefix_timeline, index, prefix_get_wait_function(delay))
-end
 
-function wait(delay)
-	table.insert(prefix_timeline, prefix_get_wait_function(delay))
-end
+	function Wait:update(frametime)
+		self.timeline.ready = false
+		self.current_time = self.current_time - frametime
+		if self.current_time - frametime > frametime then
+			return
+		end
+		self.timeline:next()
+		self:reset()
+	end
 
-function wall(side, thickness)
-	prefix_timeline_append_do(prefix_wall_module.wall, {nil, side, thickness})
-end
+	function Wait:reset()
+		self.current_time = self.time
+	end
 
-function wallAdj(side, thickness, speedAdj)
-	prefix_timeline_append_do(prefix_wall_module.wallAdj, {nil, side, thickness, speedAdj})
-end
 
-function wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
-	prefix_timeline_append_do(prefix_wall_module.wallAcc, {nil, side, thickness, speedAdj, acceleration, minSpeed, maxSpeed})
-	
+	local Do = {}
+	Do.__index = Do
+
+	function Do:new(timeline, action)
+		return setmetatable({timeline = timeline, action = action}, Do)
+	end
+
+	function Do:update()
+		self.action()
+		self.timeline:next()
+	end
+
+	function Do:reset()
+	end
+
+	return Timeline, Wait, Do
 end

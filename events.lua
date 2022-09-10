@@ -58,5 +58,12 @@ function prefix_update_events(frametime)
 			table.remove(prefix_queuedEvents, 1)
 		end
 	end
+
+	prefix_message_timeline:update(frametime)
+	if prefix_message_timeline.finished then
+		prefix_message_timeline:clear()
+		prefix_message_timeline:reset()
+	end
+
 	prefix_execute_events(prefix_MAIN_EVENTS, l_getLevelTime())
 end

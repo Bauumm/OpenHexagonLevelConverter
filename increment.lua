@@ -34,7 +34,9 @@ function prefix_update_increment(frametime)
 			l_setRotationSpeed(l_getRotationSpeedMax() * prefix_sign(l_getRotationSpeed()))
 		end
 		prefix_fast_spin = l_getFastSpin()
-		prefix_timeline_insert_do(2, prefix_side_change, {math.random(l_getSidesMin(), l_getSidesMax())})
+		prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_do:new(prefix_main_timeline, function()
+			prefix_side_change(math.random(l_getSidesMin(), l_getSidesMax()))
+		end))
 	end
 	if prefix_fast_spin > 0 then
 		l_setRotation(l_getRotation() + (math.abs((prefix_get_smoother_step(0, l_getFastSpin(), prefix_fast_spin) / 3.5) * frametime * 17)) * prefix_sign(l_getRotationSpeed()))
@@ -44,9 +46,13 @@ end
 
 function prefix_side_change(sides)
 	if not prefix_wall_module:empty() then
-		prefix_timeline_insert_do(2, prefix_timeline_clear)
-		prefix_timeline_insert_do(2, prefix_side_change, {sides})
-		prefix_timeline_insert_wait(2, 1)
+		prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_do:new(prefix_main_timeline, function()
+			prefix_clear_and_reset_timeline()
+		end))
+		prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_do:new(prefix_main_timeline, function()
+			prefix_side_change(sides)
+		end))
+		prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_wait:new(prefix_main_timeline, 1))
 		return
 	end
 	onIncrement()

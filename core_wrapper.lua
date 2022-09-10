@@ -6,7 +6,7 @@ if prefix_was_defined == nil then
 		prefix_remainder = 0
 	end
 	u_execScript("prefix_styles.lua")
-	u_execScript("prefix_timeline.lua")
+	u_execScript("prefix_main_timeline.lua")
 	u_execScript("prefix_lua_functions.lua")
 	u_execScript("prefix_events.lua")
 	u_execScript("prefix_walls.lua")
@@ -48,7 +48,7 @@ if prefix_was_defined == nil then
 		prefix_is_unloading = true
 		prefix_executingEvents = {}
 		prefix_queuedEvents = {}
-		prefix_timeline_clear()
+		prefix_clear_and_reset_timeline()
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
@@ -85,13 +85,15 @@ if prefix_was_defined == nil then
 		if prefix_is_unloading then
 			prefix_level_id = id
 		else
-			prefix_first_play = true
+			prefix_is_retry = false
 			prefix_was_defined = nil
 			prefix_3D_depth = nil
 			prefix_limit_fps = nil
 			e_messageAddImportantSilent("", 0)
-			prefix_onUnload()
+			prefix_function_wrapper(prefix_onUnload)
 			prefix_wall_module:clear()
+			prefix_message_timeline:clear()
+			prefix_message_timeline:reset()
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.styleId)
 			u_execScript(level_json.luaFile)

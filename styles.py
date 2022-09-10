@@ -67,6 +67,9 @@ def convert_style(style_json):
     # in 1.92
     style_json["3D_layer_offset"] = -1
 
+    # 1.92 casts float depths to int while the steam version just crashes
+    style_json["3D_depth"] = int(style_json["3D_depth"])
+
 
 def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "current_style=\"" +
