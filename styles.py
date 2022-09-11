@@ -79,6 +79,8 @@ def convert_lua(level_lua, level_json):
         os.makedirs("Shaders")
         shutil.copyfile(os.path.join(os.path.dirname(filepath), "wall3D.frag"),
                         "Shaders/" + CONVERTER_PREFIX + "wall3D.frag")
+        shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
+                        "Shaders/" + CONVERTER_PREFIX + "solid.frag")
 
 
 def save():

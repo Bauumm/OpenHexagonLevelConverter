@@ -1,4 +1,5 @@
 prefix_shdr_wall3D = shdr_getShaderId("prefix_wall3D.frag")
+prefix_shdr_wall = shdr_getShaderId("prefix_solid.frag")
 
 function prefix_darken_color(r, g, b, a)
 	local darken_mult = s_get3dDarkenMult()
@@ -71,6 +72,10 @@ function prefix_initStyle()
 	s_set3dAlphaMult(1)
 	s_set3dAlphaFalloff(1)
 
+	-- set wall color without needing to call cw_setVertexColor for every wall
+	shdr_setActiveFragmentShader(4, prefix_shdr_wall)
+	shdr_setUniformFVec4(prefix_shdr_wall, "color", prefix_shader_scaling({s_getMainColor()}))
+
 	-- DM adjust negations
 	local mult = u_getDifficultyMult() ^ 0.8
 	s_setMaxSwapTime(s_getMaxSwapTime() * mult)
@@ -82,6 +87,7 @@ function prefix_updateStyle()
 		prefix_3d_override_color = prefix_darken_color(s_getMainColor())
 		shdr_setUniformFVec4(prefix_shdr_wall3D, "color", prefix_shader_scaling(prefix_3d_override_color))
 	end
+	shdr_setUniformFVec4(prefix_shdr_wall, "color", prefix_shader_scaling({s_getMainColor()}))
 end
 
 function prefix_setStyle(id)
