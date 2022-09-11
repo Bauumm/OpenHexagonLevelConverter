@@ -1,4 +1,5 @@
 if prefix_was_defined == nil then
+	onInit()
 	prefix_was_defined = true
 	prefix_time_stop = 0
 	if prefix_limit_fps ~= nil then
@@ -100,7 +101,6 @@ if prefix_was_defined == nil then
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.styleId)
 			u_execScript(level_json.luaFile)
-			onInit()
 			a_playSound("go.ogg")
 			a_setMusic(level_json.musicId)
 			l_resetTime()

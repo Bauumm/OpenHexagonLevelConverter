@@ -128,7 +128,7 @@ def convert_external(json_file):
 
 def convert_level(level_json, level_lua):
     if level_lua.get_function("onInit") is None:
-        level_lua.mixin_line("function onInit()\nend", line=-1)
+        level_lua.mixin_line("function onInit()\nend")
     level_lua.mixin_line(CONVERTER_PREFIX + "MAIN_EVENTS=" +
                          convert_events(level_json.get("events", []))
                          .to_table(), "onInit")

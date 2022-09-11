@@ -71,7 +71,7 @@ NOT_SET_IN_ONINIT = [
 
 def convert(level_json, level_lua):
     if level_lua.get_function("onInit") is None:
-        level_lua.mixin_line("\nfunction onInit()\nend", line=-1)
+        level_lua.mixin_line("\nfunction onInit()\nend")
     # 1.92 doesnt have music DM sync, so with that call we can overwrite the
     # users preference to behave like 1.92. Increments are disabled because the
     # system can't deal with custom walls
