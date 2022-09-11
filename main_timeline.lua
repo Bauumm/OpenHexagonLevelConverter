@@ -10,13 +10,16 @@ function prefix_get_actual_time()
 	return (prefix_actual_time + 50) / 60
 end
 
-function prefix_update_timeline(frametime)
+function prefix_update_initial_timestop(frametime)
 	prefix_actual_time = prefix_actual_time + frametime
 	prefix_update_increment(frametime)
 	if prefix_actual_time < 0 then
 		l_resetTime()
 		u_haltTime(-6)
 	end
+end
+
+function prefix_update_timeline(frametime)
 	prefix_main_timeline:update(frametime)
 	if prefix_main_timeline.finished then
 		prefix_main_timeline:clear()

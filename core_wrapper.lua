@@ -46,6 +46,7 @@ if prefix_was_defined == nil then
 			prefix_time_stop = prefix_time_stop - frametime
 			u_haltTime(frametime)
 		end
+		prefix_update_initial_timestop(frametime)
 	end
 
 	function onPreUnload()
