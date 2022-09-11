@@ -42,6 +42,8 @@ prefix_wall_module = {
 	-- wall spawn distance in 1.92 cannot be changed
 	WALL_SPAWN_DIST = 1600,
 	walls = {},
+	stopped_walls = {},
+	stopped_wall_radius = 1 / 0,
 
 	find_self = function(self)
 		if self == nil then
@@ -89,6 +91,7 @@ prefix_wall_module = {
 		local delete_queue = {}
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65
 		for i=1,#self.walls do
+			local moved_to_stopped = false
 			local wall = self.walls[i]
 			if wall.accel ~= 0 then
 				wall.speed = wall.speed + wall.accel * frametime
@@ -97,11 +100,19 @@ prefix_wall_module = {
 				end
 				if wall.speed < wall.minSpeed then
 					wall.speed = wall.minSpeed
+					if wall.minSpeed == 0 and wall.accel <= 0 then
+						moved_to_stopped = true
+						table.insert(self.stopped_walls, wall)
+						table.insert(delete_queue, 1, i)
+					end
 				end
 			end
 			local points_on_center = 0
 			for vertex=0,3 do
 				local x, y = cw_getVertexPos(wall.cw, vertex)
+				if moved_to_stopped then
+					self.stopped_wall_radius = math.min(math.abs(x), math.abs(y), self.stopped_wall_radius)
+				end
 				if math.abs(x) < radius and math.abs(y) < radius then
 					points_on_center = points_on_center + 1
 				else
@@ -112,11 +123,35 @@ prefix_wall_module = {
 			end
 			if points_on_center > 3 then
 				cw_destroy(wall.cw)
-				table.insert(delete_queue, 1, i)
+				if not moved_to_stopped then
+					table.insert(delete_queue, 1, i)
+				end
 			end
 		end
 		for _, i in pairs(delete_queue) do
 			table.remove(self.walls, i)
+		end
+		if self.stopped_wall_radius < radius then
+			self.stopped_wall_radius = 1 / 0
+			local delete_queue = {}
+			for i=1,#self.stopped_walls do
+				local wall = self.stopped_walls[i]
+				local points_on_center = 0
+				for vertex=0,3 do
+					local x, y = cw_getVertexPos(wall.cw, vertex)
+					self.stopped_wall_radius = math.min(math.abs(x), math.abs(y), self.stopped_wall_radius)
+					if math.abs(x) < radius and math.abs(y) < radius then
+						points_on_center = points_on_center + 1
+					end
+				end
+				if points_on_center > 3 then
+					cw_destroy(wall.cw)
+					table.insert(delete_queue, 1, i)
+				end
+			end
+			for _, i in pairs(delete_queue) do
+				table.remove(self.stopped_walls, i)
+			end
 		end
 	end
 }
