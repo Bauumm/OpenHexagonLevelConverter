@@ -31,7 +31,7 @@ LEVEL_PROPERTY_MAPPING = ExtendedDict({
     "wall_angle_right": ["l_getWallAngleRight", "l_setWallAngleRight"],
 
     # keys that arent set in onInit but may be set with lua in the actual level
-    "styleId": [None, CONVERTER_PREFIX + "setStyle"],
+    "styleId": [None, CONVERTER_PREFIX + "style_module:set_style"],
     "musicId": [None, "s_setMusic"]
 })
 

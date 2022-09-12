@@ -8,6 +8,17 @@ forceIncrement = u_forceIncrement
 isKeyPressed = u_isKeyPressed
 
 
+function prefix_resolve_function(func)
+	if type(func) == "string" then
+		return _G[func]
+	else
+		return function(...)
+			return _G[func[1]][func[2]](_G[func[1]], ...)
+		end
+	end
+end
+
+
 function prefix_setField(file, field, value)
 	local functions
 	if file == "level" then
@@ -22,7 +33,7 @@ function prefix_setField(file, field, value)
 			u_log("Could not set " .. field .. "!!!")
 		end
 	else
-		_G[functions[2]](value)
+		prefix_resolve_function(functions[2])(value)
 	end
 end
 
@@ -43,7 +54,7 @@ function prefix_getField(file, field, default)
 		end
 		return value
 	else
-		return _G[functions[1]]()
+		return prefix_resolve_function(functions[1])()
 	end
 end
 

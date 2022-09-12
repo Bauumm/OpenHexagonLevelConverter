@@ -35,7 +35,7 @@ if prefix_was_defined == nil then
 
 	function prefix_call_onUpdate(frametime)
 		prefix_update_events(frametime)
-		prefix_updateStyle()
+		prefix_style_module:update()
 		prefix_function_wrapper(prefix_onUpdate, frametime)
 		prefix_update_timeline(frametime)
 		prefix_wall_module:update_walls(frametime)
@@ -73,7 +73,8 @@ if prefix_was_defined == nil then
 			u_setMessageFont("imagine.ttf")
 			u_setMessageFontSize(40)
 
-			prefix_initStyle()
+			prefix_style_module = prefix_get_style_module()
+			prefix_style_module:init()
 			prefix_function_wrapper(prefix_onLoad)
 		end
 	end

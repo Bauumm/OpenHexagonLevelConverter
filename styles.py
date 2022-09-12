@@ -46,12 +46,6 @@ def convert_style(style_json):
         else:
             style_json["colors"][i] = convert_color(style_json["colors"][i])
 
-    # save fixed 3D override colors for use in lua
-    color = style_json.get("3D_override_color")
-    if color is not None:
-        colors3D[style_json["id"]] = color
-    style_json["3D_override_color"] = [0, 0, 0, 255]
-
     # Limit depth to 100 like 1.92 does with unmodified config
     depth = style_json.get("3D_depth", 15)
     if depth < 0:
@@ -70,21 +64,30 @@ def convert_style(style_json):
     # 1.92 casts float depths to int while the steam version just crashes
     style_json["3D_depth"] = int(style_json["3D_depth"])
 
+    # Save style for use in lua
+    os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
+    lua_file = LuaFile()
+    lua_file.set_text(CONVERTER_PREFIX + "style=" + style_json.to_table())
+    lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" +
+                  style_json["id"] + ".lua")
+
+    # Set some properties to fixed values in order to remake them with lua
+    style_json["3D_override_color"] = [0, 0, 0, 255]
+
 
 def convert_lua(level_lua, level_json):
-    level_lua.mixin_line(CONVERTER_PREFIX + "current_style=\"" +
+    level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" +
                          level_json["styleId"] + "\"", "onInit")
-    # 3D alpha falloff overflow reimplementation using shaders
     if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
         os.makedirs("Shaders")
+        # 3D alpha falloff overflow reimplementation using shaders
         shutil.copyfile(os.path.join(os.path.dirname(filepath), "wall3D.frag"),
                         "Shaders/" + CONVERTER_PREFIX + "wall3D.frag")
+        # more efficient way to set colors
         shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
                         "Shaders/" + CONVERTER_PREFIX + "solid.frag")
 
 
 def save():
     styles_lua.replace("prefix_", CONVERTER_PREFIX)
-    styles_lua.mixin_line(CONVERTER_PREFIX + "3D_colors=" +
-                          colors3D.to_table())
     styles_lua.save("Scripts/" + CONVERTER_PREFIX + "styles.lua")
