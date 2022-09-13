@@ -1,7 +1,8 @@
 function prefix_get_style_module()
 	local Style = {
-		shdr_wall3D = shdr_getShaderId("prefix_wall3D.frag"),
-		shdr_wall = shdr_getShaderId("prefix_solid.frag")
+		shdr_3D = shdr_getShaderId("wall3D.frag"),
+		shdr_main = shdr_getShaderId("main.frag"),
+		shdr_cap = shdr_getShaderId("cap.frag")
 	}
 
 	function Style:darken_color(r, g, b, a)
@@ -9,6 +10,7 @@ function prefix_get_style_module()
 		if type(r) == "table" then
 			darken_mult = g
 			r,g,b,a = unpack(r)
+		end
 		if darken_mult == 0 then
 			r,g,b = 0,0,0
 		else
@@ -79,12 +81,13 @@ function prefix_get_style_module()
 			end
 		end
 		for i=1,4 do
-			result[i] = self.component_clamp(result[i] + color.pulse[i] * self.pulse_factor)
+			result[i] = self:component_clamp(result[i] + color.pulse[i] * self.pulse_factor)
 		end
 		return result
 	end
 
 	function Style:init()
+		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
 		l_setDarkenUnevenBackgroundChunk(false)
 		self.hue = s_getHueMin()
@@ -96,20 +99,27 @@ function prefix_get_style_module()
 		end
 		-- 3D alpha fixes
 		for i=1,3 do  -- 1,2,3 are the RenderStages for the 3D layers
-			shdr_setActiveFragmentShader(i, self.shdr_wall3D)
+			shdr_setActiveFragmentShader(i, self.shdr_3D)
 		end
 		if prefix_style["3D_override_color"] ~= nil then
 			local override_color = self:darken_color(unpack(prefix_style["3D_override_color"]))
-			shdr_setUniformFVec4(self.shdr_wall3D, "color", self:shader_scaling(override_color))
+			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
 		end
 		self:set_3d_alpha_mult(s_get3dAlphaMult())
 		self:set_3d_alpha_falloff(s_get3dAlphaFalloff())
 		s_set3dAlphaMult(1)
 		s_set3dAlphaFalloff(1)
 
-		-- set wall color without needing to call cw_setVertexColor for every wall
-		shdr_setActiveFragmentShader(4, self.shdr_wall)
-		shdr_setUniformFVec4(self.shdr_wall, "color", self:shader_scaling({s_getMainColor()}))
+		-- set main color
+		shdr_setActiveFragmentShader(4, self.shdr_main)
+		shdr_setActiveFragmentShader(6, self.shdr_main)
+		shdr_setActiveFragmentShader(7, self.shdr_main)
+
+		-- set cap color
+		shdr_setActiveFragmentShader(5, self.shdr_cap)
+
+		-- set background color
+		shdr_setActiveFragmentShader(0, self.shdr_back)
 
 		-- DM adjust negations
 		local mult = u_getDifficultyMult() ^ 0.8
@@ -119,18 +129,21 @@ function prefix_get_style_module()
 
 	function Style:compute_colors()
 		self.main_color = self:calculate_color(prefix_style["main"])
-		self.colors = {}
-		for _, color in prefix_style["colors"] do
-			table.insert(self.colors, self:calculate_color(color))
+		shdr_setUniformFVec4(self.shdr_main, "color", self:shader_scaling(self.main_color))
+		if prefix_style["3D_override_color"] == nil then
+			local override_color = self:darken_color(unpack(self.main_color))
+			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
+		end
+		for i, color in pairs(prefix_style["colors"]) do
+			color = self:calculate_color(color)
+			if i == 2 or #prefix_style["colors"] == 1 then
+				shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(color))
+			end
+			shdr_setUniformFVec4(self.shdr_back, "color" .. (i - 1), self:shader_scaling(color))
 		end
 	end
 
 	function Style:update(frametime)
-		if prefix_style["3D_override_color"] == nil then
-			local override_color = self:darken_color(self.main_color)
-			shdr_setUniformFVec4(self.shdr_wall3D, "color", self:shader_scaling(override_color))
-		end
-		shdr_setUniformFVec4(self.shdr_wall, "color", self:shader_scaling({s_getMainColor()}))
 		self.hue = self.hue + s_getHueInc() * frametime
 		if self.hue < s_getHueMin() then
 			if s_getHuePingPong() then
@@ -183,7 +196,7 @@ function prefix_get_style_module()
 
 	function Style:set_3d_alpha_mult(mult)
 		self.alpha_mult = mult
-		shdr_setUniformF(self.shdr_wall3D, "alpha_mult", mult)
+		shdr_setUniformF(self.shdr_3D, "alpha_mult", mult)
 	end
 
 	function Style:get_3d_alpha_mult()
@@ -192,7 +205,7 @@ function prefix_get_style_module()
 
 	function Style:set_3d_alpha_falloff(falloff)
 		self.alpha_falloff = falloff
-		shdr_setUniformF(self.shdr_wall3D, "alpha_falloff", falloff)
+		shdr_setUniformF(self.shdr_3D, "alpha_falloff", falloff)
 	end
 
 	function Style:get_3d_alpha_falloff()

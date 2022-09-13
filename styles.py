@@ -1,5 +1,6 @@
 from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
+from base_file import BaseFile
 from lua_file import LuaFile
 import shutil
 import os
@@ -18,7 +19,7 @@ colors3D = ExtendedDict()
 
 
 def convert_color(color):
-    # Set defaults
+    # Set defaults to not get unexpected nils in lua
     color["dynamic"] = color.get("dynamic", False)
     color["dynamic_darkness"] = color.get("dynamic_darkness", 0)
     color["dynamic_offset"] = color.get("dynamic_offset", False)
@@ -79,19 +80,38 @@ def convert_style(style_json):
 
     # Set some properties to fixed values in order to remake them with lua
     style_json["3D_override_color"] = [0, 0, 0, 255]
+    style_json["pulse_increment"] = 0
+    style_json["hue_increment"] = 0
+    if "main" in style_json:
+        style_json["main"]["dynamic"] = False
+    code = "#version 130\n"
+    for i in range(len(style_json.get("colors", []))):
+        style_json["colors"][i]["value"] = list(i.to_bytes(4, 'big'))
+        style_json["colors"][i]["dynamic"] = False
+        code += "uniform vec4 color" + str(i) + ";\n"
+    # Put the correct amount of color uniforms in the background shader
+    os.makedirs("Shaders", exist_ok=True)
+    background_shader = BaseFile(
+        os.path.join(os.path.dirname(filepath), "background.frag"))
+    code += "vec4 colors[] = vec4[" + str(i + 1) + "](" + \
+        ", ".join(["color" + str(i) for i in range(i + 1)]) + ");\n"
+    background_shader.mixin_line(code)
+    background_shader.save("Shaders/" + style_json["id"] + "-background.frag")
 
 
 def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" +
                          level_json["styleId"] + "\"", "onInit")
     if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
-        os.makedirs("Shaders")
+        os.makedirs("Shaders", exist_ok=True)
         # 3D alpha falloff overflow reimplementation using shaders
         shutil.copyfile(os.path.join(os.path.dirname(filepath), "wall3D.frag"),
-                        "Shaders/" + CONVERTER_PREFIX + "wall3D.frag")
+                        "Shaders/wall3D.frag")
         # more efficient way to set colors
         shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
-                        "Shaders/" + CONVERTER_PREFIX + "solid.frag")
+                        "Shaders/main.frag")
+        shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
+                        "Shaders/cap.frag")
 
 
 def save():
