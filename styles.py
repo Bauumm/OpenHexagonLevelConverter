@@ -18,12 +18,18 @@ colors3D = ExtendedDict()
 
 
 def convert_color(color):
-    # set dynamic_darkness to 0 by default
+    # Set defaults
+    color["dynamic"] = color.get("dynamic", False)
     color["dynamic_darkness"] = color.get("dynamic_darkness", 0)
-    if color.get("dynamic", False) and \
-       color.get("dynamic_offset", False) and \
-       not color.get("main", False) and \
-       color.get("offset", 0) == 0:
+    color["dynamic_offset"] = color.get("dynamic_offset", False)
+    color["offset"] = color.get("offset", 0)
+    color["main"] = color.get("main", False)
+    color["value"] = color.get("value", [0, 0, 0, 0])
+    color["pulse"] = color.get("pulse", [0, 0, 0, 0])
+    color["hue_shift"] = color.get("hue_shift", 0)
+
+    if color["dynamic"] and color["dynamic_offset"] and not color["main"] and \
+       color["offset"] == 0:
         # If these values are set this way the original color is due to
         # division by 0 which results in inf being added to the main color
         # (except for the alpha component) reset to black

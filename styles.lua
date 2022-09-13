@@ -6,6 +6,9 @@ function prefix_get_style_module()
 
 	function Style:darken_color(r, g, b, a)
 		local darken_mult = s_get3dDarkenMult()
+		if type(r) == "table" then
+			darken_mult = g
+			r,g,b,a = unpack(r)
 		if darken_mult == 0 then
 			r,g,b = 0,0,0
 		else
@@ -39,15 +42,53 @@ function prefix_get_style_module()
 		r = math.modf(r * 255)
 		g = math.modf(g * 255)
 		b = math.modf(b * 255)
-		return r,g,b,255
+		return {r,g,b,255}
 	end
 
 	function Style:shader_scaling(color)
 		return color[1] / 255, color[2] / 255, color[3] / 255, color[4] / 255
 	end
 
+	function Style:component_clamp(component)
+		if component > 255 then
+			return 255
+		elseif component < 0 then
+			return 0
+		else
+			return component
+		end
+	end
+
+	function Style:calculate_color(color)
+		local result = color.value
+		if color.dynamic then
+			local dynamic_color = self.get_color_from_hue(self.hue + color.hue_shift)
+			if color.main then
+				result = dynamic_color
+			else
+				if color.dynamic_offset then
+					if color.offset ~= 0 then
+						for i=1,3 do
+							result[i] = result[i] + dynamic_color[i] / color.offset
+						end
+					end
+					result[4] = result[4] + dynamic_color[4]
+				else
+					result = self.darken_color(dynamic_color, color.dynamic_darkness)
+				end
+			end
+		end
+		for i=1,4 do
+			result[i] = self.component_clamp(result[i] + color.pulse[i] * self.pulse_factor)
+		end
+		return result
+	end
+
 	function Style:init()
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
+		l_setDarkenUnevenBackgroundChunk(false)
+		self.hue = s_getHueMin()
+		self.pulse_factor = 0
 		if self.depth == nil then
 			self.depth = s_get3dDepth()
 		else
@@ -76,12 +117,46 @@ function prefix_get_style_module()
 		s_setHueInc(s_getHueInc() / mult)
 	end
 
-	function Style:update()
+	function Style:compute_colors()
+		self.main_color = self:calculate_color(prefix_style["main"])
+		self.colors = {}
+		for _, color in prefix_style["colors"] do
+			table.insert(self.colors, self:calculate_color(color))
+		end
+	end
+
+	function Style:update(frametime)
 		if prefix_style["3D_override_color"] == nil then
-			local override_color = self:darken_color(s_getMainColor())
+			local override_color = self:darken_color(self.main_color)
 			shdr_setUniformFVec4(self.shdr_wall3D, "color", self:shader_scaling(override_color))
 		end
 		shdr_setUniformFVec4(self.shdr_wall, "color", self:shader_scaling({s_getMainColor()}))
+		self.hue = self.hue + s_getHueInc() * frametime
+		if self.hue < s_getHueMin() then
+			if s_getHuePingPong() then
+				self.hue = s_getHueMin()
+				s_setHueInc(s_getHueInc() * -1)
+			end
+		else
+			self.hue = s_getHueMax()
+		end
+		if self.hue > s_getHueMax() then
+			if s_getHuePingPong() then
+				self.hue = s_getHueMax()
+				s_setHueInc(s_getHueInc() * -1)
+			end
+		else
+			self.hue = s_getHueMin()
+		end
+		self.pulse_factor = self.pulse_factor + s_getPulseInc() * frametime
+		if self.pulse_factor < s_getPulseMin() then
+			s_setPulseInc(s_getPulseInc() * -1)
+			self.pulse_factor = s_getPulseMin()
+		end
+		if self.pulse_factor > s_getPulseMax() then
+			s_setPulseInc(s_getPulseInc() * -1)
+			self.pulse_factor = s_getPulseMax()
+		end
 	end
 
 	function Style:set_style(id)
