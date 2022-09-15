@@ -122,7 +122,7 @@ def convert_sound(path):
 
 
 def convert_font(path):
-    os.makedirs("Fonts")
+    os.makedirs("Fonts", exist_ok=True)
     shutil.copyfile(os.path.join(os.path.dirname(filepath), "imagine.ttf"),
                     "Fonts/imagine.ttf")
 

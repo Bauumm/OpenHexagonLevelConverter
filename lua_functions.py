@@ -17,27 +17,27 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
     "pulse_max": ["s_getPulseMax", "s_setPulseMax"],
     "pulse_increment": ["s_getPulseIncrement", "s_setPulseIncrement"],
     "3D_depth": [
-        [CONVERTER_PREFIX + "style_module", "get_3d_depth"],
-        [CONVERTER_PREFIX + "style_module", "set_3d_depth"]
+        [CONVERTER_PREFIX + "style_module", "get_3D_depth"],
+        [CONVERTER_PREFIX + "style_module", "set_3D_depth"]
     ],
     "3D_skew": ["s_get3dSkew", "s_set3dSkew"],
     "3D_pulse_min": ["s_get3dPulseMin", "s_set3dPulseMin"],
     "3D_pulse_max": ["s_get3dPulseMax", "s_set3dPulseMax"],
     "3D_pulse_speed": ["s_get3dPulseSpeed", "s_set3dPulseSpeed"],
     "3D_spacing": [
-        [CONVERTER_PREFIX + "style_module", "get_3d_spacing"],
-        [CONVERTER_PREFIX + "style_module", "set_3d_spacing"]
+        [CONVERTER_PREFIX + "style_module", "get_3D_spacing"],
+        [CONVERTER_PREFIX + "style_module", "set_3D_spacing"]
     ],
     "3D_perspective_multiplier": ["s_get3dPerspectiveMult",
                                   "s_set3dPerspectiveMult"],
     "3D_darken_multiplier": ["s_get3dDarkenMult", "s_set3dDarkenMult"],
     "3D_alpha_multiplier": [
-        [CONVERTER_PREFIX + "style_module", "get_3d_alpha_mult"],
-        [CONVERTER_PREFIX + "style_module", "set_3d_alpha_mult"]
+        [CONVERTER_PREFIX + "style_module", "get_3D_alpha_mult"],
+        [CONVERTER_PREFIX + "style_module", "set_3D_alpha_mult"]
     ],
     "3D_alpha_falloff": [
-        [CONVERTER_PREFIX + "style_module", "get_3d_alpha_falloff"],
-        [CONVERTER_PREFIX + "style_module", "set_3d_alpha_falloff"]
+        [CONVERTER_PREFIX + "style_module", "get_3D_alpha_falloff"],
+        [CONVERTER_PREFIX + "style_module", "set_3D_alpha_falloff"]
     ],
 })
 CORE_FUNCTIONS = [

@@ -81,21 +81,46 @@ def convert_style(style_json):
     # Set some properties to fixed values in order to remake them with lua
     style_json["3D_override_color"] = [0, 0, 0, 255]
     style_json["pulse_increment"] = 0
+    style_json["pulse_min"] = 0
+    style_json["pulse_max"] = 0
     style_json["hue_increment"] = 0
+    style_json["hue_min"] = 0
+    style_json["hue_max"] = 0
+    style_json["cap_color"] = {
+        "legacy": False,
+        "dynamic": False,
+        "dynamic_offset": False,
+        "offset": 0,
+        "main": False,
+        "hue_shift": 0,
+        "value": [0, 0, 0, 0],
+        "pulse": [0, 0, 0, 0]
+    }
     if "main" in style_json:
         style_json["main"]["dynamic"] = False
-    code = "#version 130\n"
+    code = "const ColorData colors[] = ColorData[" + str(i + 1) + "](\n"
     for i in range(len(style_json.get("colors", []))):
+        color_data = style_json["colors"][i]
+        code += "\tColorData(" + ", ".join([
+            str(color_data["dynamic"]).lower(),
+            str(color_data["dynamic_darkness"]),
+            str(color_data["dynamic_offset"]).lower(),
+            str(color_data["offset"]),
+            str(color_data["main"]).lower(),
+            "vec4" + "(" +
+            ", ".join([str(f / 255) for f in color_data["value"]]) + ")",
+            "vec4" + "(" +
+            ", ".join([str(f / 255) for f in color_data["pulse"]]) + ")",
+            str(color_data["hue_shift"])
+        ]) + "),\n"
         style_json["colors"][i]["value"] = list(i.to_bytes(4, 'big'))
+        style_json["colors"][i]["pulse"] = [0, 0, 0, 0]
         style_json["colors"][i]["dynamic"] = False
-        code += "uniform vec4 color" + str(i) + ";\n"
-    # Put the correct amount of color uniforms in the background shader
+    code = code[:-2] + "\n);\n\n"
     os.makedirs("Shaders", exist_ok=True)
     background_shader = BaseFile(
         os.path.join(os.path.dirname(filepath), "background.frag"))
-    code += "vec4 colors[] = vec4[" + str(i + 1) + "](" + \
-        ", ".join(["color" + str(i) for i in range(i + 1)]) + ");\n"
-    background_shader.mixin_line(code)
+    background_shader.mixin_line(code, 17)
     background_shader.save("Shaders/" + style_json["id"] + "-background.frag")
 
 

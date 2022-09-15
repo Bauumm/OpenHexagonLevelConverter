@@ -62,9 +62,9 @@ function prefix_get_style_module()
 	end
 
 	function Style:calculate_color(color)
-		local result = color.value
+		local result = {unpack(color.value)}
 		if color.dynamic then
-			local dynamic_color = self.get_color_from_hue(self.hue + color.hue_shift)
+			local dynamic_color = self:get_color_from_hue((self.hue + color.hue_shift) / 360)
 			if color.main then
 				result = dynamic_color
 			else
@@ -81,16 +81,18 @@ function prefix_get_style_module()
 			end
 		end
 		for i=1,4 do
+			result[i] = result[i] % 256
 			result[i] = self:component_clamp(result[i] + color.pulse[i] * self.pulse_factor)
 		end
 		return result
 	end
 
 	function Style:init()
+		shdr_resetAllActiveFragmentShaders()
 		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
 		l_setDarkenUnevenBackgroundChunk(false)
-		self.hue = s_getHueMin()
+		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
 		if self.depth == nil then
 			self.depth = s_get3dDepth()
@@ -105,8 +107,8 @@ function prefix_get_style_module()
 			local override_color = self:darken_color(unpack(prefix_style["3D_override_color"]))
 			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
 		end
-		self:set_3d_alpha_mult(s_get3dAlphaMult())
-		self:set_3d_alpha_falloff(s_get3dAlphaFalloff())
+		self:set_3D_alpha_mult(s_get3dAlphaMult())
+		self:set_3D_alpha_falloff(s_get3dAlphaFalloff())
 		s_set3dAlphaMult(1)
 		s_set3dAlphaFalloff(1)
 
@@ -124,51 +126,47 @@ function prefix_get_style_module()
 		-- DM adjust negations
 		local mult = u_getDifficultyMult() ^ 0.8
 		s_setMaxSwapTime(s_getMaxSwapTime() * mult)
-		s_setHueInc(s_getHueInc() / mult)
 	end
 
 	function Style:compute_colors()
-		self.main_color = self:calculate_color(prefix_style["main"])
+		self.main_color = self:calculate_color(prefix_style.main)
 		shdr_setUniformFVec4(self.shdr_main, "color", self:shader_scaling(self.main_color))
 		if prefix_style["3D_override_color"] == nil then
 			local override_color = self:darken_color(unpack(self.main_color))
 			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
 		end
-		for i, color in pairs(prefix_style["colors"]) do
-			color = self:calculate_color(color)
-			if i == 2 or #prefix_style["colors"] == 1 then
-				shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(color))
-			end
-			shdr_setUniformFVec4(self.shdr_back, "color" .. (i - 1), self:shader_scaling(color))
-		end
+		local cap_color = self:calculate_color(prefix_style.colors[#prefix_style.colors > 1 and 2 or 1])
+		shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(cap_color))
+		shdr_setUniformF(self.shdr_back, "hue", self.hue)
+		shdr_setUniformF(self.shdr_back, "pulse_factor", self.pulse_factor)
 	end
 
 	function Style:update(frametime)
-		self.hue = self.hue + s_getHueInc() * frametime
-		if self.hue < s_getHueMin() then
-			if s_getHuePingPong() then
-				self.hue = s_getHueMin()
-				s_setHueInc(s_getHueInc() * -1)
+		self.hue = self.hue + prefix_style.hue_increment * frametime
+		if self.hue < prefix_style.hue_min then
+			if prefix_style.hue_ping_pong then
+				self.hue = prefix_style.hue_min
+				prefix_style.hue_increment = -prefix_style.hue_increment
+			else
+				self.hue = prefix_style.hue_max
 			end
-		else
-			self.hue = s_getHueMax()
 		end
-		if self.hue > s_getHueMax() then
-			if s_getHuePingPong() then
-				self.hue = s_getHueMax()
-				s_setHueInc(s_getHueInc() * -1)
+		if self.hue > prefix_style.hue_max then
+			if prefix_style.hue_ping_pong then
+				self.hue = prefix_style.hue_max
+				prefix_style.hue_increment = -prefix_style.hue_increment
+			else
+				self.hue = prefix_style.hue_min
 			end
-		else
-			self.hue = s_getHueMin()
 		end
-		self.pulse_factor = self.pulse_factor + s_getPulseInc() * frametime
-		if self.pulse_factor < s_getPulseMin() then
-			s_setPulseInc(s_getPulseInc() * -1)
-			self.pulse_factor = s_getPulseMin()
+		self.pulse_factor = self.pulse_factor + prefix_style.pulse_increment * frametime
+		if self.pulse_factor < prefix_style.pulse_min then
+			prefix_style.pulse_increment = -prefix_style.pulse_increment
+			self.pulse_factor = prefix_style.pulse_min
 		end
-		if self.pulse_factor > s_getPulseMax() then
-			s_setPulseInc(s_getPulseInc() * -1)
-			self.pulse_factor = s_getPulseMax()
+		if self.pulse_factor > prefix_style.pulse_max then
+			prefix_style.pulse_increment = -prefix_style.pulse_increment
+			self.pulse_factor = prefix_style.pulse_max
 		end
 	end
 
@@ -177,38 +175,38 @@ function prefix_get_style_module()
 		self:init()
 	end
 
-	function Style:set_3d_depth(depth)
+	function Style:set_3D_depth(depth)
 		self.depth = depth
 		s_set3dDepth(depth)
 	end
 
-	function Style:get_3d_depth()
+	function Style:get_3D_depth()
 		return self.depth
 	end
 
-	function Style:set_3d_spacing(spacing)
+	function Style:set_3D_spacing(spacing)
 		s_set3dSpacing(spacing / 1.4)
 	end
 
-	function Style:get_3d_spacing()
+	function Style:get_3D_spacing()
 		return s_get3dSpacing() * 1.4
 	end
 
-	function Style:set_3d_alpha_mult(mult)
+	function Style:set_3D_alpha_mult(mult)
 		self.alpha_mult = mult
 		shdr_setUniformF(self.shdr_3D, "alpha_mult", mult)
 	end
 
-	function Style:get_3d_alpha_mult()
+	function Style:get_3D_alpha_mult()
 		return self.alpha_mult
 	end
 
-	function Style:set_3d_alpha_falloff(falloff)
+	function Style:set_3D_alpha_falloff(falloff)
 		self.alpha_falloff = falloff
 		shdr_setUniformF(self.shdr_3D, "alpha_falloff", falloff)
 	end
 
-	function Style:get_3d_alpha_falloff()
+	function Style:get_3D_alpha_falloff()
 		return self.alpha_falloff
 	end
 

@@ -32,7 +32,7 @@ LEVEL_PROPERTY_MAPPING = ExtendedDict({
 
     # keys that arent set in onInit but may be set with lua in the actual level
     "styleId": [None, CONVERTER_PREFIX + "style_module:set_style"],
-    "musicId": [None, "s_setMusic"]
+    "musicId": [None, "a_setMusic"]
 })
 
 LEVEL_PROPERTY_DEFAULTS = {

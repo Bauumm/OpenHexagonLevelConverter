@@ -33,6 +33,9 @@ function prefix_setField(file, field, value)
 			u_log("Could not set " .. field .. "!!!")
 		end
 	else
+		if file == "style" then
+			prefix_style[field] = value
+		end
 		prefix_resolve_function(functions[2])(value)
 	end
 end
@@ -54,6 +57,9 @@ function prefix_getField(file, field, default)
 		end
 		return value
 	else
+		if file == "style" and prefix_style[field] ~= nil then
+			return prefix_style[field]
+		end
 		return prefix_resolve_function(functions[1])()
 	end
 end
