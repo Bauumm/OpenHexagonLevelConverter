@@ -94,6 +94,7 @@ function prefix_get_style_module()
 		l_setDarkenUnevenBackgroundChunk(false)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
+		self.swap_time = 0
 		if self.depth == nil then
 			self.depth = s_get3dDepth()
 		else
@@ -135,13 +136,21 @@ function prefix_get_style_module()
 			local override_color = self:darken_color(unpack(self.main_color))
 			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
 		end
-		local cap_color = self:calculate_color(prefix_style.colors[#prefix_style.colors > 1 and 2 or 1])
+		local swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
+		local cap_index = (#prefix_style.colors > 1 and 2 or 1 + swap_offset) % #prefix_style.colors + 1
+		local cap_color = self:calculate_color(prefix_style.colors[cap_index])
 		shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(cap_color))
 		shdr_setUniformF(self.shdr_back, "hue", self.hue)
 		shdr_setUniformF(self.shdr_back, "pulse_factor", self.pulse_factor)
+		shdr_setUniformI(self.shdr_back, "swap", swap_offset)
+		shdr_setUniformI(self.shdr_back, "sides", l_getSides())
 	end
 
 	function Style:update(frametime)
+		self.swap_time = self.swap_time + frametime
+		if self.swap_time > prefix_style.max_swap_time then
+			self.swap_time = 0
+		end
 		self.hue = self.hue + prefix_style.hue_increment * frametime
 		if self.hue < prefix_style.hue_min then
 			if prefix_style.hue_ping_pong then

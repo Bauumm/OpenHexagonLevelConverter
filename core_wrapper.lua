@@ -38,7 +38,6 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onUpdate, frametime)
 		prefix_update_timeline(frametime)
 		prefix_wall_module:update_walls(frametime)
-		prefix_style_module:update(frametime)
 	end
 
 	function onUpdate(frametime)
@@ -47,6 +46,7 @@ if prefix_was_defined == nil then
 			u_haltTime(frametime)
 		end
 		prefix_update_initial_timestop(frametime)
+		prefix_style_module:update(frametime)
 		prefix_style_module:compute_colors(frametime)
 	end
 

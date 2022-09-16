@@ -71,6 +71,9 @@ def convert_style(style_json):
     # 1.92 casts float depths to int while the steam version just crashes
     style_json["3D_depth"] = int(style_json["3D_depth"])
 
+    # Set default max_swap_time
+    style_json["max_swap_time"] = style_json.get("max_swap_time", 100)
+
     # Save style for use in lua
     os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
     lua_file = LuaFile()
@@ -86,6 +89,7 @@ def convert_style(style_json):
     style_json["hue_increment"] = 0
     style_json["hue_min"] = 0
     style_json["hue_max"] = 0
+    style_json["max_swap_time"] = 0
     style_json["cap_color"] = {
         "legacy": False,
         "dynamic": False,
@@ -120,7 +124,7 @@ def convert_style(style_json):
     os.makedirs("Shaders", exist_ok=True)
     background_shader = BaseFile(
         os.path.join(os.path.dirname(filepath), "background.frag"))
-    background_shader.mixin_line(code, 17)
+    background_shader.mixin_line(code, 20)
     background_shader.save("Shaders/" + style_json["id"] + "-background.frag")
 
 
