@@ -76,7 +76,7 @@ function prefix_get_style_module()
 					end
 					result[4] = result[4] + dynamic_color[4]
 				else
-					result = self.darken_color(dynamic_color, color.dynamic_darkness)
+					result = self:darken_color(dynamic_color, color.dynamic_darkness)
 				end
 			end
 		end
@@ -137,8 +137,12 @@ function prefix_get_style_module()
 			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
 		end
 		local swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
-		local cap_index = (#prefix_style.colors > 1 and 2 or 1 + swap_offset) % #prefix_style.colors + 1
-		local cap_color = self:calculate_color(prefix_style.colors[cap_index])
+		if(#prefix_style.colors < 2) then
+			cap_color = {0, 0, 0, 0}
+		else
+			local cap_index = (1 + swap_offset) % (#prefix_style.colors) + 1
+			cap_color = self:calculate_color(prefix_style.colors[cap_index])
+		end
 		shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(cap_color))
 		shdr_setUniformF(self.shdr_back, "hue", self.hue)
 		shdr_setUniformF(self.shdr_back, "pulse_factor", self.pulse_factor)
@@ -180,6 +184,7 @@ function prefix_get_style_module()
 	end
 
 	function Style:set_style(id)
+		prefix_style_id = id
 		s_setStyle(id)
 		self:init()
 	end
