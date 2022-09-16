@@ -47,9 +47,11 @@ def convert_style(style_json):
     for color in COLOR_OBJECTS:
         if color in style_json:
             style_json[color] = convert_color(style_json[color])
+    has_none = False
     for i in range(len(style_json.get("colors", []))):
         if style_json["colors"][i] is None:
             del style_json["colors"][i]
+            has_none = True
         else:
             style_json["colors"][i] = convert_color(style_json["colors"][i])
 
@@ -102,6 +104,8 @@ def convert_style(style_json):
     }
     if "main" in style_json:
         style_json["main"]["dynamic"] = False
+    if has_none:
+        i -= 1
     code = "const ColorData colors[] = ColorData[" + str(i + 1) + "](\n"
     for i in range(len(style_json.get("colors", []))):
         color_data = style_json["colors"][i]
