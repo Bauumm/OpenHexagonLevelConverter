@@ -19,13 +19,10 @@ if prefix_was_defined == nil then
 		end
 	end
 
-	prefix_rs_calls = 0
-	prefix_rs_ft = 0
-	function onRenderStage(rs)
-		if rs == 0 then
-			prefix_rs_calls = prefix_rs_calls + 1
-			prefix_style_module:update(prefix_rs_ft)
-			prefix_style_module:compute_colors(prefix_rs_ft)
+	function onRenderStage(render_stage, frametime)
+		if render_stage == 0 then
+			prefix_style_module:update(frametime)
+			prefix_style_module:compute_colors(frametime)
 		end
 	end
 
