@@ -19,8 +19,22 @@ if prefix_was_defined == nil then
 		end
 	end
 
+	prefix_rs_calls = 0
+	prefix_rs_ft = 0
+	function onRenderStage(rs)
+		if rs == 0 then
+			prefix_rs_calls = prefix_rs_calls + 1
+			prefix_style_module:update(prefix_rs_ft)
+			prefix_style_module:compute_colors(prefix_rs_ft)
+		end
+	end
+
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function onInput(frametime)
+		if prefix_rs_calls ~= 0 then
+			prefix_rs_ft = frametime / prefix_rs_calls
+			prefix_rs_calls = 0
+		end
 		if prefix_limit_fps ~= nil then
 			local calls = prefix_target_tickrate + prefix_remainder
 			local actual_calls = math.floor(calls)
@@ -46,8 +60,6 @@ if prefix_was_defined == nil then
 			u_haltTime(frametime)
 		end
 		prefix_update_initial_timestop(frametime)
-		prefix_style_module:update(frametime)
-		prefix_style_module:compute_colors(frametime)
 	end
 
 	function onPreUnload()

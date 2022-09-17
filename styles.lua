@@ -92,9 +92,12 @@ function prefix_get_style_module()
 		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
 		l_setDarkenUnevenBackgroundChunk(false)
+		l_setManual3dPulseControl(true)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
 		self.swap_time = 0
+		self.pulse3D = 1
+		self.pulse3DDirection = 1
 		if self.depth == nil then
 			self.depth = s_get3dDepth()
 		else
@@ -181,6 +184,13 @@ function prefix_get_style_module()
 			prefix_style.pulse_increment = -prefix_style.pulse_increment
 			self.pulse_factor = prefix_style.pulse_max
 		end
+		self.pulse3D = self.pulse3D + prefix_style["3D_pulse_speed"] * self.pulse3DDirection * frametime
+		if self.pulse3D > prefix_style["3D_pulse_max"] then
+			self.pulse3DDirection = -1
+		elseif self.pulse3D < prefix_style["3D_pulse_min"] then
+			self.pulse3DDirection = 1
+		end
+		l_set3dPulse(self.pulse3D)
 	end
 
 	function Style:set_style(id)

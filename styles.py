@@ -73,8 +73,11 @@ def convert_style(style_json):
     # 1.92 casts float depths to int while the steam version just crashes
     style_json["3D_depth"] = int(style_json["3D_depth"])
 
-    # Set default max_swap_time
+    # Set defaults
     style_json["max_swap_time"] = style_json.get("max_swap_time", 100)
+    style_json["3D_pulse_speed"] = style_json.get("3D_pulse_speed", 0.01)
+    style_json["3D_pulse_min"] = style_json.get("3D_pulse_min", 0)
+    style_json["3D_pulse_max"] = style_json.get("3D_pulse_max", 3.2)
 
     # Save style for use in lua
     os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
