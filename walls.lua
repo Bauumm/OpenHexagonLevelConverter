@@ -39,6 +39,10 @@ prefix_wall_module = {
 		       math.sin((degrees / 57.3).value) * distance
 	end,
 
+	size = function(self)
+		return #self.walls + #self.stopped_walls
+	end,
+
 	-- wall spawn distance in 1.92 cannot be changed
 	WALL_SPAWN_DIST = 1600,
 	walls = {},
@@ -78,7 +82,7 @@ prefix_wall_module = {
 		table.insert(self.walls, wall)
 	end,
 	empty = function(self)
-		return #self.walls == 0
+		return self:size() == 0
 	end,
 	clear = function(self)
 		local length = #self.walls

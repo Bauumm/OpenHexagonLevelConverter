@@ -2,8 +2,10 @@ if prefix_was_defined == nil then
 	onInit()
 	prefix_was_defined = true
 	prefix_time_stop = 0
+	prefix_dynamic_fps = true
+	prefix_died = false
 	if prefix_limit_fps ~= nil then
-		prefix_target_tickrate = prefix_limit_fps / 240
+		prefix_target_frametime = 60 / prefix_limit_fps
 		prefix_remainder = 0
 	end
 	u_execScript("prefix_styles.lua")
@@ -19,36 +21,50 @@ if prefix_was_defined == nil then
 		end
 	end
 
+	function onDeath()
+		prefix_died = true
+	end
+
 	function onRenderStage(render_stage, frametime)
 		if render_stage == 0 then
-			prefix_style_module:update(frametime)
-			prefix_style_module:compute_colors(frametime)
+			if prefix_died then
+				prefix_style_module:update(frametime)
+				prefix_style_module:compute_colors()
+			else
+				if prefix_limit_fps == nil then
+					prefix_call_onUpdate(frametime)
+				else
+					if prefix_dynamic_fps then
+						-- estimate for standardised fps
+						local walls = prefix_wall_module:size()
+						if walls < 1000 then
+							prefix_target_frametime = 60 / prefix_limit_fps
+						else
+							prefix_target_frametime = 60 / (prefix_limit_fps / (walls / 1000))
+						end
+						if prefix_target_frametime < 0 then
+							prefix_target_frametime = 0.25
+						end
+					end
+					prefix_remainder = prefix_remainder + frametime
+					local calls = math.floor(prefix_remainder / prefix_target_frametime)
+					prefix_remainder = prefix_remainder - calls * prefix_target_frametime
+					for i=1, calls do
+						prefix_call_onUpdate(prefix_target_frametime)
+					end
+				end
+			end
 		end
 	end
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
-	function onInput(frametime)
-		if prefix_rs_calls ~= 0 then
-			prefix_rs_ft = frametime / prefix_rs_calls
-			prefix_rs_calls = 0
-		end
-		if prefix_limit_fps ~= nil then
-			local calls = prefix_target_tickrate + prefix_remainder
-			local actual_calls = math.floor(calls)
-			prefix_remainder = calls - actual_calls
-			for i=1,actual_calls do
-				prefix_call_onUpdate(frametime / prefix_target_tickrate)
-			end
-		else
-			prefix_call_onUpdate(frametime)
-		end
-	end
-
 	function prefix_call_onUpdate(frametime)
 		prefix_update_events(frametime)
 		prefix_function_wrapper(prefix_onUpdate, frametime)
 		prefix_update_timeline(frametime)
 		prefix_wall_module:update_walls(frametime)
+		prefix_style_module:update(frametime)
+		prefix_style_module:compute_colors()
 	end
 
 	function onUpdate(frametime)

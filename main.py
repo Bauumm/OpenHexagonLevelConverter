@@ -91,11 +91,16 @@ def convert_level(files, args):
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         styles.convert_lua(lua_file, level_json)
+        has_limit = False
         if args.fps_limit is not None:
             for fps_limit in args.fps_limit:
                 if level_json["id"] == fps_limit[0]:
                     lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" +
                                         str(fps_limit[1]))
+                    has_limit = True
+        if not has_limit:
+            lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" + str(
+                args.default_fps_limit))
         if level_json.get("selectable", True):
             level_json.save("Levels/" + level)
         else:
@@ -201,19 +206,25 @@ def convert_pack(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Convert packs for Open \
-                                     Hexagon 1.92 to be compatible with the \
-                                     steam version.")
+    parser = argparse.ArgumentParser(
+        description="Convert packs for Open Hexagon 1.92 to be compatible \
+        with the steam version.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("source_pack", type=str, help="the 1.92 pack to be \
                         converted")
     parser.add_argument("destination_folder", type=str, help="the path the \
                         converted pack will be created at")
     parser.add_argument("--fps-limit", nargs=2, metavar=("level", "fps_limit"),
-                        help="limit fps for a level that may depend on it",
+                        help="set fps for a level that may depend on it",
                         action="append")
+    parser.add_argument("--default-fps-limit", type=int, default=960,
+                        help="set the default fps to replicate")
     args = parser.parse_args()
     if not os.path.exists(args.source_pack):
         log.error("Source pack doesn't exist!")
+        exit(1)
     if os.path.exists(args.destination_folder):
         log.error("Destination path exists!")
+        exit(1)
     convert_pack(args)
