@@ -5,9 +5,6 @@ from config import CONVERTER_PREFIX
 LEVEL_PROPERTY_MAPPING = ExtendedDict({
     "speed_multiplier": ["l_getSpeedMult", "l_setSpeedMult"],
     "speed_increment": ["l_getSpeedInc", "l_setSpeedInc"],
-    "rotation_speed": ["l_getRotationSpeed", "l_setRotationSpeed"],
-    "rotation_increment": ["l_getRotationSpeedInc", "l_setRotationSpeedInc"],
-    "rotation_speed_max": ["l_getRotationSpeedMax", "l_setRotationSpeedMax"],
     "delay_multiplier": ["l_getDelayMult", "l_setDelayMult"],
     "delay_increment": ["l_getDelayInc", "l_setDelayInc"],
     "fast_spin": ["l_getFastSpin", "l_setFastSpin"],
@@ -106,7 +103,5 @@ def convert(level_json, level_lua):
     for key in required_defaults.keys():
         function = LEVEL_PROPERTY_MAPPING.get(key)[1]
         code += "\n" + function + "(" + str(LEVEL_PROPERTY_DEFAULTS[key]) + ")"
-    code += "\nl_setRotationSpeed(l_getRotationSpeed() * \
-        (math.random(0, 1) * 2 - 1))"
     code += "\n" + CONVERTER_PREFIX + "custom_keys=" + custom_keys.to_table()
     level_lua.mixin_line(code, "onInit")

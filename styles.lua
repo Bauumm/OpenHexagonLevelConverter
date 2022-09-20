@@ -189,6 +189,9 @@ function prefix_get_style_module()
 			prefix_style.pulse_increment = -prefix_style.pulse_increment
 			self.pulse_factor = prefix_style.pulse_max
 		end
+	end
+
+	function Style:update3D(frametime)
 		self.pulse3D = self.pulse3D + prefix_style["3D_pulse_speed"] * self.pulse3DDirection * frametime
 		if self.pulse3D > prefix_style["3D_pulse_max"] then
 			self.pulse3DDirection = -1

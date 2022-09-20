@@ -28,19 +28,15 @@ function prefix_update_increment(frametime)
 		prefix_is_incrementing = true
 		
 		a_playSound("levelUp.ogg")
-		l_setRotationSpeed(l_getRotationSpeed() + l_getRotationSpeedInc() * prefix_sign(l_getRotationSpeed()))
-		l_setRotationSpeed(l_getRotationSpeed() * -1)
-		if prefix_fast_spin < 0 and math.abs(l_getRotationSpeed()) > l_getRotationSpeedMax() then
-			l_setRotationSpeed(l_getRotationSpeedMax() * prefix_sign(l_getRotationSpeed()))
+		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") + l_getRotationSpeedInc() * prefix_sign(getLevelValueFloat("rotation_speed")))
+		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * -1)
+		if prefix_fast_spin < 0 and math.abs(getLevelValueFloat("rotation_speed")) > getLevelValueFloat("rotation_speed_max") then
+			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed_max") * prefix_sign(getLevelValueFloat("rotation_speed")))
 		end
 		prefix_fast_spin = l_getFastSpin()
 		prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_do:new(prefix_main_timeline, function()
 			prefix_side_change(math.random(l_getSidesMin(), l_getSidesMax()))
 		end))
-	end
-	if prefix_fast_spin > 0 then
-		l_setRotation(l_getRotation() + (math.abs((prefix_get_smoother_step(0, l_getFastSpin(), prefix_fast_spin) / 3.5) * frametime * 17)) * prefix_sign(l_getRotationSpeed()))
-		prefix_fast_spin = prefix_fast_spin - frametime
 	end
 end
 
