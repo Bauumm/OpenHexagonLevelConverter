@@ -20,7 +20,6 @@ LEVEL_PROPERTY_MAPPING = ExtendedDict({
     "pulse_speed": ["l_getPulseSpeed", "l_setPulseSpeed"],
     "pulse_speed_r": ["l_getPulseSpeedR", "l_setPulseSpeedR"],
     "pulse_delay_max": ["l_getPulseDelayMax", "l_setPulseDelayMax"],
-    "pulse_delay_half_max": [None, None],
     "beatpulse_max": ["l_getBeatPulseMax", "l_setBeatPulseMax"],
     "beatpulse_delay_max": ["l_getBeatPulseDelayMax",
                             "l_setBeatPulseDelayMax"],
@@ -92,7 +91,10 @@ def convert(level_json, level_lua):
             del required_defaults[key]
         functions = LEVEL_PROPERTY_MAPPING.get(key)
         if functions is None or functions[1] is None:
-            custom_keys[key] = level_json[key]
+            if key == "pulse_delay_half_max":  # only in 1.92
+                custom_keys[key] = level_json.get(key, 0)
+            else:
+                custom_keys[key] = level_json[key]
         else:
             function = functions[1]
             if level_json.get(key) == float("inf"):

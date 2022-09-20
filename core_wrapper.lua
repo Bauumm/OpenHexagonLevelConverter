@@ -13,6 +13,7 @@ if prefix_was_defined == nil then
 	u_execScript("prefix_lua_functions.lua")
 	u_execScript("prefix_events.lua")
 	u_execScript("prefix_walls.lua")
+	u_execScript("prefix_pulse.lua")
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -63,6 +64,8 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onUpdate, frametime)
 		prefix_update_timeline(frametime)
 		prefix_wall_module:update_walls(frametime)
+		prefix_pulse_module:update_beatpulse(frametime)
+		prefix_pulse_module:update_pulse(frametime)
 		prefix_style_module:update(frametime)
 		prefix_style_module:compute_colors()
 	end
@@ -101,6 +104,8 @@ if prefix_was_defined == nil then
 
 			prefix_style_module = prefix_get_style_module()
 			prefix_style_module:init()
+			prefix_pulse_module = prefix_get_pulse_module()
+			prefix_pulse_module:init()
 			prefix_function_wrapper(prefix_onLoad)
 		end
 	end
