@@ -139,8 +139,13 @@ function prefix_get_style_module()
 			local override_color = self:darken_color(unpack(self.main_color))
 			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
 		end
-		local swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
-		if(#prefix_style.colors < 2) then
+		local swap_offset
+		if prefix_style.max_swap_time == 0 then
+			swap_offset = 0
+		else
+			swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
+		end
+		if #prefix_style.colors < 2 then
 			cap_color = {0, 0, 0, 0}
 		else
 			local cap_index = (1 + swap_offset) % (#prefix_style.colors) + 1
