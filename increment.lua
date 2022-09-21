@@ -28,7 +28,7 @@ function prefix_update_increment(frametime)
 		prefix_is_incrementing = true
 		
 		a_playSound("levelUp.ogg")
-		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") + l_getRotationSpeedInc() * prefix_sign(getLevelValueFloat("rotation_speed")))
+		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") + getLevelValueFloat("rotation_increment") * prefix_sign(getLevelValueFloat("rotation_speed")))
 		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * -1)
 		if prefix_fast_spin < 0 and math.abs(getLevelValueFloat("rotation_speed")) > getLevelValueFloat("rotation_speed_max") then
 			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed_max") * prefix_sign(getLevelValueFloat("rotation_speed")))
