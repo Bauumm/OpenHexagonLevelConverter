@@ -91,7 +91,6 @@ function prefix_get_style_module()
 		shdr_resetAllActiveFragmentShaders()
 		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
-		l_setDarkenUnevenBackgroundChunk(false)
 		l_setManual3dPulseControl(true)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
@@ -155,7 +154,6 @@ function prefix_get_style_module()
 		shdr_setUniformF(self.shdr_back, "hue", self.hue)
 		shdr_setUniformF(self.shdr_back, "pulse_factor", self.pulse_factor)
 		shdr_setUniformI(self.shdr_back, "swap", swap_offset)
-		shdr_setUniformI(self.shdr_back, "sides", l_getSides())
 	end
 
 	function Style:update(frametime)

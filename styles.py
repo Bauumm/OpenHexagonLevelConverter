@@ -124,14 +124,14 @@ def convert_style(style_json):
             ", ".join([str(f / 255) for f in color_data["pulse"]]) + ")",
             str(color_data["hue_shift"])
         ]) + "),\n"
-        style_json["colors"][i]["value"] = list(i.to_bytes(4, 'big'))
+        style_json["colors"][i]["value"] = [14, *i.to_bytes(3, 'big')]
         style_json["colors"][i]["pulse"] = [0, 0, 0, 0]
         style_json["colors"][i]["dynamic"] = False
     code = code[:-2] + "\n);\n\n"
     os.makedirs("Shaders", exist_ok=True)
     background_shader = BaseFile(
         os.path.join(os.path.dirname(filepath), "background.frag"))
-    background_shader.mixin_line(code, 20)
+    background_shader.mixin_line(code, 19)
     background_shader.save("Shaders/" + style_json["id"] + "-background.frag")
 
 

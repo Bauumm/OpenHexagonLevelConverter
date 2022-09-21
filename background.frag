@@ -2,7 +2,6 @@
 uniform float hue;
 uniform float pulse_factor;
 uniform int swap;
-uniform int sides;
 const float color_mod = 256.f / 255.f;
 
 
@@ -73,14 +72,15 @@ vec4 calculateColor(ColorData color_data) {
 }
 
 
-int getIndex(vec4 color) {
-	const float mults[] = float[4](255.f, 255.f * 256.f, 255.f * pow(256.f, 2.f), 255.f * pow(256.f, 3.f));
-	return int(color.a * mults[0] + color.b * mults[1] + color.g * mults[2] + color.r * mults[3]);
+int getIndex(vec4 color, float mult) {
+	const float mults[] = float[3](255.f, 255.f * 256.f, 255.f * pow(256.f, 2.f));
+	return int((color.a * mults[0] + color.b * mults[1] + color.g * mults[2]) * mult);
 }
 
 
 void main() {
-	int index = (getIndex(gl_Color) + swap) % colors.length();
-	vec4 color = calculateColor(colors[index]) / (index % 2 == 0 && index == sides - 1 ? 1.4 : 1);
+	float mult = (gl_Color.r * 255.f == 10.f ? 1.4f : 1.f);
+	int index = (getIndex(gl_Color, mult) + swap) % colors.length();
+	vec4 color = calculateColor(colors[index]) / mult;
 	gl_FragColor = color;
 }
