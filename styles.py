@@ -78,6 +78,9 @@ def convert_style(style_json):
     style_json["3D_pulse_speed"] = style_json.get("3D_pulse_speed", 0.01)
     style_json["3D_pulse_min"] = style_json.get("3D_pulse_min", 0)
     style_json["3D_pulse_max"] = style_json.get("3D_pulse_max", 3.2)
+    style_json["pulse_min"] = style_json.get("pulse_min", 0)
+    style_json["pulse_max"] = style_json.get("pulse_max", 0)
+    style_json["pulse_increment"] = style_json.get("pulse_increment", 0)
 
     # Save style for use in lua
     os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
