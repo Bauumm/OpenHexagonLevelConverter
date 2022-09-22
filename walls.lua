@@ -122,7 +122,11 @@ prefix_wall_module = {
 				else
 					local magnitude = math.sqrt(x ^ 2 + y ^ 2)
 					local move_dist = wall.speed * 5 * frametime
-					cw_setVertexPos(wall.cw, vertex, x - x / magnitude * move_dist, y - y / magnitude * move_dist)
+					local new_x, new_y = x - x / magnitude * move_dist, y - y / magnitude * move_dist
+					if (prefix_sign(new_x) ~= prefix_sign(x) or prefix_sign(new_y) ~= prefix_sign(y)) and wall.accel == 0 then
+						points_on_center = points_on_center + 1
+					end
+					cw_setVertexPos(wall.cw, vertex, new_x, new_y)
 				end
 			end
 			if points_on_center > 3 then
