@@ -3,6 +3,7 @@ from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 from lua_file import LuaFile
 import fix_utils
+import shutil
 import os
 
 
@@ -47,6 +48,7 @@ CORE_FUNCTIONS = [
     "onUpdate",
     "onStep"
 ]
+filepath = __file__
 lua_functions = LuaFile(os.path.join(os.path.dirname(__file__),
                                      "lua_functions.lua"))
 core_wrapper = LuaFile(os.path.join(os.path.dirname(__file__),
@@ -113,3 +115,5 @@ def save(sounds, level_jsons):
             + "\"]=" + level_json.to_table() + "\n"
     core_wrapper.mixin_line(code)
     core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")
+    shutil.copyfile(os.path.join(os.path.dirname(filepath), "JSON.lua"),
+                    "Scripts/" + CONVERTER_PREFIX + "JSON.lua")
