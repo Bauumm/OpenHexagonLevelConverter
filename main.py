@@ -190,6 +190,7 @@ def convert_pack(args):
         convert_custom_lua("walls.lua")
         convert_custom_lua("pulse.lua")
         convert_custom_lua("rotation.lua")
+        convert_custom_lua("random.lua")
         log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)

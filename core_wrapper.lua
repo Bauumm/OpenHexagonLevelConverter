@@ -1,3 +1,4 @@
+u_execScript("prefix_random.lua")
 if prefix_was_defined == nil then
 	onInit()
 	prefix_was_defined = true
@@ -84,6 +85,7 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
+			e_eval("prefix_seed = " .. prefix_seed)
 			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
 		end
 	end
