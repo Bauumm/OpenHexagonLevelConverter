@@ -26,6 +26,8 @@ if prefix_was_defined == nil then
 
 	function onDeath()
 		prefix_died = true
+		l_setRotationSpeed(getLevelValueFloat("rotation_speed"))
+		setLevelValueFloat("rotation_speed", 0)
 	end
 
 	function onRenderStage(render_stage, frametime)
@@ -53,9 +55,7 @@ if prefix_was_defined == nil then
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function prefix_call_onUpdate(frametime)
-		if prefix_died then
-			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * 0.99)
-		else
+		if not prefix_died then
 			prefix_wall_module:update_walls(frametime)
 			prefix_update_events(frametime)
 			prefix_update_timeline(frametime)
