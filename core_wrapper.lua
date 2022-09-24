@@ -1,14 +1,11 @@
-u_execScript("prefix_random.lua")
 if prefix_was_defined == nil then
 	onInit()
 	prefix_was_defined = true
 	prefix_time_stop = 0
-	prefix_dynamic_fps = true
 	prefix_died = false
-	if prefix_limit_fps ~= nil then
-		prefix_target_frametime = 60 / prefix_limit_fps
-		prefix_remainder = 0
-	end
+	prefix_next_calls = 0
+	prefix_next_time = 0
+	prefix_remainder = 0
 	u_execScript("prefix_styles.lua")
 	u_execScript("prefix_main_timeline.lua")
 	u_execScript("prefix_lua_functions.lua")
@@ -16,6 +13,7 @@ if prefix_was_defined == nil then
 	u_execScript("prefix_walls.lua")
 	u_execScript("prefix_pulse.lua")
 	u_execScript("prefix_rotation.lua")
+	u_execScript("prefix_random.lua")
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -30,32 +28,52 @@ if prefix_was_defined == nil then
 		setLevelValueFloat("rotation_speed", 0)
 	end
 
+	function prefix_get_fps()
+		-- estimate for standardised fps
+		local walls = prefix_wall_module:size()
+		local fps
+		if walls < 1000 then
+			fps = prefix_limit_fps
+		else
+			fps = prefix_limit_fps / (walls / 1000)
+		end
+		if fps < 60 then
+			fps = 60
+		end
+		return fps
+	end
+
 	function onRenderStage(render_stage, frametime)
-		if render_stage == 0 then
-			if prefix_dynamic_fps then
-				-- estimate for standardised fps
-				local walls = prefix_wall_module:size()
-				if walls < 1000 then
-					prefix_target_frametime = 60 / prefix_limit_fps
-				else
-					prefix_target_frametime = 60 / (prefix_limit_fps / (walls / 1000))
-				end
-				if prefix_target_frametime < 0 then
-					prefix_target_frametime = 0.25
-				end
-			end
+		if render_stage == 0 and prefix_next_calls > 0 then
 			prefix_remainder = prefix_remainder + frametime
-			local calls = math.floor(prefix_remainder / prefix_target_frametime)
-			prefix_remainder = prefix_remainder - calls * prefix_target_frametime
-			for i=1, calls do
-				prefix_call_onUpdate(prefix_target_frametime)
+			local calls = math.floor(prefix_remainder / prefix_next_time)
+			prefix_remainder = prefix_remainder - calls * prefix_next_time
+			for i=1,calls do
+				prefix_next_calls = prefix_next_calls - 1
+				prefix_call_onUpdate(prefix_next_time)
 			end
+		end
+	end
+
+	function onInput(frametime, movement, focus)
+		prefix_movement = movement
+		prefix_focus = focus
+		while prefix_next_calls >= 1 do
+			prefix_call_onUpdate(prefix_next_time)
+			prefix_next_calls = prefix_next_calls - 1
+		end
+		prefix_remainder = 0
+		prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
+		prefix_next_time = frametime / prefix_next_calls
+		if movement ~= 0 then
+			return true
 		end
 	end
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function prefix_call_onUpdate(frametime)
 		if not prefix_died then
+			prefix_wall_module:check_collisions(frametime, prefix_movement, prefix_focus)
 			prefix_wall_module:update_walls(frametime)
 			prefix_update_events(frametime)
 			prefix_update_timeline(frametime)

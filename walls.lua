@@ -35,8 +35,11 @@ end
 
 prefix_wall_module = {
 	_getOrbit = function(degrees, distance)
-		return math.cos((degrees / 57.3).value) * distance,
-		       math.sin((degrees / 57.3).value) * distance
+		if type(degrees) == "table" then
+			degrees = degrees.value
+		end
+		return math.cos((degrees / 57.3)) * distance,
+		       math.sin((degrees / 57.3)) * distance
 	end,
 
 	size = function(self)
@@ -75,6 +78,7 @@ prefix_wall_module = {
 		cw_setVertexPos(wall.cw, 2, self._getOrbit(angle + div * 0.5, self.WALL_SPAWN_DIST))
 		cw_setVertexPos(wall.cw, 1, self._getOrbit(angle + div * 0.5 + l_getWallAngleLeft(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewLeft()))
 		cw_setVertexPos(wall.cw, 0, self._getOrbit(angle - div * 0.5 + l_getWallAngleRight(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewRight()))
+		cw_setCollision(wall.cw, false)
 		wall.speed = speed
 		wall.accel = acceleration
 		wall.minSpeed = minSpeed
@@ -90,6 +94,47 @@ prefix_wall_module = {
 			cw_destroy(self.walls[1].cw)
 			table.remove(self.walls, 1)
 		end
+	end,
+	_is_overlapping = function(verts, point)
+		local result = false
+		local vert_count = #verts / 2
+		local j = vert_count - 1
+		for i = 0, vert_count - 1 do
+			local vI = {verts[i * 2 + 1], verts[i * 2 + 2]}
+			local vJ = {verts[j * 2 + 1], verts[j * 2 + 2]}
+			if (vI[2] > point[2]) ~= (vJ[2] > point[2]) and point[1] < (vJ[1] - vI[1]) * (point[2] - vI[2]) / (vJ[2] - vI[2]) + vI[1] then
+				result = not result
+			end
+			j = i
+		end
+		return result
+	end,
+	check_collisions = function(self, frametime, movement, focus)
+		local speed = focus and 4.625 or 9.45
+		local last_angle = math.deg(u_getPlayerAngle())
+		local angle = last_angle + speed * movement * frametime
+		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse())
+		local last_pos = {self._getOrbit(angle, radius)}
+		for i=1,#self.walls do
+			local wall = self.walls[i]
+			local verts = {cw_getVertexPos4(wall.cw)}
+			local dead = false
+			if self._is_overlapping(verts, last_pos) then
+				if movement == 0 then
+					dead = true
+				else
+					angle = last_angle
+					if self._is_overlapping(verts, {self._getOrbit(angle, radius)}) then
+						dead = true
+					end
+				end
+			end
+			if dead then
+				e_kill()
+				return
+			end
+		end
+		u_setPlayerAngle(math.rad(angle))
 	end,
 	update_walls = function(self, frametime)
 		local delete_queue = {}
