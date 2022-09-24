@@ -9,6 +9,7 @@ if prefix_was_defined == nil then
 	prefix_next_time = 0
 	prefix_remainder = 0
 	prefix_call_depth = 0
+	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
 	u_execScript("prefix_styles.lua")
 	u_execScript("prefix_main_timeline.lua")
 	u_execScript("prefix_lua_functions.lua")
@@ -65,15 +66,17 @@ if prefix_was_defined == nil then
 	end
 
 	function onInput(frametime, movement, focus)
-		prefix_movement = movement
-		prefix_focus = focus
-		while prefix_next_calls >= 1 do
-			prefix_call_onUpdate(prefix_next_time)
-			prefix_next_calls = prefix_next_calls - 1
+		if prefix_finished_timehalt then
+			prefix_movement = movement
+			prefix_focus = focus
+			while prefix_next_calls > 0 do
+				prefix_call_onUpdate(prefix_next_time)
+				prefix_next_calls = prefix_next_calls - 1
+			end
+			prefix_remainder = 0
+			prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
+			prefix_next_time = frametime / prefix_next_calls
 		end
-		prefix_remainder = 0
-		prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
-		prefix_next_time = frametime / prefix_next_calls
 		if movement ~= 0 then
 			return true
 		end
@@ -97,6 +100,9 @@ if prefix_was_defined == nil then
 	end
 
 	function onUpdate(frametime)
+		if not prefix_finished_timehalt then
+			prefix_finished_timehalt = true
+		end
 		if prefix_time_stop > 0 then
 			prefix_time_stop = prefix_time_stop - frametime
 			u_haltTime(frametime)

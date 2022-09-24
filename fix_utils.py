@@ -50,7 +50,8 @@ def fix_recursion(lua_file):
     for func in functions:
         log.warn("Limiting recursion depth approximately in", func[0].name.id)
         lua_file.mixin_line("if " + CONVERTER_PREFIX +
-                            "call_depth >= 16381 then return end " +
+                            "call_depth >= 16381 then u_haltTime(16) \
+                            error(\"stack overflow\") end " +
                             CONVERTER_PREFIX + "call_depth = " +
                             CONVERTER_PREFIX + "call_depth + 1",
                             func[0].name.id)
