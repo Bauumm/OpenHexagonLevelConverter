@@ -38,6 +38,11 @@ class LuaFile(BaseFile):
                 self.mixin_line("end", line=line)
             else:
                 raise error
+        fix_utils.fix_recursion(self)
+
+    def set_text(self, text):
+        self._text = text
+        self._ast_tree = ast.parse(self._text)
 
     def _get_function_node(self, name):
         if name is None:

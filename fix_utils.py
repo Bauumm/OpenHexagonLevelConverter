@@ -1,3 +1,6 @@
+from luaparser import astnodes
+from luaparser import ast
+from config import CONVERTER_PREFIX
 import log
 import os
 
@@ -26,6 +29,34 @@ def fix_lua(code):
     code = code.replace("\\*", "\\\\*")
     code = code.replace(".\\Â°", ".\\\\Â°")
     return _parse_code(code)
+
+
+def fix_recursion(lua_file):
+    functions = []
+    for node in ast.walk(lua_file._ast_tree):
+        if isinstance(node, astnodes.Function):
+            if isinstance(node.name, astnodes.Index):
+                continue
+            func_code = lua_file._text[node.start_char:node.stop_char + 1]
+            func_ast = ast.parse(func_code)
+            for sub_node in ast.walk(func_ast):
+                if isinstance(sub_node, astnodes.Call) and \
+                        isinstance(sub_node.func, astnodes.Name):
+                    if sub_node.func.id == node.name.id and \
+                            func_code[sub_node.stop_char - 1:
+                                      sub_node.stop_char + 1] == "()":
+                        functions.append([node, sub_node])
+    functions.reverse()
+    for func in functions:
+        log.warn("Limiting recursion depth approximately in", func[0].name.id)
+        lua_file.mixin_line("if " + CONVERTER_PREFIX +
+                            "call_depth >= 16381 then return end " +
+                            CONVERTER_PREFIX + "call_depth = " +
+                            CONVERTER_PREFIX + "call_depth + 1",
+                            func[0].name.id)
+        lua_file.mixin_line(CONVERTER_PREFIX + "call_depth = " +
+                            CONVERTER_PREFIX + "call_depth - 1",
+                            func[0].name.id, -1)
 
 
 OPENING_KEYWORDS = ["if", "for", "while", "function"]
@@ -128,7 +159,8 @@ def _parse_code(code):
                 swap = True
                 is_comment = False
         if not is_comment:
-            line, ends, openings, needs_do = _parse_line(line, ends, openings, needs_do)
+            line, ends, openings, needs_do = _parse_line(line, ends, openings,
+                                                         needs_do)
         if comment[:4] == "--[[" or comment[:7] == "--[===[":
             is_comment = True
         if swap:

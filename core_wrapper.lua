@@ -8,6 +8,7 @@ if prefix_was_defined == nil then
 	prefix_next_calls = 0
 	prefix_next_time = 0
 	prefix_remainder = 0
+	prefix_call_depth = 0
 	u_execScript("prefix_styles.lua")
 	u_execScript("prefix_main_timeline.lua")
 	u_execScript("prefix_lua_functions.lua")
@@ -55,8 +56,10 @@ if prefix_was_defined == nil then
 			local calls = math.floor(prefix_remainder / prefix_next_time)
 			prefix_remainder = prefix_remainder - calls * prefix_next_time
 			for i=1,calls do
-				prefix_next_calls = prefix_next_calls - 1
-				prefix_call_onUpdate(prefix_next_time)
+				if prefix_next_calls > 0 then
+					prefix_next_calls = prefix_next_calls - 1
+					prefix_call_onUpdate(prefix_next_time)
+				end
 			end
 		end
 	end
