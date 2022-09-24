@@ -51,6 +51,7 @@ prefix_wall_module = {
 	walls = {},
 	stopped_walls = {},
 	stopped_wall_radius = 1 / 0,
+	collide_walls = {},
 
 	find_self = function(self)
 		if self == nil then
@@ -115,9 +116,8 @@ prefix_wall_module = {
 		local angle = last_angle + speed * movement * frametime
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse())
 		local last_pos = {self._getOrbit(angle, radius)}
-		for i=1,#self.walls do
-			local wall = self.walls[i]
-			local verts = {cw_getVertexPos4(wall.cw)}
+		for _, cw in pairs(self.collide_walls) do
+			local verts = {cw_getVertexPos4(cw)}
 			local dead = false
 			if self._is_overlapping(verts, last_pos) then
 				if movement == 0 then
@@ -139,6 +139,7 @@ prefix_wall_module = {
 	update_walls = function(self, frametime)
 		local delete_queue = {}
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65
+		self.collide_walls = {}
 		for i=1,#self.walls do
 			local moved_to_stopped = false
 			local wall = self.walls[i]
@@ -156,11 +157,17 @@ prefix_wall_module = {
 					end
 				end
 			end
+			local collide_index
 			local points_on_center = 0
+			local collide = false
 			for vertex=0,3 do
 				local x, y = cw_getVertexPos(wall.cw, vertex)
 				if moved_to_stopped then
 					self.stopped_wall_radius = math.min(math.abs(x), math.abs(y), self.stopped_wall_radius)
+				else
+					if math.abs(x) < radius * 2 and math.abs(y) < radius * 2 then
+						collide = true
+					end
 				end
 				if math.abs(x) < radius and math.abs(y) < radius then
 					points_on_center = points_on_center + 1
@@ -174,11 +181,16 @@ prefix_wall_module = {
 					cw_setVertexPos(wall.cw, vertex, new_x, new_y)
 				end
 			end
+			if collide then
+				table.insert(self.collide_walls, wall.cw)
+				collide_index = #self.collide_walls
+			end
 			if points_on_center > 3 then
 				cw_destroy(wall.cw)
 				if not moved_to_stopped then
 					table.insert(delete_queue, 1, i)
 				end
+				table.remove(self.collide_walls, collide_index)
 			end
 		end
 		for _, i in pairs(delete_queue) do
