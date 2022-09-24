@@ -1,6 +1,7 @@
 if prefix_was_defined == nil then
 	onInit()
 	l_setShowPlayerTrail(false)
+	l_setShadersRequired(true)
 	prefix_was_defined = true
 	prefix_time_stop = 0
 	prefix_died = false

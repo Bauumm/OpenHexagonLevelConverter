@@ -98,6 +98,15 @@ def convert_style(style_json):
     style_json["hue_min"] = 0
     style_json["hue_max"] = 0
     style_json["max_swap_time"] = 0
+    style_json["text_color"] = {
+        "dynamic": False,
+        "dynamic_offset": False,
+        "offset": 0,
+        "main": False,
+        "hue_shift": 0,
+        "value": [0, 0, 0, 0],
+        "pulse": [0, 0, 0, 0]
+    }
     style_json["cap_color"] = {
         "legacy": False,
         "dynamic": False,
@@ -151,6 +160,8 @@ def convert_lua(level_lua, level_json):
                         "Shaders/main.frag")
         shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
                         "Shaders/cap.frag")
+        shutil.copyfile(os.path.join(os.path.dirname(filepath), "text.frag"),
+                        "Shaders/text.frag")
 
 
 def save():

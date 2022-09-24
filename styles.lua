@@ -2,7 +2,8 @@ function prefix_get_style_module()
 	local Style = {
 		shdr_3D = shdr_getShaderId("wall3D.frag"),
 		shdr_main = shdr_getShaderId("main.frag"),
-		shdr_cap = shdr_getShaderId("cap.frag")
+		shdr_cap = shdr_getShaderId("cap.frag"),
+		shdr_text = shdr_getShaderId("text.frag")
 	}
 
 	function Style:darken_color(r, g, b, a)
@@ -123,6 +124,9 @@ function prefix_get_style_module()
 		-- set cap color
 		shdr_setActiveFragmentShader(5, self.shdr_cap)
 
+		-- set text color
+		shdr_setActiveFragmentShader(8, self.shdr_text)
+
 		-- set background color
 		shdr_setActiveFragmentShader(0, self.shdr_back)
 
@@ -133,7 +137,6 @@ function prefix_get_style_module()
 
 	function Style:compute_colors()
 		self.main_color = self:calculate_color(prefix_style.main)
-		shdr_setUniformFVec4(self.shdr_main, "color", self:shader_scaling(self.main_color))
 		if prefix_style["3D_override_color"] == nil then
 			local override_color = self:darken_color(unpack(self.main_color))
 			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
@@ -150,7 +153,10 @@ function prefix_get_style_module()
 			local cap_index = (1 + swap_offset) % (#prefix_style.colors) + 1
 			cap_color = self:calculate_color(prefix_style.colors[cap_index])
 		end
+		shdr_setUniformFVec4(self.shdr_main, "color", self:shader_scaling(self.main_color))
 		shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(cap_color))
+		shdr_setUniformFVec4(self.shdr_text, "offset_color", self:shader_scaling(cap_color))
+		shdr_setUniformFVec4(self.shdr_text, "text_color", self:shader_scaling(self.main_color))
 		shdr_setUniformF(self.shdr_back, "hue", self.hue)
 		shdr_setUniformF(self.shdr_back, "pulse_factor", self.pulse_factor)
 		shdr_setUniformI(self.shdr_back, "swap", swap_offset)
