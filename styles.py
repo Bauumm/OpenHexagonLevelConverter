@@ -89,6 +89,13 @@ def convert_style(style_json):
     lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" +
                   style_json["id"] + ".lua")
 
+    # Save it now for use in menu
+    style_json["id"] += "-menu"
+    style_json.save("Styles/" + os.path.basename(style_json.path)[:-5] +
+                    "-menu.json")
+    style_json.saved = False
+    style_json["id"] = style_json["id"][:-5]
+
     # Set some properties to fixed values in order to remake them with lua
     style_json["3D_override_color"] = [0, 0, 0, 255]
     style_json["pulse_increment"] = 0
@@ -150,6 +157,7 @@ def convert_style(style_json):
 def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" +
                          level_json["styleId"] + "\"", "onInit")
+    level_json["styleId"] += "-menu"
     if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
         os.makedirs("Shaders", exist_ok=True)
         # 3D alpha falloff overflow reimplementation using shaders

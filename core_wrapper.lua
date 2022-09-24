@@ -134,7 +134,7 @@ if prefix_was_defined == nil then
 			u_setMessageFontSize(40)
 
 			prefix_style_module = prefix_get_style_module()
-			prefix_style_module:init()
+			prefix_style_module:set_style(prefix_style_id)
 			prefix_pulse_module = prefix_get_pulse_module()
 			prefix_pulse_module:init()
 			prefix_function_wrapper(prefix_onLoad)
