@@ -1,5 +1,6 @@
 if prefix_was_defined == nil then
 	onInit()
+	l_setShowPlayerTrail(false)
 	prefix_was_defined = true
 	prefix_time_stop = 0
 	prefix_died = false
@@ -44,6 +45,10 @@ if prefix_was_defined == nil then
 	end
 
 	function onRenderStage(render_stage, frametime)
+		if prefix_kill_wall ~= nil then
+			cw_destroy(prefix_kill_wall)
+			prefix_kill_wall = nil
+		end
 		if render_stage == 0 and prefix_next_calls > 0 then
 			prefix_remainder = prefix_remainder + frametime
 			local calls = math.floor(prefix_remainder / prefix_next_time)
@@ -93,6 +98,12 @@ if prefix_was_defined == nil then
 			u_haltTime(frametime)
 		end
 		prefix_update_initial_timestop(frametime)
+		if prefix_must_kill and prefix_kill_wall == nil then
+			prefix_must_kill = false
+			prefix_kill_wall = cw_create()
+			cw_setDeadly(prefix_kill_wall, true)
+			cw_setVertexPos4(prefix_kill_wall, -1600, 1600, -1600, -1600, 1600, -1600, 1600, 1600)
+		end
 	end
 
 	function onPreUnload()

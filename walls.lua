@@ -130,7 +130,7 @@ prefix_wall_module = {
 				end
 			end
 			if dead then
-				e_kill()
+				prefix_must_kill = true
 				return
 			end
 		end
