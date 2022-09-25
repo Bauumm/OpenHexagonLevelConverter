@@ -6,7 +6,6 @@ getDelayMult = u_getDelayMultDM
 getDifficultyMult = u_getDifficultyMult
 execScript = u_execScript
 forceIncrement = u_forceIncrement
-isKeyPressed = u_isKeyPressed
 
 
 function prefix_resolve_function(func)
@@ -186,10 +185,30 @@ io.open = function(path)
 				new_config[key] = config[key]
 			end
 		end
+
+		-- Set default controls, so onInput can be used to replace isKeyPressed whenever possible
+		new_config.t_rotate_ccw = {{"kLeft"}}
+		new_config.t_rotate_cw = {{"kRight"}}
+		new_config.t_focus = {{"kShift"}}
+
 		local new_file = io.tmpfile()
 		new_file:write(JSON:encode_pretty(new_config))
 		return new_file
 	else
 		return prefix_io_open(path)
+	end
+end
+
+
+prefix_key_mapping = {
+	[38] = "prefix_focus",
+	[71] = "prefix_movement == -1",
+	[72] = "prefix_movement == 1"
+}
+function isKeyPressed(key)
+	if prefix_key_mapping[key] == nil then
+		return u_isKeyPressed(key)
+	else
+		return loadstring("return " .. prefix_key_mapping[key])()
 	end
 end
