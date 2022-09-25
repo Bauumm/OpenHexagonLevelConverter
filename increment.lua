@@ -22,9 +22,9 @@ function prefix_update_increment(frametime)
 	if not prefix_increment_enabled then
 		return
 	end
-	local incTime = l_getLevelTime() - prefix_last_increment
+	local incTime = prefix_level_time - prefix_last_increment
 	if incTime >= l_getIncTime() then
-		prefix_last_increment = l_getLevelTime()
+		prefix_last_increment = prefix_level_time
 		prefix_is_incrementing = true
 		
 		a_playSound("levelUp.ogg")

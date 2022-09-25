@@ -4,6 +4,7 @@ if prefix_was_defined == nil then
 	l_setShadersRequired(true)
 	prefix_was_defined = true
 	prefix_time_stop = 0
+	prefix_level_time = 0
 	prefix_died = false
 	prefix_next_calls = 0
 	prefix_next_time = 0
@@ -75,6 +76,7 @@ if prefix_was_defined == nil then
 				prefix_call_onUpdate(prefix_next_time)
 				prefix_next_calls = prefix_next_calls - 1
 			end
+			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
 			prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
 			prefix_next_time = frametime / prefix_next_calls
