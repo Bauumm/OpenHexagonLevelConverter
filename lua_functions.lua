@@ -26,16 +26,14 @@ function prefix_setField(file, field, value)
 	elseif file == "style" then
 		functions = prefix_STYLE_PROPERTY_MAPPING[field]
 	end
+	if file == "style" then
+		prefix_style[field] = value
+	end
 	if functions == nil then
 		if file == "level" then
 			prefix_custom_keys[field] = value
-		else
-			u_log("Could not set " .. field .. "!!!")
 		end
 	else
-		if file == "style" then
-			prefix_style[field] = value
-		end
 		prefix_resolve_function(functions[2])(value)
 	end
 end
