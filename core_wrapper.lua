@@ -70,12 +70,12 @@ if prefix_was_defined == nil then
 
 	function onInput(frametime, movement, focus)
 		if prefix_finished_timehalt then
-			prefix_movement = movement
-			prefix_focus = focus
 			while prefix_next_calls > 0 do
 				prefix_call_onUpdate(prefix_next_time)
 				prefix_next_calls = prefix_next_calls - 1
 			end
+			prefix_movement = movement
+			prefix_focus = focus
 			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
 			prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
