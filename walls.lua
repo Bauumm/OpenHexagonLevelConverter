@@ -43,13 +43,14 @@ prefix_wall_module = {
 	end,
 
 	size = function(self)
-		return #self.walls + #self.stopped_walls
+		return #self.walls + #self.stopped_walls + self.imaginary_walls
 	end,
 
 	-- wall spawn distance in 1.92 cannot be changed
 	WALL_SPAWN_DIST = 1600,
 	walls = {},
 	stopped_walls = {},
+	imaginary_walls = 0,
 	stopped_wall_radius = 1 / 0,
 	collide_walls = {},
 
@@ -195,6 +196,9 @@ prefix_wall_module = {
 				collide_index = #self.collide_walls
 			end
 			if points_on_center > 3 or points_out_of_bg > 3 then
+				if points_out_of_bg > 3 then
+					self.imaginary_walls = self.imaginary_walls + 1
+				end
 				cw_destroy(wall.cw)
 				if not moved_to_stopped then
 					table.insert(delete_queue, 1, i)
