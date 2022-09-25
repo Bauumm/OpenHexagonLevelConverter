@@ -83,6 +83,10 @@ def convert_style(style_json):
     style_json["pulse_min"] = style_json.get("pulse_min", 0)
     style_json["pulse_max"] = style_json.get("pulse_max", 0)
     style_json["pulse_increment"] = style_json.get("pulse_increment", 0)
+    style_json["hue_min"] = style_json.get("hue_min", 0)
+    style_json["hue_max"] = style_json.get("hue_max", 0)
+    style_json["hue_ping_pong"] = style_json.get("hue_ping_pong", False)
+    style_json["hue_increment"] = style_json.get("hue_increment", 0)
 
     # Save style for use in lua
     os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
