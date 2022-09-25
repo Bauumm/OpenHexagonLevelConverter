@@ -115,21 +115,26 @@ prefix_wall_module = {
 		local last_angle = math.deg(u_getPlayerAngle())
 		local angle = last_angle + speed * movement * frametime
 		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse())
-		local last_pos = {self._getOrbit(angle, radius)}
+		local pos = {self._getOrbit(angle, radius)}
+		local last_pos = {self._getOrbit(last_angle, radius)}
+		local last_now_kill = false
+		local reset = false
 		for _, cw in pairs(self.collide_walls) do
 			local verts = {cw_getVertexPos4(cw)}
 			local dead = false
-			if self._is_overlapping(verts, last_pos) then
+			if self._is_overlapping(verts, pos) then
 				if movement == 0 then
-					dead = true
+					prefix_must_kill = true
+					return
 				else
 					angle = last_angle
-					if self._is_overlapping(verts, {self._getOrbit(angle, radius)}) then
-						dead = true
-					end
+					reset = true
 				end
 			end
-			if dead then
+			if self._is_overlapping(verts, last_pos) then
+				last_now_kill = true
+			end
+			if reset and last_now_kill then
 				prefix_must_kill = true
 				return
 			end
