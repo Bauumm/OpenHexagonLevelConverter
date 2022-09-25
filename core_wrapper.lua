@@ -17,7 +17,9 @@ if prefix_was_defined == nil then
 	u_execScript("prefix_walls.lua")
 	u_execScript("prefix_pulse.lua")
 	u_execScript("prefix_rotation.lua")
-	u_execScript("prefix_random.lua")
+
+	-- removing this for now as it causes issues
+	--u_execScript("prefix_random.lua")
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -124,7 +126,7 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
-			e_eval("prefix_seed = " .. prefix_seed)
+			--e_eval("prefix_seed = " .. prefix_seed)
 			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
 		end
 	end
