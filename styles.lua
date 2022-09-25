@@ -93,6 +93,7 @@ function prefix_get_style_module()
 		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
 		l_setManual3dPulseControl(true)
+		s_setBGTileRadius(4500)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
 		self.swap_time = 0

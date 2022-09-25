@@ -164,6 +164,7 @@ prefix_wall_module = {
 			end
 			local collide_index
 			local points_on_center = 0
+			local points_out_of_bg = 0
 			local collide = false
 			for vertex=0,3 do
 				local x, y = cw_getVertexPos(wall.cw, vertex)
@@ -174,8 +175,11 @@ prefix_wall_module = {
 						collide = true
 					end
 				end
-				if math.abs(x) < radius and math.abs(y) < radius then
+				local abs_x, abs_y = math.abs(x), math.abs(y)
+				if abs_x < radius and abs_y < radius then
 					points_on_center = points_on_center + 1
+				elseif abs_x > 4500 and abs_y > 4500 then
+					points_out_of_bg = points_out_of_bg + 1
 				else
 					local magnitude = math.sqrt(x ^ 2 + y ^ 2)
 					local move_dist = wall.speed * 5 * frametime
@@ -190,7 +194,7 @@ prefix_wall_module = {
 				table.insert(self.collide_walls, wall.cw)
 				collide_index = #self.collide_walls
 			end
-			if points_on_center > 3 then
+			if points_on_center > 3 or points_out_of_bg > 3 then
 				cw_destroy(wall.cw)
 				if not moved_to_stopped then
 					table.insert(delete_queue, 1, i)
