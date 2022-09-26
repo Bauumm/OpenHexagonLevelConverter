@@ -1,9 +1,14 @@
 function prefix_get_style_module()
+	l_setManual3dPulseControl(true)
+	s_setBGTileRadius(4500)
+
 	local Style = {
 		shdr_3D = shdr_getShaderId("wall3D.frag"),
 		shdr_main = shdr_getShaderId("main.frag"),
 		shdr_cap = shdr_getShaderId("cap.frag"),
-		shdr_text = shdr_getShaderId("text.frag")
+		shdr_text = shdr_getShaderId("text.frag"),
+		pulse3D = 1,
+		pulse3DDirection = 1
 	}
 
 	function Style:darken_color(r, g, b, a)
@@ -92,13 +97,9 @@ function prefix_get_style_module()
 		shdr_resetAllActiveFragmentShaders()
 		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
 		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
-		l_setManual3dPulseControl(true)
-		s_setBGTileRadius(4500)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
 		self.swap_time = 0
-		self.pulse3D = 1
-		self.pulse3DDirection = 1
 		if self.depth == nil then
 			self.depth = s_get3dDepth()
 		else
