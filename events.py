@@ -96,8 +96,14 @@ def convert_event(event_json, pack_path):
         elif event["type"] == "script_exec":
             real_path = fix_utils.match_capitalization(
                 os.path.join(pack_path, "Scripts", event["value_name"]))
-            event["value_name"] = os.path.relpath(real_path, os.path.join(
-                pack_path, "Scripts"))
+            if real_path is None:
+                log.warn("Script", os.path.join(pack_path, "Scripts",
+                                                event["value_name"]),
+                         "not found!")
+                return "u_log(\"" + event["value_name"] + " not found!\")"
+            else:
+                event["value_name"] = os.path.relpath(real_path, os.path.join(
+                    pack_path, "Scripts"))
         for prop in event:
             function = function.replace("<" + prop + ">", str(event[prop]))
         return function.replace("\n", "\\n").replace("\\", "\\\\")
