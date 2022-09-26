@@ -55,12 +55,12 @@ if prefix_was_defined == nil then
 			cw_destroy(prefix_kill_wall)
 			prefix_kill_wall = nil
 		end
-		if render_stage == 0 and prefix_next_calls > 0 then
+		if render_stage == 0 and prefix_next_calls >= 1 then
 			prefix_remainder = prefix_remainder + frametime
 			local calls = math.floor(prefix_remainder / prefix_next_time)
 			prefix_remainder = prefix_remainder - calls * prefix_next_time
 			for i=1,calls do
-				if prefix_next_calls > 0 then
+				if prefix_next_calls >= 1 then
 					prefix_next_calls = prefix_next_calls - 1
 					prefix_call_onUpdate(prefix_next_time)
 				end
@@ -70,7 +70,7 @@ if prefix_was_defined == nil then
 
 	function onInput(frametime, movement, focus)
 		if prefix_finished_timehalt then
-			while prefix_next_calls > 0 do
+			while prefix_next_calls >= 1 do
 				prefix_call_onUpdate(prefix_next_time)
 				prefix_next_calls = prefix_next_calls - 1
 			end
@@ -79,7 +79,7 @@ if prefix_was_defined == nil then
 			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
 			prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
-			prefix_next_time = frametime / prefix_next_calls
+			prefix_next_time = frametime / math.floor(prefix_next_calls)
 		end
 		if movement ~= 0 then
 			return true
