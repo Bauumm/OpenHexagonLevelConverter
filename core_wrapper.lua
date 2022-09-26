@@ -10,6 +10,9 @@ if prefix_was_defined == nil then
 	prefix_next_time = 0
 	prefix_remainder = 0
 	prefix_call_depth = 0
+	prefix_skipped_time = 0
+	prefix_skip_divider = 0
+	prefix_last_skip_divider = 1
 	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
 	u_execScript("prefix_styles.lua")
 	u_execScript("prefix_main_timeline.lua")
@@ -79,7 +82,21 @@ if prefix_was_defined == nil then
 			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
 			prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
-			prefix_next_time = frametime / math.floor(prefix_next_calls)
+			if math.floor(prefix_next_calls) == 0 then
+				if prefix_skip_divider ~= 0 then
+					prefix_skipped_time = 0
+				end
+				prefix_skipped_time = prefix_skipped_time + frametime
+				prefix_next_time = 0
+				prefix_last_skip_divider = prefix_skip_divider
+				if prefix_last_skip_divider < 1 then
+					prefix_last_skip_divider = 1
+				end
+				prefix_skip_divider = 0
+			else
+				prefix_next_time = prefix_skipped_time / prefix_last_skip_divider + frametime / math.floor(prefix_next_calls)
+				prefix_skip_divider = prefix_skip_divider + 1
+			end
 		end
 		if movement ~= 0 then
 			return true
