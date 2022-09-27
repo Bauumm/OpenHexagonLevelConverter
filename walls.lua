@@ -172,7 +172,7 @@ prefix_wall_module = {
 				if moved_to_stopped then
 					self.stopped_wall_radius = math.min(math.abs(x), math.abs(y), self.stopped_wall_radius)
 				else
-					if math.abs(x) <= math.abs(radius) and math.abs(y) <= math.abs(radius) then
+					if math.abs(x) <= math.abs(radius) * 1.1 and math.abs(y) <= math.abs(radius) * 1.1 then
 						collide = true
 					end
 				end
