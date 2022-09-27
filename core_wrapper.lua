@@ -3,7 +3,6 @@ if prefix_was_defined == nil then
 	l_setShowPlayerTrail(false)
 	l_setShadersRequired(true)
 	prefix_was_defined = true
-	prefix_time_stop = 0
 	prefix_level_time = 0
 	prefix_died = false
 	prefix_next_calls = 0
@@ -123,10 +122,6 @@ if prefix_was_defined == nil then
 	function onUpdate(frametime)
 		if not prefix_finished_timehalt then
 			prefix_finished_timehalt = true
-		end
-		if prefix_time_stop > 0 then
-			prefix_time_stop = prefix_time_stop - frametime
-			u_haltTime(frametime)
 		end
 		prefix_update_initial_timestop(frametime)
 		if prefix_must_kill and prefix_kill_wall == nil then

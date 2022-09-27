@@ -64,6 +64,6 @@ function prefix_update_events(frametime)
 		prefix_message_timeline:clear()
 		prefix_message_timeline:reset()
 	end
-
+	
 	prefix_execute_events(prefix_MAIN_EVENTS, prefix_level_time)
 end
