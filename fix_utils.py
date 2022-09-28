@@ -120,6 +120,10 @@ def _parse_line(line, ends, openings, needs_do):
     dos = _count_keyword(line, "do")
     if has_loop and dos == 0:
         needs_do = True
+    function = _count_keyword(line, "function") > 0
+    if function and "(" not in line:
+        log.warn("Adding missing brackets to line:", line)
+        line = line + "()"
     # Remove lines without loop but with do,
     #              with "elseif >",
     #              with ", )" or
