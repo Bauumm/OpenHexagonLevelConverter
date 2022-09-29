@@ -34,7 +34,10 @@ function prefix_setField(file, field, value)
 			prefix_custom_keys[field] = value
 		end
 	else
-		prefix_resolve_function(functions[2])(value)
+		local func = prefix_resolve_function(functions[2])
+		if func ~= nil then
+			func(value)
+		end
 	end
 end
 

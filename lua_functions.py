@@ -17,10 +17,7 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
     "pulse_min": ["s_getPulseMin", "s_setPulseMin"],
     "pulse_max": ["s_getPulseMax", "s_setPulseMax"],
     "pulse_increment": ["s_getPulseIncrement", "s_setPulseIncrement"],
-    "3D_depth": [
-        [CONVERTER_PREFIX + "style_module", "get_3D_depth"],
-        [CONVERTER_PREFIX + "style_module", "set_3D_depth"]
-    ],
+    "3D_depth": ["s_get3dDepth", None],
     "3D_skew": ["s_get3dSkew", "s_set3dSkew"],
     "3D_pulse_min": ["s_get3dPulseMin", "s_set3dPulseMin"],
     "3D_pulse_max": ["s_get3dPulseMax", "s_set3dPulseMax"],

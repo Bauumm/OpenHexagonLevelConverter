@@ -213,15 +213,6 @@ function prefix_get_style_module()
 		self:init()
 	end
 
-	function Style:set_3D_depth(depth)
-		self.depth = depth
-		s_set3dDepth(depth)
-	end
-
-	function Style:get_3D_depth()
-		return self.depth
-	end
-
 	function Style:set_3D_spacing(spacing)
 		s_set3dSpacing(spacing / 1.4)
 	end
