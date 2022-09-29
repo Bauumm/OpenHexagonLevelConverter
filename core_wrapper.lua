@@ -183,7 +183,9 @@ if prefix_was_defined == nil then
 			prefix_3D_depth = nil
 			prefix_limit_fps = nil
 			e_messageAddImportantSilent("", 0)
-			prefix_function_wrapper(prefix_onUnload)
+			if prefix_is_retry then
+				prefix_function_wrapper(prefix_onUnload)
+			end
 			prefix_wall_module:clear()
 			prefix_message_timeline:clear()
 			prefix_message_timeline:reset()
