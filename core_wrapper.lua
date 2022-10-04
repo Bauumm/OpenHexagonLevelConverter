@@ -149,6 +149,7 @@ if prefix_was_defined == nil then
 			prefix_pulse_module = prefix_get_pulse_module()
 			prefix_pulse_module:init()
 			prefix_function_wrapper(prefix_onLoad)
+			prefix_onLoad_done = true
 		end
 	end
 
