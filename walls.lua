@@ -144,7 +144,8 @@ prefix_wall_module = {
 	end,
 	update_walls = function(self, frametime)
 		local delete_queue = {}
-		local radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()) * 0.65
+		local real_radius = (l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse())
+		local radius = real_radius * 0.65
 		self.collide_walls = {}
 		for i=1,#self.walls do
 			local moved_to_stopped = false
@@ -169,14 +170,14 @@ prefix_wall_module = {
 			local collide = false
 			for vertex=0,3 do
 				local x, y = cw_getVertexPos(wall.cw, vertex)
+				local abs_x, abs_y = math.abs(x), math.abs(y)
 				if moved_to_stopped then
 					self.stopped_wall_radius = math.min(math.abs(x), math.abs(y), self.stopped_wall_radius)
 				else
-					if math.abs(x) <= math.abs(radius) * 1.1 and math.abs(y) <= math.abs(radius) * 1.1 then
+					if abs_x <= real_radius and abs_y <= real_radius then
 						collide = true
 					end
 				end
-				local abs_x, abs_y = math.abs(x), math.abs(y)
 				if abs_x < radius and abs_y < radius then
 					points_on_center = points_on_center + 1
 				elseif abs_x > 4500 and abs_y > 4500 then

@@ -20,6 +20,7 @@ if prefix_was_defined == nil then
 	u_execScript("prefix_walls.lua")
 	u_execScript("prefix_pulse.lua")
 	u_execScript("prefix_rotation.lua")
+	u_execScript("prefix_perfsim.lua")
 
 	-- removing this for now as it causes issues
 	--u_execScript("prefix_random.lua")
@@ -35,21 +36,6 @@ if prefix_was_defined == nil then
 		prefix_died = true
 		l_setRotationSpeed(getLevelValueFloat("rotation_speed"))
 		setLevelValueFloat("rotation_speed", 0)
-	end
-
-	function prefix_get_fps()
-		-- estimate for standardised fps
-		local walls = prefix_wall_module:size()
-		local fps
-		if walls < 1000 then
-			fps = prefix_limit_fps
-		else
-			fps = prefix_limit_fps / (walls / 1000)
-		end
-		if fps < 60 then
-			fps = 60
-		end
-		return fps
 	end
 
 	function onRenderStage(render_stage, frametime)
@@ -80,7 +66,7 @@ if prefix_was_defined == nil then
 			prefix_focus = focus
 			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
-			prefix_next_calls = prefix_next_calls + prefix_get_fps() / 240
+			prefix_next_calls = prefix_next_calls + 0.25 / prefix_perfsim:get_target()
 			if math.floor(prefix_next_calls) == 0 then
 				if prefix_skip_divider ~= 0 then
 					prefix_skipped_time = 0
