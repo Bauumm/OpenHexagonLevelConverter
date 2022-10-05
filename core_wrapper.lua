@@ -91,8 +91,9 @@ if prefix_was_defined == nil then
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function prefix_call_onUpdate(frametime)
 		if not prefix_died then
-			prefix_wall_module:check_collisions(frametime, prefix_movement, prefix_focus)
+			prefix_wall_module:move_player(frametime, prefix_movement, prefix_focus)
 			prefix_wall_module:update_walls(frametime)
+			prefix_wall_module:check_collisions(prefix_movement)
 			prefix_update_events(frametime)
 			prefix_update_timeline(frametime)
 			prefix_function_wrapper(prefix_onUpdate, frametime)
