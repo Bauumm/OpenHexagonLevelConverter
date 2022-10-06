@@ -23,6 +23,12 @@ end
 function prefix_perfsim:get_target()
 	local wc = prefix_wall_module:size()
 	local ft = ((0.785 * prefix_style_module.depth + 1) * (0.000461074 * prefix_perf_const + 0.000155698) * wc + prefix_perf_const * (0.025 * prefix_style_module.depth + 1))
+	if 60 / ft > prefix_limit_fps then
+		ft = 60 / prefix_limit_fps
+	end
+	if 60 / ft < 60 then
+		ft = 1
+	end
 	prefix_current_fps = 60 / ft
 	return ft
 end

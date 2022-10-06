@@ -28,15 +28,15 @@ function prefix_setField(file, field, value)
 	end
 	if file == "style" then
 		prefix_style[field] = value
-		if functions[2] == nil then
-			return
-		end
 	end
 	if functions == nil then
 		if file == "level" then
 			prefix_custom_keys[field] = value
 		end
 	else
+		if file == "style" and functions[2] == nil then
+			return
+		end
 		local func = prefix_resolve_function(functions[2])
 		if func ~= nil then
 			func(value)
