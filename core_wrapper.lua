@@ -172,7 +172,6 @@ if prefix_was_defined == nil then
 			prefix_is_retry = false
 			prefix_was_defined = nil
 			prefix_3D_depth = nil
-			prefix_limit_fps = nil
 			e_messageAddImportantSilent("", 0)
 			if prefix_is_retry then
 				prefix_function_wrapper(prefix_onUnload)

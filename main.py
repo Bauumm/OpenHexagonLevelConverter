@@ -91,16 +91,19 @@ def convert_level(files, args):
         events.convert_level(level_json, lua_file)
         level_properties.convert(level_json, lua_file)
         styles.convert_lua(lua_file, level_json)
-        has_limit = False
-        if args.fps_limit is not None:
-            for fps_limit in args.fps_limit:
-                if level_json["id"] == fps_limit[0]:
-                    lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" +
-                                        str(fps_limit[1]))
-                    has_limit = True
-        if not has_limit:
-            lua_file.mixin_line(CONVERTER_PREFIX + "limit_fps=" + str(
-                args.default_fps_limit))
+        has_options = False
+        if args.timing_options is not None:
+            for options in args.timing_options:
+                if level_json["id"] == options[0]:
+                    options = options[1:]
+                    has_options = True
+                    break
+        if not has_options:
+            options = args.default_timing_options
+        lua_file.mixin_line(CONVERTER_PREFIX + "timing_options={" +
+                            str(60 / float(options[1])) + "," +
+                            str(60 / float(options[2])) + "}\n" +
+                            CONVERTER_PREFIX + "perf_const=" + str(options[0]))
         if level_json.get("selectable", True):
             level_json.save("Levels/" + level)
         else:
@@ -174,9 +177,7 @@ def convert_author(files):
             if author is None:
                 author = new_author
             elif author.upper() != new_author.upper():
-                if author.upper() in new_author.upper():
-                    author = new_author
-                elif new_author.upper() not in author.upper():
+                if new_author.upper() not in author.upper():
                     author += " & " + new_author
     return author
 
@@ -253,11 +254,16 @@ if __name__ == "__main__":
                         converted")
     parser.add_argument("destination_folder", type=str, help="the path the \
                         converted pack will be created at")
-    parser.add_argument("--fps-limit", nargs=2, metavar=("level", "fps_limit"),
-                        help="set fps for a level that may depend on it",
-                        action="append")
-    parser.add_argument("--default-fps-limit", type=int, default=960,
-                        help="set the default fps to replicate")
+    parser.add_argument("--timing-options", nargs=4, metavar=(
+                            "level", "performance_level", "fps_limit_lower",
+                            "fps_limit_upper"
+                        ), help="set timing options for a level that may \
+                        depend on it", action="append")
+    parser.add_argument("--default-timing-options", nargs=3, metavar=(
+                            "performance_level", "fps_limit_lower",
+                            "fps_limit_upper"
+                        ), help="set the default timing options",
+                        default=[0.03, 240, 960])
     args = parser.parse_args()
     if not os.path.exists(args.source_pack):
         log.error("Source pack doesn't exist!")
