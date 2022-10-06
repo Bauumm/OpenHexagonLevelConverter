@@ -205,7 +205,8 @@ function prefix_get_style_module()
 			self.pulse3DDirection = 1
 		end
 		l_set3dPulse(self.pulse3D)
-		prefix_perfsim:update_3D()
+		-- Unused for now, as it seems to cause more issues than it's good
+		--prefix_perfsim:update_3D()
 	end
 
 	function Style:set_style(id)
