@@ -203,20 +203,34 @@ prefix_wall_module = {
 		for _, i in pairs(delete_queue) do
 			table.remove(self.walls, i)
 		end
-		if self.stopped_wall_radius < radius then
+		if self.stopped_wall_radius <= math.abs(self.radius) then
 			self.stopped_wall_radius = 1 / 0
 			local delete_queue = {}
 			for i=1,#self.stopped_walls do
 				local wall = self.stopped_walls[i]
 				local points_on_center = 0
-				for vertex=0,3 do
-					local x, y = cw_getVertexPos(wall.cw, vertex)
-					self.stopped_wall_radius = math.min(math.abs(x), math.abs(y), self.stopped_wall_radius)
-					if math.abs(x) < radius and math.abs(y) < radius then
+				local points_out_of_bg = 0
+				local wall_verts = {cw_getVertexPos4(wall.cw)}
+				for i=1,8,2 do
+					local x, y = wall_verts[i], wall_verts[i + 1]
+					local abs_x, abs_y = math.abs(x), math.abs(y)
+					if abs_x < radius and abs_y < radius then
 						points_on_center = points_on_center + 1
+					elseif abs_x > 4500 and abs_y > 4500 then
+						points_out_of_bg = points_out_of_bg + 1
 					end
+					self.stopped_wall_radius = math.min(abs_x, abs_y, self.stopped_wall_radius)
 				end
-				if points_on_center > 3 then
+				if self._is_overlapping(wall_verts, self.new_player_pos) then
+					self.collides = true
+				end
+				if self._is_overlapping(wall_verts, self.last_player_pos) then
+					self.last_pos_now_kill = true
+				end
+				if points_on_center > 3 or points_out_of_bg > 3 then
+					if points_out_of_bg > 3 then
+						self.imaginary_walls = self.imaginary_walls + 1
+					end
 					cw_destroy(wall.cw)
 					table.insert(delete_queue, 1, i)
 				end
