@@ -154,6 +154,8 @@ if prefix_was_defined == nil then
 			prefix_pulse_module:init()
 			prefix_function_wrapper(prefix_onLoad)
 			prefix_onLoad_done = true
+		else
+			l_setRotationSpeed(prefix_custom_keys.rotation_speed)
 		end
 	end
 
