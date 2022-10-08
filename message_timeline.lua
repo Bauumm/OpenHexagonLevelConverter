@@ -6,6 +6,7 @@ function messageAdd(message, duration)
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
 		if not prefix_is_retry then
 			prefix_shown_message = message
+			a_playSound("beep.ogg")
 		end
 	end))
 	prefix_message_timeline:append(prefix_t_wait:new(prefix_message_timeline, duration))
@@ -17,6 +18,7 @@ end
 function messageImportantAdd(message, duration)
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
 		prefix_shown_message = message
+		a_playSound("beep.ogg")
 	end))
 	prefix_message_timeline:append(prefix_t_wait:new(prefix_message_timeline, duration))
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
@@ -25,16 +27,19 @@ function messageImportantAdd(message, duration)
 end
 
 function prefix_set_message(str)
-	e_messageAddImportant(str, 1)
+	e_messageAddImportantSilent(str, 1)
 	ct_eval(prefix_message_clear_timeline, "e_clearMessages()")
 end
 
 function prefix_update_message_timeline(frametime)
 	prefix_message_timeline:update(frametime)
-	if prefix_shown_message == nil then
-		e_messageAddImportantSilent("", 0)
-	else
-		prefix_set_message(prefix_shown_message)
+	if prefix_shown_message ~= prefix_last_shown_message then
+		prefix_last_shown_message = prefix_shown_message
+		if prefix_shown_message == nil then
+			e_messageAddImportantSilent("", 0)
+		else
+			prefix_set_message(prefix_shown_message)
+		end
 	end
 	if prefix_message_timeline.finished then
 		prefix_message_timeline:clear()
