@@ -21,9 +21,7 @@ if prefix_was_defined == nil then
 	u_execScript("prefix_pulse.lua")
 	u_execScript("prefix_rotation.lua")
 	u_execScript("prefix_perfsim.lua")
-
-	-- removing this for now as it causes issues
-	--u_execScript("prefix_random.lua")
+	u_execScript("prefix_random.lua")
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -131,7 +129,6 @@ if prefix_was_defined == nil then
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
-			--e_eval("prefix_seed = " .. prefix_seed)
 			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
 		end
 	end
@@ -184,6 +181,7 @@ if prefix_was_defined == nil then
 			prefix_message_timeline:reset()
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.styleId)
+			io.open = prefix_io_open
 			u_execScript(level_json.luaFile)
 			a_playSound("go.ogg")
 			a_setMusic(level_json.musicId)
