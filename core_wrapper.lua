@@ -100,7 +100,10 @@ if prefix_was_defined == nil then
 			prefix_wall_module:move_player(frametime, prefix_movement, prefix_focus)
 			prefix_wall_module:update_walls(frametime)
 			prefix_wall_module:check_collisions(prefix_movement)
-			prefix_update_events(frametime)
+			if prefix_update_events(frametime) then
+				-- level changed
+				return
+			end
 			prefix_update_timeline(frametime)
 			prefix_function_wrapper(prefix_onUpdate, frametime)
 			prefix_pulse_module:update_beatpulse(frametime)
@@ -183,6 +186,7 @@ if prefix_was_defined == nil then
 			prefix_wall_module:clear()
 			prefix_message_timeline:clear()
 			prefix_message_timeline:reset()
+			prefix_shown_message = nil
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.styleId)
 			io.open = prefix_io_open

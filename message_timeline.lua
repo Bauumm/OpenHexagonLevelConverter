@@ -1,37 +1,43 @@
 prefix_message_clear_timeline = ct_create()
 prefix_message_timeline = prefix_timeline:new()
-prefix_message_remove_time = nil
+prefix_shown_message = nil
 
 function messageAdd(message, duration)
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
-		setMessage(message)
+		if not prefix_is_retry then
+			prefix_shown_message = message
+		end
 	end))
 	prefix_message_timeline:append(prefix_t_wait:new(prefix_message_timeline, duration))
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
-		e_messageAddImportantSilent("", 0)
+		prefix_shown_message = nil
 	end))
 end
 
 function messageImportantAdd(message, duration)
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
-		setMessageImportant(message)
+		prefix_shown_message = message
 	end))
 	prefix_message_timeline:append(prefix_t_wait:new(prefix_message_timeline, duration))
 	prefix_message_timeline:append(prefix_t_do:new(prefix_message_timeline, function()
-		e_messageAddImportantSilent("", 0)
+		prefix_shown_message = nil
 	end))
 end
 
-function setMessage(str)
-	if not prefix_is_retry then
-		setMessageImportant(str)
-		return
-	end
-	e_messageAdd(str, 1)
+function prefix_set_message(str)
+	e_messageAddImportant(str, 1)
 	ct_eval(prefix_message_clear_timeline, "e_clearMessages()")
 end
 
-function setMessageImportant(str)
-	e_messageAddImportant(str, 1)
-	ct_eval(prefix_message_clear_timeline, "e_clearMessages()")
+function prefix_update_message_timeline(frametime)
+	prefix_message_timeline:update(frametime)
+	if prefix_shown_message == nil then
+		e_messageAddImportantSilent("", 0)
+	else
+		prefix_set_message(prefix_shown_message)
+	end
+	if prefix_message_timeline.finished then
+		prefix_message_timeline:clear()
+		prefix_message_timeline:reset()
+	end
 end

@@ -45,6 +45,10 @@ function prefix_update_events(frametime)
 	local del_queue = {}
 	for i=1, #prefix_executingEvents do
 		prefix_update_event(prefix_executingEvents[i], frametime)
+		if #prefix_executingEvents == 0 then
+			-- level changed
+			return true
+		end
 		if prefix_executingEvents[i].done then
 			table.insert(del_queue, 1, i)
 		end
@@ -59,11 +63,7 @@ function prefix_update_events(frametime)
 		end
 	end
 
-	prefix_message_timeline:update(frametime)
-	if prefix_message_timeline.finished then
-		prefix_message_timeline:clear()
-		prefix_message_timeline:reset()
-	end
+	prefix_update_message_timeline(frametime)
 	
 	prefix_execute_events(prefix_MAIN_EVENTS, prefix_level_time)
 end
