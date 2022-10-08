@@ -81,6 +81,10 @@ if prefix_was_defined == nil then
 				prefix_next_time = prefix_skipped_time / prefix_last_skip_divider + frametime / math.floor(prefix_next_calls)
 				prefix_skip_divider = prefix_skip_divider + 1
 			end
+			if prefix_next_calls >= 1 then
+				prefix_call_onUpdate(prefix_next_time)
+				prefix_next_calls = prefix_next_calls - 1
+			end
 		end
 		if movement ~= 0 then
 			return true
