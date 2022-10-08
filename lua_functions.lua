@@ -178,7 +178,7 @@ prefix_config_keys = {
 	"zoom_factor"
 }
 prefix_io_open = io.open
-io.open = function(path)
+io.open = function(path, mode)
 	if path == "config.json" then
 		local config_file = prefix_io_open("config.json")
 		local config = JSON:decode(config_file:read("*a"))
@@ -199,16 +199,132 @@ io.open = function(path)
 		new_file:write(JSON:encode_pretty(new_config))
 		return new_file
 	else
-		return prefix_io_open(path)
+		return prefix_io_open(path, mode)
 	end
 end
 
 
-prefix_key_mapping = {
-	[38] = "prefix_focus",
-	[71] = "prefix_movement == -1",
-	[72] = "prefix_movement == 1"
+prefix_KEYS = {
+	Unknown = -1,
+	A = 0,
+	B = 1,
+        C = 2,
+        D = 3,
+        E = 4,
+        F = 5,
+        G = 6,
+        H = 7,
+        I = 8,
+        J = 9,
+        K = 10,
+        L = 11,
+        M = 12,
+        N = 13,
+        O = 14,
+        P = 15,
+        Q = 16,
+        R = 17,
+        S = 18,
+        T = 19,
+        U = 20,
+        V = 21,
+        W = 22,
+        X = 23,
+        Y = 24,
+        Z = 25,
+        Num0 = 26,
+        Num1 = 27,
+        Num2 = 28,
+        Num3 = 29,
+        Num4 = 30,
+        Num5 = 31,
+        Num6 = 32,
+        Num7 = 33,
+        Num8 = 34,
+        Num9 = 35,
+        Escape = 36,
+        LControl = 37,
+        LShift = 38,
+        LAlt = 39,
+        LSystem = 40,
+        RControl = 41,
+        RShift = 42,
+        RAlt = 43,
+        RSystem = 44,
+        Menu = 45,
+        LBracket = 46,
+        RBracket = 47,
+        Semicolon = 48,
+        Comma = 49,
+        Period = 50,
+        Quote = 51,
+        Slash = 52,
+        Backslash = 53,
+        Tilde = 54,
+        Equal = 55,
+        Hyphen = 56,
+        Space = 57,
+        Enter = 58,
+        Backspace = 59,
+        Tab = 60,
+        PageUp = 61,
+        PageDown = 62,
+        End = 63,
+        Home = 64,
+        Insert = 65,
+        Delete = 66,
+        Add = 67,
+        Subtract = 68,
+        Multiply = 69,
+        Divide = 70,
+        Left = 71,
+        Right = 72,
+        Up = 73,
+        Down = 74,
+        Numpad0 = 75,
+        Numpad1 = 76,
+        Numpad2 = 77,
+        Numpad3 = 78,
+        Numpad4 = 79,
+        Numpad5 = 80,
+        Numpad6 = 81,
+        Numpad7 = 82,
+        Numpad8 = 83,
+        Numpad9 = 84,
+        F1 = 85,
+        F2 = 86,
+        F3 = 87,
+        F4 = 88,
+        F5 = 89,
+        F6 = 90,
+        F7 = 91,
+        F8 = 92,
+        F9 = 93,
+        F10 = 94,
+        F11 = 95,
+        F12 = 96,
+        F13 = 97,
+        F14 = 98,
+        F15 = 99,
+        Pause = 100
 }
+prefix_key_mapping = {
+	[prefix_KEYS.LShift] = "prefix_focus",
+	[prefix_KEYS.Left] = "prefix_movement == -1",
+	[prefix_KEYS.Right] = "prefix_movement == 1"
+}
+
+-- use onInput swap to find key if possible
+local config_file = prefix_io_open("config.json")
+local config = JSON:decode(config_file:read("*a"))
+config_file:close()
+for _, key in pairs(config.t_swap) do
+	local kId = key[1]:sub(2)
+	if prefix_KEYS[kId] ~= nil then
+		prefix_key_mapping[prefix_KEYS[kId]] = "prefix_swap"
+	end
+end
+
 function isKeyPressed(key)
 	if prefix_key_mapping[key] == nil then
 		return u_isKeyPressed(key)

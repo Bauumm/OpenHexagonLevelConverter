@@ -56,7 +56,7 @@ if prefix_was_defined == nil then
 		end
 	end
 
-	function onInput(frametime, movement, focus)
+	function onInput(frametime, movement, focus, swap)
 		if prefix_finished_timehalt then
 			while prefix_next_calls >= 1 do
 				prefix_call_onUpdate(prefix_next_time)
@@ -64,6 +64,7 @@ if prefix_was_defined == nil then
 			end
 			prefix_movement = movement
 			prefix_focus = focus
+			prefix_swap = swap
 			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
 			prefix_next_calls = prefix_next_calls + 0.25 / prefix_perfsim:get_target()
