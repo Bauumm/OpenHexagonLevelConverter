@@ -177,32 +177,84 @@ prefix_config_keys = {
 	"windowed_width",
 	"zoom_factor"
 }
-prefix_io_open = io.open
-io.open = function(path, mode)
-	if path == "config.json" then
-		local config_file = prefix_io_open("config.json")
-		local config = JSON:decode(config_file:read("*a"))
-		config_file:close()
-		local new_config = {}
-		for _, key in pairs(prefix_config_keys) do
-			if config[key] ~= nil then
-				new_config[key] = config[key]
+if not prefix_init_fs then
+	prefix_init_fs = true
+	prefix_original_io = io
+	io = setmetatable({}, {__index = function(t, k)
+		return function(f, ...)
+			if f ~= nil and f[k] ~= nil then
+				return f[k](f, ...)
+			end
+			if type(f) == "table" then
+				return prefix_original_io[k](f.file, ...)
+			else
+				return prefix_original_io[k](f, ...)
 			end
 		end
+	end})
+	prefix_fake_file = {__index = function(t, k)
+		if type(t.file[k]) == "function" then
+			return function(self, ...)
+				if type(self) == "table" then
+					return t.file[k](self.file, ...)
+				else
+					return t.file[k](self, ...)
+				end
+			end
+		else
+			return t.file[k]
+		end
+	end}
+	prefix_virtual_filesystem = {}
+	prefix_io_open = prefix_original_io.open
+	io.open = function(path, mode)
+		mode = mode or "r"
+		mode = mode:sub(0, 1)
+		if mode == "w" or mode == "a" then
+			if mode == "a" and prefix_virtual_filesystem[path] ~= nil then
+				prefix_virtual_filesystem[path]:seek("end", 0)
+				return prefix_virtual_filesystem[path]
+			end
+			local file = setmetatable({
+				file = io.tmpfile(),
+				close = function(self)
+					self.file:seek("set", 0)
+					return true
+				end}, prefix_fake_file)
+			prefix_virtual_filesystem[path] = file
+			return file
+		elseif mode == "r" then
+			if path == "config.json" then
+				local config_file = prefix_io_open("config.json")
+				local config = JSON:decode(config_file:read("*a"))
+				config_file:close()
+				local new_config = {}
+				for _, key in pairs(prefix_config_keys) do
+					if config[key] ~= nil then
+						new_config[key] = config[key]
+					end
+				end
 
-		-- Set default controls, so onInput can be used to replace isKeyPressed whenever possible
-		new_config.t_rotate_ccw = {{"kLeft"}}
-		new_config.t_rotate_cw = {{"kRight"}}
-		new_config.t_focus = {{"kShift"}}
+				-- Set default controls, so onInput can be used to replace isKeyPressed whenever possible
+				new_config.t_rotate_ccw = {{"kLeft"}}
+				new_config.t_rotate_cw = {{"kRight"}}
+				new_config.t_focus = {{"kShift"}}
 
-		local new_file = io.tmpfile()
-		new_file:write(JSON:encode_pretty(new_config))
-		return new_file
-	else
-		return prefix_io_open(path, mode)
+				local new_file = io.tmpfile()
+				new_file:write(JSON:encode_pretty(new_config))
+				return new_file
+			end
+			if prefix_virtual_filesystem[path] == nil then
+				return prefix_io_open(path, mode)
+			else
+				prefix_virtual_filesystem[path]:seek("set", 0)
+				return prefix_virtual_filesystem[path]
+			end
+		else
+			return prefix_io_open(path, mode)
+		end
 	end
 end
-
 
 prefix_KEYS = {
 	Unknown = -1,

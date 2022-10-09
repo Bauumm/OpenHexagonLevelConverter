@@ -193,7 +193,6 @@ if prefix_was_defined == nil then
 			prefix_shown_message = nil
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.styleId)
-			io.open = prefix_io_open
 			u_execScript(level_json.luaFile)
 			a_playSound("go.ogg")
 			a_setMusic(level_json.musicId)
