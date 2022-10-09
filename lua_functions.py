@@ -91,7 +91,7 @@ def convert_level_lua(level_lua):
     convert_lua(level_lua)
 
 
-def save(sounds, level_jsons):
+def save(sounds, level_jsons, quiet):
     lua_functions.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + sounds.to_table()
                              + "\n" + CONVERTER_PREFIX +
                              "LEVEL_PROPERTY_MAPPING=" +
@@ -111,6 +111,7 @@ def save(sounds, level_jsons):
         level_json["luaFile"] = level_json["luaFile"][8:]
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"
+    code += CONVERTER_PREFIX + "quiet=" + str(quiet).lower() + "\n"
     core_wrapper.mixin_line(code)
     core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")
     shutil.copyfile(os.path.join(os.path.dirname(filepath), "JSON.lua"),

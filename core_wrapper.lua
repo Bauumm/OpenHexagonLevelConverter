@@ -26,7 +26,11 @@ if prefix_was_defined == nil then
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
 		if func ~= nil then
-			xpcall(func, print, arg)
+			if prefix_quiet then
+				pcall(func, arg)
+			else
+				xpcall(func, print, arg)
+			end
 		end
 	end
 

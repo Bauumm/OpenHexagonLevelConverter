@@ -210,7 +210,8 @@ def convert_pack(args):
     else:
         sounds = convert_sound(args.source_pack)
         level_luas = convert_level(files, args)
-        lua_functions.save(sounds, all_dict_values(files["Levels"]))
+        lua_functions.save(sounds, all_dict_values(files["Levels"]),
+                           args.quiet)
         convert_event(files)
         convert_lua(files, level_luas, args.source_pack)
         convert_font(args.source_pack)
@@ -264,6 +265,9 @@ if __name__ == "__main__":
                             "fps_limit_upper"
                         ), help="set the default timing options",
                         default=[0.03, 240, 960])
+    parser.add_argument("--quiet", action="store_true", help="with this \
+                        option converted packs will not print out error \
+                        messages from the original lua")
     args = parser.parse_args()
     if not os.path.exists(args.source_pack):
         log.error("Source pack doesn't exist!")
