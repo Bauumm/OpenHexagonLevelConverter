@@ -239,5 +239,11 @@ prefix_wall_module = {
 				table.remove(self.stopped_walls, i)
 			end
 		end
+
+		-- delete walls that were deleted for performance optimization when radius exceeds BGTileRadius
+		-- may cause issues if far distant walls are not supposed to be deleted
+		if self.radius > 4500 then
+			self.imaginary_walls = 0
+		end
 	end
 }
