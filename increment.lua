@@ -24,18 +24,21 @@ function prefix_update_increment(frametime)
 	local incTime = prefix_level_time - prefix_last_increment
 	if incTime >= l_getIncTime() then
 		prefix_last_increment = prefix_level_time
-		
-		a_playSound("levelUp.ogg")
-		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") + getLevelValueFloat("rotation_increment") * prefix_sign(getLevelValueFloat("rotation_speed")))
-		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * -1)
-		if prefix_fast_spin < 0 and math.abs(getLevelValueFloat("rotation_speed")) > getLevelValueFloat("rotation_speed_max") then
-			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed_max") * prefix_sign(getLevelValueFloat("rotation_speed")))
-		end
-		prefix_fast_spin = l_getFastSpin()
-		prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_do:new(prefix_main_timeline, function()
-			prefix_side_change(math.random(l_getSidesMin(), l_getSidesMax()))
-		end))
+		prefix_increment_difficulty()
 	end
+end
+
+function prefix_increment_difficulty()
+	a_playSound("levelUp.ogg")
+	setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") + getLevelValueFloat("rotation_increment") * prefix_sign(getLevelValueFloat("rotation_speed")))
+	setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * -1)
+	if prefix_fast_spin < 0 and math.abs(getLevelValueFloat("rotation_speed")) > getLevelValueFloat("rotation_speed_max") then
+		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed_max") * prefix_sign(getLevelValueFloat("rotation_speed")))
+	end
+	prefix_fast_spin = l_getFastSpin()
+	prefix_main_timeline:insert(prefix_main_timeline:get_current_index() + 1, prefix_t_do:new(prefix_main_timeline, function()
+		prefix_side_change(math.random(l_getSidesMin(), l_getSidesMax()))
+	end))
 end
 
 function prefix_side_change(sides)
