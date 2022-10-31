@@ -54,7 +54,10 @@ function prefix_side_change(sides)
 	onIncrement()
 	prefix_is_incrementing = false
 	l_setSpeedMult(l_getSpeedMult() + l_getSpeedInc())
-	l_setDelayMult(l_getDelayMult() + l_getDelayInc())
+
+	-- This is supposed to be delayMult but in 1.92 for some reason it sets delayInc
+	l_setDelayInc(l_getDelayMult() + l_getDelayInc())
+
 	if prefix_enable_rnd_side_changes then
 		a_playSound("beep.ogg")
 		l_setSides(sides)
