@@ -1,5 +1,4 @@
 prefix_last_increment = 0
-prefix_is_incrementing = false
 prefix_fast_spin = 0
 prefix_enable_rnd_side_changes = true
 prefix_increment_enabled = true
@@ -25,7 +24,6 @@ function prefix_update_increment(frametime)
 	local incTime = prefix_level_time - prefix_last_increment
 	if incTime >= l_getIncTime() then
 		prefix_last_increment = prefix_level_time
-		prefix_is_incrementing = true
 		
 		a_playSound("levelUp.ogg")
 		setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") + getLevelValueFloat("rotation_increment") * prefix_sign(getLevelValueFloat("rotation_speed")))
@@ -52,7 +50,6 @@ function prefix_side_change(sides)
 		return
 	end
 	onIncrement()
-	prefix_is_incrementing = false
 	l_setSpeedMult(l_getSpeedMult() + l_getSpeedInc())
 
 	-- This is supposed to be delayMult but in 1.92 for some reason it sets delayInc
