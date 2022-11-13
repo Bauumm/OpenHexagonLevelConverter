@@ -40,7 +40,7 @@ def get_files(folder):
     return structure
 
 
-def get_lua_file(files, level_json, lua_path):
+def get_lua_file(files, level_json, lua_path, args):
     try:
         lua_file = dpath.util.get(files, lua_path)
     except KeyError:
@@ -64,7 +64,7 @@ def convert_level(files, args):
     for level in levels:
         level_json = levels[level]
         lua_path = os.path.join("Scripts", level_json.get("lua_file"))
-        lua_file = get_lua_file(files, level_json, lua_path)
+        lua_file = get_lua_file(files, level_json, lua_path, args)
         if lua_file.saved and level_json.saved:
             continue
         if lua_file.saved and not level_json.saved:
@@ -154,34 +154,6 @@ def convert_lua(files, level_luas, path):
                 script.save(os.path.relpath(script.path, path))
 
 
-def convert_author(files):
-    last_author = None
-    for level in files.get("Levels").values():
-        author = level.get("author")
-        if last_author is not None:
-            new_author = ""
-            for i in range(len(last_author)):
-                if i >= len(author):
-                    break
-                if author[i] != last_author[i]:
-                    continue
-                new_author += author[i]
-            author = new_author
-        last_author = author
-    if author != "":
-        return author
-    author = None
-    for level in files.get("Levels").values():
-        new_authors = level.get("author").split(" & ")
-        for new_author in new_authors:
-            if author is None:
-                author = new_author
-            elif author.upper() != new_author.upper():
-                if new_author.upper() not in author.upper():
-                    author += " & " + new_author
-    return author
-
-
 def convert_custom_lua(name):
     lua_file = LuaFile(os.path.join(os.path.dirname(filepath), name))
     lua_file.replace("prefix_", CONVERTER_PREFIX)
@@ -232,10 +204,7 @@ def convert_pack(args):
         log.info("Copying Music and pack.json...")
         convert_music(all_dict_values(files.get("Music", {})),
                       args.source_pack)
-        author = convert_author(files)
-        if author is not None:
-            log.info("Guessing author:", author)
-            files["pack.json"]["author"] = author
+        files["pack.json"]["author"] = "1.92 -> 2.1.6 converter"
         files["pack.json"].save(os.path.relpath(files["pack.json"].path,
                                                 args.source_pack))
         for file in os.listdir(os.path.join(args.source_pack, "Music")):
