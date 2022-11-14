@@ -2,7 +2,6 @@ from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 from base_file import BaseFile
 from lua_file import LuaFile
-import shutil
 import os
 
 
@@ -13,7 +12,6 @@ COLOR_OBJECTS = [
     "wall_color"
 ]
 
-styles_lua = LuaFile(os.path.join(os.path.dirname(__file__), "styles.lua"))
 filepath = os.path.realpath(__file__)
 colors3D = ExtendedDict()
 
@@ -178,20 +176,3 @@ def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" +
                          level_json["styleId"] + "\"", "onInit")
     level_json["styleId"] += "-menu"
-    if not os.path.exists("Shaders/" + CONVERTER_PREFIX + "wall3D.frag"):
-        os.makedirs("Shaders", exist_ok=True)
-        # 3D alpha falloff overflow reimplementation using shaders
-        shutil.copyfile(os.path.join(os.path.dirname(filepath), "wall3D.frag"),
-                        "Shaders/wall3D.frag")
-        # more efficient way to set colors
-        shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
-                        "Shaders/main.frag")
-        shutil.copyfile(os.path.join(os.path.dirname(filepath), "solid.frag"),
-                        "Shaders/cap.frag")
-        shutil.copyfile(os.path.join(os.path.dirname(filepath), "text.frag"),
-                        "Shaders/text.frag")
-
-
-def save():
-    styles_lua.replace("prefix_", CONVERTER_PREFIX)
-    styles_lua.save("Scripts/" + CONVERTER_PREFIX + "styles.lua")

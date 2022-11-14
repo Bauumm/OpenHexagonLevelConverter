@@ -3,10 +3,10 @@ function prefix_get_style_module()
 	s_setBGTileRadius(4500)
 
 	local Style = {
-		shdr_3D = shdr_getShaderId("wall3D.frag"),
-		shdr_main = shdr_getShaderId("main.frag"),
-		shdr_cap = shdr_getShaderId("cap.frag"),
-		shdr_text = shdr_getShaderId("text.frag"),
+		shdr_3D = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "wall3D.frag"),
+		shdr_main = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "main.frag"),
+		shdr_cap = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "cap.frag"),
+		shdr_text = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "text.frag"),
 		pulse3D = 1,
 		pulse3DDirection = 1
 	}
@@ -96,7 +96,7 @@ function prefix_get_style_module()
 	function Style:init()
 		shdr_resetAllActiveFragmentShaders()
 		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
-		u_execScript("prefix_Styles/" .. prefix_style_id .. ".lua")
+		prefix_data_module:loadStyle(prefix_style_id)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
 		self.swap_time = 0

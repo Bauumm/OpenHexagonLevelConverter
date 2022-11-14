@@ -2,12 +2,12 @@ prefix_executingEvents = {}
 prefix_queuedEvents = {}
 
 function execEvent(event_id)
-	u_execScript("prefix_Events/" .. event_id .. ".lua")
+	prefix_data_module:loadEvent(event_id)
 	table.insert(prefix_executingEvents, _G["prefix_" .. event_id .. "_EVENTS"])
 end
 
 function enqueueEvent(event_id)
-	u_execScript("prefix_Events/" .. event_id .. ".lua")
+	prefix_data_module:loadEvent(event_id)
 	table.insert(prefix_queuedEvents, _G["prefix_" .. event_id .. "_EVENTS"])
 end
 

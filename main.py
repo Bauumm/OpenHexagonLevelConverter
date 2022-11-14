@@ -129,19 +129,12 @@ def convert_sound(path):
     return dict_sounds
 
 
-def convert_font(path):
-    os.makedirs("Fonts", exist_ok=True)
-    shutil.copyfile(os.path.join(os.path.dirname(filepath), "imagine.ttf"),
-                    "Fonts/imagine.ttf")
-
-
 def convert_event(files):
     event_files = files.get("Events")
     if event_files is not None:
         log.info("Converting Events...")
         for event in event_files:
             events.convert_external(event_files[event])
-    events.save()
 
 
 def convert_lua(files, level_luas, path):
@@ -182,29 +175,28 @@ def convert_pack(args):
     else:
         sounds = convert_sound(args.source_pack)
         level_luas = convert_level(files, args)
-        lua_functions.save(sounds, all_dict_values(files["Levels"]),
+        packdata = LuaFile(os.path.join(os.path.dirname(filepath),
+                                        "packdata.lua"))
+        packdata.replace("prefix_", CONVERTER_PREFIX)
+        lua_functions.save(packdata, sounds, all_dict_values(files["Levels"]),
                            args.quiet)
         convert_event(files)
         convert_lua(files, level_luas, args.source_pack)
-        convert_font(args.source_pack)
-        convert_custom_lua("timeline.lua")
-        convert_custom_lua("main_timeline.lua")
-        convert_custom_lua("increment.lua")
-        convert_custom_lua("message_timeline.lua")
-        convert_custom_lua("walls.lua")
-        convert_custom_lua("pulse.lua")
-        convert_custom_lua("rotation.lua")
-        convert_custom_lua("random.lua")
-        convert_custom_lua("perfsim.lua")
         log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)
             file.save(os.path.relpath(file.path, args.source_pack))
-        styles.save()
         log.info("Copying Music and pack.json...")
         convert_music(all_dict_values(files.get("Music", {})),
                       args.source_pack)
-        files["pack.json"]["author"] = "1.92 -> 2.1.6 converter"
+        files["pack.json"]["disambiguator"] = "1.92->2.1.6-converter"
+        files["pack.json"]["author"] = "1.92->2.1.6-converter"
+        files["pack.json"]["dependencies"] = [{
+            "disambiguator": "1.92->2.1.6-converter",
+            "name": "lib_192",
+            "author": "Baum",
+            "min_version": 1
+        }]
         files["pack.json"].save(os.path.relpath(files["pack.json"].path,
                                                 args.source_pack))
         for file in os.listdir(os.path.join(args.source_pack, "Music")):
@@ -214,34 +206,63 @@ def convert_pack(args):
         log.info("Done")
 
 
+def convert_lib(args):
+    lib_path = os.path.join(os.path.dirname(filepath), "lib_192")
+    shutil.copytree(lib_path, args.destination_folder)
+
+    def convert_dir(path):
+        for filename in os.listdir(path):
+            filename = os.path.join(path, filename)
+            if os.path.isdir(filename):
+                convert_dir(filename)
+            else:
+                with open(filename, "r") as lua_file:
+                    content = lua_file.read()
+                with open(filename, "w") as lua_file:
+                    lua_file.write(content.replace("prefix_", CONVERTER_PREFIX)
+                                   )
+
+    convert_dir(os.path.join(args.destination_folder, "Scripts"))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert packs for Open Hexagon 1.92 to be compatible \
         with the steam version.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("source_pack", type=str, help="the 1.92 pack to be \
-                        converted")
-    parser.add_argument("destination_folder", type=str, help="the path the \
-                        converted pack will be created at")
-    parser.add_argument("--timing-options", nargs=4, metavar=(
-                            "level", "performance_level", "fps_limit_lower",
-                            "fps_limit_upper"
-                        ), help="set timing options for a level that may \
-                        depend on it", action="append")
-    parser.add_argument("--default-timing-options", nargs=3, metavar=(
-                            "performance_level", "fps_limit_lower",
-                            "fps_limit_upper"
-                        ), help="set the default timing options",
-                        default=[0.03, 240, 960])
-    parser.add_argument("--quiet", action="store_true", help="with this \
-                        option converted packs will not print out error \
-                        messages from the original lua")
+    sub_parsers = parser.add_subparsers(dest="command")
+    pack_parser = sub_parsers.add_parser("convert-pack", help="converts a pack"
+                                         )
+    pack_parser.add_argument("source_pack", type=str, help="the 1.92 pack to \
+                             be converted")
+    pack_parser.add_argument("destination_folder", type=str, help="the path \
+                             the converted pack will be created at")
+    pack_parser.add_argument("--timing-options", nargs=4, metavar=(
+                                "level", "performance_level",
+                                "fps_limit_lower", "fps_limit_upper"
+                            ), help="set timing options for a level that may \
+                                    depend on it", action="append")
+    pack_parser.add_argument("--default-timing-options", nargs=3, metavar=(
+                                "performance_level", "fps_limit_lower",
+                                "fps_limit_upper"
+                            ), help="set the default timing options",
+                            default=[0.03, 240, 960])
+    pack_parser.add_argument("--quiet", action="store_true", help="with this \
+                             option converted packs will not print out error \
+                             messages from the original lua")
+    lib_parser = sub_parsers.add_parser("convert-lib", help="converts the \
+                                        lib_192 to use the correct prefix")
+    lib_parser.add_argument("destination_folder", type=str, help="the path \
+                            the converted pack will be created at")
     args = parser.parse_args()
-    if not os.path.exists(args.source_pack):
-        log.error("Source pack doesn't exist!")
-        exit(1)
     if os.path.exists(args.destination_folder):
         log.error("Destination path exists!")
         exit(1)
-    convert_pack(args)
+    if args.command == "convert-pack":
+        if not os.path.exists(args.source_pack):
+            log.error("Source pack doesn't exist!")
+            exit(1)
+        convert_pack(args)
+    elif args.command == "convert-lib":
+        convert_lib(args)

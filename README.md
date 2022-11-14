@@ -6,7 +6,8 @@ A tool to automatically port Open Hexagon 1.92 Levels to the new Open Hexagon
 # Usage
 You may need to set `LD_LIBRARY_PATH` to `/usr/local/lib` for it to find SSVUtilsJson
 ```
-usage: main.py [-h] [--fps-limit level fps_limit] source_pack destination_folder
+usage: main.py [-h] [--timing-options level performance_level fps_limit_lower fps_limit_upper] [--default-timing-options performance_level fps_limit_lower fps_limit_upper] [--quiet]
+               source_pack destination_folder
 
 Convert packs for Open Hexagon 1.92 to be compatible with the steam version.
 
@@ -16,8 +17,11 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  --fps-limit level fps_limit
-                        limit fps for a level that may depend on it
+  --timing-options level performance_level fps_limit_lower fps_limit_upper
+                        set timing options for a level that may depend on it (default: None)
+  --default-timing-options performance_level fps_limit_lower fps_limit_upper
+                        set the default timing options (default: [0.03, 240, 960])
+  --quiet               with this option converted packs will not print out error messages from the original lua (default: False)
 ```
 # Installation
 ## From source

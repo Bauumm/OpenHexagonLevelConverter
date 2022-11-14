@@ -1,9 +1,7 @@
 from level_properties import LEVEL_PROPERTY_MAPPING
 from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
-from lua_file import LuaFile
 import fix_utils
-import shutil
 import os
 
 
@@ -46,11 +44,6 @@ CORE_FUNCTIONS = [
     "onUpdate",
     "onStep"
 ]
-filepath = __file__
-lua_functions = LuaFile(os.path.join(os.path.dirname(__file__),
-                                     "lua_functions.lua"))
-core_wrapper = LuaFile(os.path.join(os.path.dirname(__file__),
-                                    "core_wrapper.lua"))
 
 
 def convert_lua(lua_file):
@@ -87,20 +80,16 @@ def rename_core_functions(lua_file):
 
 def convert_level_lua(level_lua):
     level_lua.mixin_line("u_execScript(\"" + CONVERTER_PREFIX +
-                         "core_wrapper.lua\")")
+                         "packdata.lua\")")
     convert_lua(level_lua)
 
 
-def save(sounds, level_jsons, quiet):
-    lua_functions.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + sounds.to_table()
-                             + "\n" + CONVERTER_PREFIX +
-                             "LEVEL_PROPERTY_MAPPING=" +
-                             LEVEL_PROPERTY_MAPPING.to_table() + "\n" +
-                             CONVERTER_PREFIX + "STYLE_PROPERTY_MAPPING=" +
-                             STYLE_PROPERTY_MAPPING.to_table() + "\n")
-    lua_functions.replace("prefix_", CONVERTER_PREFIX)
-    lua_functions.save("Scripts/" + CONVERTER_PREFIX + "lua_functions.lua")
-    core_wrapper.replace("prefix_", CONVERTER_PREFIX)
+def save(packdata, sounds, level_jsons, quiet):
+    packdata.mixin_line(CONVERTER_PREFIX + "SOUNDS=" + sounds.to_table() + "\n"
+                        + CONVERTER_PREFIX + "LEVEL_PROPERTY_MAPPING=" +
+                        LEVEL_PROPERTY_MAPPING.to_table() + "\n" +
+                        CONVERTER_PREFIX + "STYLE_PROPERTY_MAPPING=" +
+                        STYLE_PROPERTY_MAPPING.to_table() + "\n")
     code = ""
     for level_json in level_jsons:
         for prop in level_json:
@@ -112,7 +101,5 @@ def save(sounds, level_jsons, quiet):
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"
     code += CONVERTER_PREFIX + "quiet=" + str(quiet).lower() + "\n"
-    core_wrapper.mixin_line(code)
-    core_wrapper.save("Scripts/" + CONVERTER_PREFIX + "core_wrapper.lua")
-    shutil.copyfile(os.path.join(os.path.dirname(filepath), "JSON.lua"),
-                    "Scripts/" + CONVERTER_PREFIX + "JSON.lua")
+    packdata.mixin_line(code)
+    packdata.save("Scripts/" + CONVERTER_PREFIX + "packdata.lua")

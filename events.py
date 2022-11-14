@@ -66,9 +66,6 @@ getLevelValueFloat(\"<value_name>\") / <value>)",
     "play_sound": "playSound(\"<id>\")"
 }
 
-event_lua = LuaFile(os.path.join(os.path.dirname(__file__), "events.lua"))
-event_lua.replace("prefix_", CONVERTER_PREFIX)
-
 
 def convert_event(event_json, pack_path):
     # set default values
@@ -152,7 +149,3 @@ def convert_level(level_json, level_lua):
                                         pack_path)
                          .to_table(), "onInit")
     level_json.delete("events")
-
-
-def save():
-    event_lua.save("Scripts/" + CONVERTER_PREFIX + "events.lua")

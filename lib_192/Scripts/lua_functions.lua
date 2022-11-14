@@ -1,4 +1,4 @@
-u_execScript("prefix_JSON.lua")
+u_execScript("JSON.lua")
 log = u_log
 getSides = l_getSides
 getSpeedMult = u_getSpeedMultDM

@@ -13,15 +13,15 @@ if prefix_was_defined == nil then
 	prefix_skip_divider = 0
 	prefix_last_skip_divider = 1
 	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
-	u_execScript("prefix_styles.lua")
-	u_execScript("prefix_main_timeline.lua")
-	u_execScript("prefix_lua_functions.lua")
-	u_execScript("prefix_events.lua")
-	u_execScript("prefix_walls.lua")
-	u_execScript("prefix_pulse.lua")
-	u_execScript("prefix_rotation.lua")
-	u_execScript("prefix_perfsim.lua")
-	u_execScript("prefix_random.lua")
+	u_execScript("styles.lua")
+	u_execScript("main_timeline.lua")
+	u_execScript("lua_functions.lua")
+	u_execScript("events.lua")
+	u_execScript("walls.lua")
+	u_execScript("pulse.lua")
+	u_execScript("rotation.lua")
+	u_execScript("perfsim.lua")
+	u_execScript("random.lua")
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -154,9 +154,10 @@ if prefix_was_defined == nil then
 			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * (math.random(0, 1) * 2 - 1))
 
 			-- make font the same as 1.92
-			u_setMessageFont("imagine.ttf")
+			u_setDependencyMessageFont("1.92->2.1.6-converter", "lib_192", "Baum", "imagine.ttf")
 			u_setMessageFontSize(40)
 
+			prefix_data_module = prefix_get_data_module()
 			prefix_style_module = prefix_get_style_module()
 			prefix_style_module:set_style(prefix_style_id)
 			prefix_pulse_module = prefix_get_pulse_module()

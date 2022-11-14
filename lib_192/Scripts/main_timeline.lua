@@ -1,8 +1,8 @@
-u_execScript("prefix_timeline.lua")
-u_execScript("prefix_increment.lua")
+u_execScript("timeline.lua")
+u_execScript("increment.lua")
 
 prefix_timeline, prefix_t_wait, prefix_t_do = prefix_get_timeline_module()
-u_execScript("prefix_message_timeline.lua")
+u_execScript("message_timeline.lua")
 prefix_actual_time = -50
 prefix_main_timeline = prefix_timeline:new()
 

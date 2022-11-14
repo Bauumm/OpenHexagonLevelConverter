@@ -88,10 +88,7 @@ def convert(level_json, level_lua):
             del required_defaults[key]
         functions = LEVEL_PROPERTY_MAPPING.get(key)
         if functions is None or functions[1] is None:
-            if key == "pulse_delay_half_max":  # only in 1.92
-                custom_keys[key] = level_json.get(key, 0)
-            else:
-                custom_keys[key] = level_json[key]
+            custom_keys[key] = level_json[key]
         else:
             function = functions[1]
             if level_json.get(key) == float("inf"):
