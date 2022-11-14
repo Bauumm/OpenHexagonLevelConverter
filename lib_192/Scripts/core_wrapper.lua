@@ -157,6 +157,7 @@ if prefix_was_defined == nil then
 			u_setDependencyMessageFont("1.92->2.1.6-converter", "lib_192", "Baum", "imagine.ttf")
 			u_setMessageFontSize(40)
 
+			prefix_wall_module = prefix_get_wall_module()
 			prefix_data_module = prefix_get_data_module()
 			prefix_style_module = prefix_get_style_module()
 			prefix_style_module:set_style(prefix_style_id)

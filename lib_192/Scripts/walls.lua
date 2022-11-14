@@ -1,7 +1,6 @@
--- small utility class to automatically round numbers like floats
+-- small utility class to automatically round numbers like exactly like floats in c++
 prefix_float = {}
 prefix_float.round = function(num)
-	-- this could be done with something like `return math.floor(num * 10 ^ 6 + 0.5) / 10 ^ 6` but I'm not 100% sure if it's accurate
 	local speedMult = l_getSpeedMult()
 	l_setSpeedMult(num)
 	local num = l_getSpeedMult()
@@ -33,45 +32,67 @@ function prefix_float:new(value)
 	return setmetatable({value=prefix_float.round(value or 0)}, prefix_float)
 end
 
-prefix_wall_module = {
-	_getOrbit = function(degrees, distance)
-		if type(degrees) == "table" then
-			degrees = degrees.value
+
+function prefix_get_wall_module()
+	local wall_module = {
+		-- wall spawn distance in 1.92 cannot be changed
+		WALL_SPAWN_DIST = 1600,
+		walls = {},
+		stopped_walls = {},
+		imaginary_walls = 0,
+		stopped_wall_radius = 1 / 0,
+
+		_getOrbit = function(degrees, distance)
+			if type(degrees) == "table" then
+				degrees = degrees.value
+			end
+			return math.cos((degrees / 57.3)) * distance,
+			       math.sin((degrees / 57.3)) * distance
+		end,
+
+		_is_overlapping = function(verts, point)
+			local result = false
+			local vert_count = #verts / 2
+			local j = vert_count - 1
+			for i = 0, vert_count - 1 do
+				local vI = {verts[i * 2 + 1], verts[i * 2 + 2]}
+				local vJ = {verts[j * 2 + 1], verts[j * 2 + 2]}
+				if (vI[2] > point[2]) ~= (vJ[2] > point[2]) and point[1] < (vJ[1] - vI[1]) * (point[2] - vI[2]) / (vJ[2] - vI[2]) + vI[1] then
+					result = not result
+				end
+				j = i
+			end
+			return result
 		end
-		return math.cos((degrees / 57.3)) * distance,
-		       math.sin((degrees / 57.3)) * distance
-	end,
+	}
 
-	size = function(self)
+	function wall_module:size()
 		return #self.walls + #self.stopped_walls + self.imaginary_walls
-	end,
+	end
 
-	-- wall spawn distance in 1.92 cannot be changed
-	WALL_SPAWN_DIST = 1600,
-	walls = {},
-	stopped_walls = {},
-	imaginary_walls = 0,
-	stopped_wall_radius = 1 / 0,
-
-	find_self = function(self)
+	function wall_module:find_self()
 		if self == nil then
 			return prefix_wall_module
 		end
 		return self
-	end,
-	wallAcc = function(self, side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
+	end
+
+	function wall_module:wallAcc(side, thickness, speedAdj, acceleration, minSpeed, maxSpeed)
 		self = prefix_wall_module.find_self(self)
 		self:_wall(side, thickness, speedAdj * u_getSpeedMultDM(), acceleration, minSpeed * u_getSpeedMultDM(), maxSpeed * u_getSpeedMultDM())
-	end,
-	wallAdj = function(self, side, thickness, speedAdj)
+	end
+
+	function wall_module:wallAdj(side, thickness, speedAdj)
 		self = prefix_wall_module.find_self(self)
 		self:_wall(side, thickness, speedAdj * u_getSpeedMultDM(), 0, 0, 0)
-	end,
-	wall = function(self, side, thickness)
+	end
+
+	function wall_module:wall(side, thickness)
 		self = prefix_wall_module.find_self(self)
 		self:_wall(side, thickness, u_getSpeedMultDM(), 0, 0, 0)
-	end,
-	_wall = function(self, side, thickness, speed, acceleration, minSpeed, maxSpeed)
+	end
+
+	function wall_module:_wall(side, thickness, speed, acceleration, minSpeed, maxSpeed)
 		local wall = {cw=cw_create()}
 		local div = prefix_float:new(360 / l_getSides())
 		local angle = div * side
@@ -85,40 +106,30 @@ prefix_wall_module = {
 		wall.minSpeed = minSpeed
 		wall.maxSpeed = maxSpeed
 		table.insert(self.walls, wall)
-	end,
-	empty = function(self)
+	end
+
+	function wall_module:empty()
 		return self:size() == 0
-	end,
-	clear = function(self)
+	end
+
+	function wall_module:clear()
 		local length = #self.walls
 		for i=1,length do
 			cw_destroy(self.walls[1].cw)
 			table.remove(self.walls, 1)
 		end
-	end,
-	_is_overlapping = function(verts, point)
-		local result = false
-		local vert_count = #verts / 2
-		local j = vert_count - 1
-		for i = 0, vert_count - 1 do
-			local vI = {verts[i * 2 + 1], verts[i * 2 + 2]}
-			local vJ = {verts[j * 2 + 1], verts[j * 2 + 2]}
-			if (vI[2] > point[2]) ~= (vJ[2] > point[2]) and point[1] < (vJ[1] - vI[1]) * (point[2] - vI[2]) / (vJ[2] - vI[2]) + vI[1] then
-				result = not result
-			end
-			j = i
-		end
-		return result
-	end,
-	move_player = function(self, frametime, movement, focus)
+	end
+
+	function wall_module:move_player(frametime, movement, focus)
 		local speed = focus and 4.625 or 9.45
 		local last_angle = math.deg(u_getPlayerAngle())
 		self.new_angle = last_angle + speed * movement * frametime
 		self.radius = l_getRadiusMin() * (l_getPulse() / l_getPulseMin()) + l_getBeatPulse()
 		self.last_player_pos = {self._getOrbit(last_angle, self.radius)}
 		self.new_player_pos = {self._getOrbit(self.new_angle, self.radius)}
-	end,
-	check_collisions = function(self, movement)
+	end
+
+	function wall_module:check_collisions(movement)
 		if movement == 0 then
 			if self.collides then
 				prefix_must_kill = true
@@ -132,8 +143,9 @@ prefix_wall_module = {
 				u_setPlayerAngle(math.rad(self.new_angle))
 			end
 		end
-	end,
-	update_walls = function(self, frametime)
+	end
+
+	function wall_module:update_walls(frametime)
 		local delete_queue = {}
 		local radius = self.radius * 0.65
 		self.last_pos_now_kill = false
@@ -246,4 +258,6 @@ prefix_wall_module = {
 			self.imaginary_walls = 0
 		end
 	end
-}
+
+	return wall_module
+end
