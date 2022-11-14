@@ -228,12 +228,13 @@ def convert_lib(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert packs for Open Hexagon 1.92 to be compatible \
-        with the steam version.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        with the steam version."
     )
     sub_parsers = parser.add_subparsers(dest="command")
-    pack_parser = sub_parsers.add_parser("convert-pack", help="converts a pack"
-                                         )
+    pack_parser = sub_parsers.add_parser("convert-pack",
+                                         help="converts a pack",
+                                         formatter_class=argparse.
+                                         ArgumentDefaultsHelpFormatter)
     pack_parser.add_argument("source_pack", type=str, help="the 1.92 pack to \
                              be converted")
     pack_parser.add_argument("destination_folder", type=str, help="the path \
