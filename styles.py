@@ -16,6 +16,16 @@ filepath = os.path.realpath(__file__)
 colors3D = ExtendedDict()
 
 
+def ensure_item_count(items, count=4, default=0):
+    length = len(items)
+    if length > 4:
+        return items[:4]
+    elif length < 4:
+        while len(items) < 4:
+            items.append(default)
+    return items
+
+
 def convert_color(color):
     # Set defaults to not get unexpected nils in lua
     color["dynamic"] = color.get("dynamic", False)
@@ -23,8 +33,8 @@ def convert_color(color):
     color["dynamic_offset"] = color.get("dynamic_offset", False)
     color["offset"] = color.get("offset", 0)
     color["main"] = color.get("main", False)
-    color["value"] = color.get("value", [0, 0, 0, 0])
-    color["pulse"] = color.get("pulse", [0, 0, 0, 0])
+    color["value"] = ensure_item_count(color.get("value", [0, 0, 0, 0]))
+    color["pulse"] = ensure_item_count(color.get("pulse", [0, 0, 0, 0]))
     color["hue_shift"] = color.get("hue_shift", 0)
 
     if color["dynamic"] and color["dynamic_offset"] and not color["main"] and \
@@ -36,7 +46,7 @@ def convert_color(color):
             color["value"][i] = 0
     # Let pulse values underflow/overflow like in 1.92
     if color.get("pulse") is not None:
-        for i in range(len(color["pulse"])):
+        for i in range(4):
             color["pulse"][i] %= 256
     return color
 
