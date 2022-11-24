@@ -187,8 +187,13 @@ def convert_pack(args):
             styles.convert_style(file)
             file.save(os.path.relpath(file.path, args.source_pack))
         log.info("Copying Music and pack.json...")
-        convert_music(all_dict_values(files.get("Music", {})),
-                      args.source_pack)
+        convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
+        for key in files["pack.json"]:
+            str_val = str(files["pack.json"][key])
+            if str_val.endswith("inf"):
+                files["pack.json"][key] = int(str_val.replace(
+                    "inf", "9999999999999999999999999999999999999999"
+                ))
         files["pack.json"]["disambiguator"] = "1.92->2.1.6-converter"
         files["pack.json"]["author"] = "1.92->2.1.6-converter"
         files["pack.json"]["dependencies"] = [{
