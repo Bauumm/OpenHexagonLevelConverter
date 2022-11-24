@@ -33,11 +33,42 @@ function prefix_float:new(value)
 end
 
 
+function insert_path(t, keys, value)
+	local directory = t
+	for i=1,#keys do
+		local key = keys[i]
+		if directory[key] == nil then
+			if i == #keys then
+				directory[key] = value
+				return
+			end
+			directory[key] = {}
+		end
+		directory = directory[key]
+	end
+end
+
+
+function lookup_path(t, keys)
+	local directory = t
+	for _, key in pairs(keys) do
+		if directory[key] == nil then
+			return
+		end
+		directory = directory[key]
+	end
+	return directory
+end
+
+
 function prefix_get_wall_module()
 	local wall_module = {
 		-- wall spawn distance in 1.92 cannot be changed
 		WALL_SPAWN_DIST = 1600,
 		walls = {},
+		duplicate_walls = {},
+		duplicate_wall_count = 0,
+		tmp_wall_data = {},
 		stopped_walls = {},
 		imaginary_walls = 0,
 		stopped_wall_radius = 1 / 0,
@@ -67,7 +98,7 @@ function prefix_get_wall_module()
 	}
 
 	function wall_module:size()
-		return #self.walls + #self.stopped_walls + self.imaginary_walls
+		return #self.walls + #self.stopped_walls + self.imaginary_walls + self.duplicate_wall_count
 	end
 
 	function wall_module:find_self()
@@ -93,19 +124,53 @@ function prefix_get_wall_module()
 	end
 
 	function wall_module:_wall(side, thickness, speed, acceleration, minSpeed, maxSpeed)
-		local wall = {cw=cw_create()}
-		local div = prefix_float:new(360 / l_getSides())
-		local angle = div * side
-		cw_setVertexPos(wall.cw, 3, self._getOrbit(angle - div * 0.5, self.WALL_SPAWN_DIST))
-		cw_setVertexPos(wall.cw, 2, self._getOrbit(angle + div * 0.5, self.WALL_SPAWN_DIST))
-		cw_setVertexPos(wall.cw, 1, self._getOrbit(angle + div * 0.5 + l_getWallAngleLeft(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewLeft()))
-		cw_setVertexPos(wall.cw, 0, self._getOrbit(angle - div * 0.5 + l_getWallAngleRight(), self.WALL_SPAWN_DIST + thickness + l_getWallSkewRight()))
-		cw_setCollision(wall.cw, false)
-		wall.speed = speed
-		wall.accel = acceleration
-		wall.minSpeed = minSpeed
-		wall.maxSpeed = maxSpeed
-		table.insert(self.walls, wall)
+		local side_count = l_getSides()
+		local wall_angle_left = l_getWallAngleLeft()
+		local wall_angle_right = l_getWallAngleRight()
+		local wall_skew_left = l_getWallSkewLeft()
+		local wall_skew_right = l_getWallSkewRight()
+		local cw_handle = lookup_path(self.tmp_wall_data, {side_count, wall_angle_left, wall_angle_right, wall_skew_left, wall_skew_right, side, thickness, speed, acceleration, minSpeed, maxSpeed})
+		if cw_handle ~= nil then
+			if self.duplicate_walls[cw_handle] == nil then
+				self.duplicate_walls[cw_handle] = {}
+			end
+			local cw = cw_createNoCollision()
+			cw_setVertexPos4(cw, cw_getVertexPos4(cw_handle))
+			table.insert(self.duplicate_walls[cw_handle], cw)
+			self.duplicate_wall_count = self.duplicate_wall_count + 1
+		else
+			local wall = {cw=cw_createNoCollision()}
+			insert_path(self.tmp_wall_data, {side_count, wall_angle_left, wall_angle_right, wall_skew_left, wall_skew_right, side, thickness, speed, acceleration, minSpeed, maxSpeed}, wall.cw)
+			local div = prefix_float:new(360 / side_count)
+			local angle = div * side
+			cw_setVertexPos(wall.cw, 3, self._getOrbit(angle - div * 0.5, self.WALL_SPAWN_DIST))
+			cw_setVertexPos(wall.cw, 2, self._getOrbit(angle + div * 0.5, self.WALL_SPAWN_DIST))
+			cw_setVertexPos(wall.cw, 1, self._getOrbit(angle + div * 0.5 + wall_angle_left, self.WALL_SPAWN_DIST + thickness + wall_skew_left))
+			cw_setVertexPos(wall.cw, 0, self._getOrbit(angle - div * 0.5 + wall_angle_right, self.WALL_SPAWN_DIST + thickness + wall_skew_right))
+			wall.speed = speed
+			wall.accel = acceleration
+			wall.minSpeed = minSpeed
+			wall.maxSpeed = maxSpeed
+			table.insert(self.walls, wall)
+		end
+	end
+
+	function wall_module:remove_duplicates(cw)
+		if self.duplicate_walls[cw] ~= nil then
+			self.duplicate_wall_count = self.duplicate_wall_count - #self.duplicate_walls[cw]
+			for _, dup in pairs(self.duplicate_walls[cw]) do
+				cw_destroy(dup)
+			end
+			self.duplicate_walls[cw] = nil
+		end
+	end
+
+	function wall_module:update_duplicates(cw, x0, y0, x1, y1, x2, y2, x3, y3)
+		if self.duplicate_walls[cw] ~= nil then
+			for _, dup in pairs(self.duplicate_walls[cw]) do
+				cw_setVertexPos4(dup, x0, y0, x1, y1, x2, y2, x3, y3)
+			end
+		end
 	end
 
 	function wall_module:empty()
@@ -146,6 +211,7 @@ function prefix_get_wall_module()
 	end
 
 	function wall_module:update_walls(frametime)
+		self.tmp_wall_data = {}
 		local delete_queue = {}
 		local radius = self.radius * 0.65
 		self.last_pos_now_kill = false
@@ -193,20 +259,22 @@ function prefix_get_wall_module()
 					moved = true
 				end
 			end
+			self:update_duplicates(wall.cw, unpack(wall_verts))
 			if moved then
 				cw_setVertexPos4(wall.cw, unpack(wall_verts))
-				if self._is_overlapping(wall_verts, self.new_player_pos) then
-					self.collides = true
-				end
-				if self._is_overlapping(wall_verts, self.last_player_pos) then
-					self.last_pos_now_kill = true
-				end
+			end
+			if self._is_overlapping(wall_verts, self.new_player_pos) then
+				self.collides = true
+			end
+			if self._is_overlapping(wall_verts, self.last_player_pos) then
+				self.last_pos_now_kill = true
 			end
 			if points_on_center > 3 or points_out_of_bg > 3 then
 				if points_out_of_bg > 3 then
 					self.imaginary_walls = self.imaginary_walls + 1
 				end
 				cw_destroy(wall.cw)
+				self:remove_duplicates(wall.cw)
 				if not moved_to_stopped then
 					table.insert(delete_queue, 1, i)
 				end
@@ -233,6 +301,7 @@ function prefix_get_wall_module()
 					end
 					self.stopped_wall_radius = math.min(abs_x, abs_y, self.stopped_wall_radius)
 				end
+				self:update_duplicates(wall.cw, unpack(wall_verts))
 				if self._is_overlapping(wall_verts, self.new_player_pos) then
 					self.collides = true
 				end
@@ -244,6 +313,7 @@ function prefix_get_wall_module()
 						self.imaginary_walls = self.imaginary_walls + 1
 					end
 					cw_destroy(wall.cw)
+					self:remove_duplicates(wall.cw)
 					table.insert(delete_queue, 1, i)
 				end
 			end
