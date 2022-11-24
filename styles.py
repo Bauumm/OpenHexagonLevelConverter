@@ -39,9 +39,9 @@ def convert_color(color):
 
     if color["dynamic"] and color["dynamic_offset"] and not color["main"] and \
        color["offset"] == 0:
-        # If these values are set this way the original color is due to
-        # division by 0 which results in inf being added to the main color
-        # (except for the alpha component) reset to black
+        # If these values are set this way the original color is due to division by 0
+        # which results in inf being added to the main color (except for the alpha
+        # component) reset to black
         for i in range(3):
             color["value"][i] = 0
     # Let pulse values underflow/overflow like in 1.92
@@ -76,9 +76,9 @@ def convert_style(style_json):
     # Divide 3D_spacing by 1.4 because the steam version multiplies it by 1.4
     style_json["3D_spacing"] = style_json.get("3D_spacing", 1) / 1.4
 
-    # This way the first 3D layer is rendered inside the main layer just like
-    # in 1.92
+    # This way the first 3D layer is rendered inside the main layer just like in 1.92
     style_json["3D_layer_offset"] = -1
+    style_json["3D_alpha_mirror"] = True
 
     # 1.92 casts float depths to int while the steam version just crashes
     style_json["3D_depth"] = int(style_json["3D_depth"])
@@ -100,13 +100,11 @@ def convert_style(style_json):
     os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
     lua_file = LuaFile()
     lua_file.set_text(CONVERTER_PREFIX + "style=" + style_json.to_table())
-    lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" +
-                  style_json["id"] + ".lua")
+    lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" + style_json["id"] + ".lua")
 
     # Save it now for use in menu
     style_json["id"] += "-menu"
-    style_json.save("Styles/" + os.path.basename(style_json.path)[:-5] +
-                    "-menu.json")
+    style_json.save("Styles/" + os.path.basename(style_json.path)[:-5] + "-menu.json")
     style_json.saved = False
     style_json["id"] = style_json["id"][:-5]
 
@@ -165,10 +163,8 @@ def convert_style(style_json):
             str(color_data["dynamic_offset"]).lower(),
             str(color_data["offset"]),
             str(color_data["main"]).lower(),
-            "vec4" + "(" +
-            ", ".join([str(f / 255) for f in color_data["value"]]) + ")",
-            "vec4" + "(" +
-            ", ".join([str(f / 255) for f in color_data["pulse"]]) + ")",
+            "vec4" + "(" + ", ".join([str(f / 255) for f in color_data["value"]]) + ")",
+            "vec4" + "(" + ", ".join([str(f / 255) for f in color_data["pulse"]]) + ")",
             str(color_data["hue_shift"])
         ]) + "),\n"
         style_json["colors"][i]["value"] = [14, *i.to_bytes(3, 'big')]
@@ -176,13 +172,13 @@ def convert_style(style_json):
         style_json["colors"][i]["dynamic"] = False
     code = code[:-2] + "\n);\n\n"
     os.makedirs("Shaders", exist_ok=True)
-    background_shader = BaseFile(
-        os.path.join(os.path.dirname(filepath), "background.frag"))
+    background_shader = BaseFile(os.path.join(os.path.dirname(filepath),
+                                              "background.frag"))
     background_shader.mixin_line(code, 19)
     background_shader.save("Shaders/" + style_json["id"] + "-background.frag")
 
 
 def convert_lua(level_lua, level_json):
-    level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" +
-                         level_json["styleId"] + "\"", "onInit")
+    level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" + level_json["styleId"] +
+                         "\"", "onInit")
     level_json["styleId"] += "-menu"
