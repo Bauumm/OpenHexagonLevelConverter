@@ -154,7 +154,7 @@ if prefix_was_defined == nil then
 			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * (math.random(0, 1) * 2 - 1))
 
 			-- make font the same as 1.92
-			u_setDependencyMessageFont("1.92->2.1.6-converter", "lib_192", "Baum", "imagine.ttf")
+			u_setDependencyMessageFont(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "imagine.ttf")
 			u_setMessageFontSize(40)
 
 			prefix_wall_module = prefix_get_wall_module()

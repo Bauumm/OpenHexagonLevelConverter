@@ -1,4 +1,4 @@
-u_execDependencyScript("1.92->2.1.6-converter", "lib_192", "Baum", "core_wrapper.lua")
+u_execDependencyScript(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "core_wrapper.lua")
 
 
 -- small module to load events and styles which is invoked by the converter lib

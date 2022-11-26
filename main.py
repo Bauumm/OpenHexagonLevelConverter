@@ -1,5 +1,5 @@
+from config import CONVERTER_PREFIX, DISAMBIGUATOR
 from extended_dict import ExtendedDict
-from config import CONVERTER_PREFIX
 from json_file import JsonFile
 from lua_file import LuaFile
 import level_properties
@@ -178,6 +178,8 @@ def convert_pack(args):
         packdata = LuaFile(os.path.join(os.path.dirname(filepath),
                                         "packdata.lua"))
         packdata.replace("prefix_", CONVERTER_PREFIX)
+        packdata.mixin_line(CONVERTER_PREFIX + "DISAMBIGUATOR=\"" + DISAMBIGUATOR +
+                            "\"")
         lua_functions.save(packdata, sounds, all_dict_values(files["Levels"]),
                            args.quiet)
         convert_event(files)
@@ -194,11 +196,11 @@ def convert_pack(args):
                 files["pack.json"][key] = int(str_val.replace(
                     "inf", "9999999999999999999999999999999999999999"
                 ))
-        files["pack.json"]["disambiguator"] = "1.92->2.1.6-converter"
-        files["pack.json"]["author"] = "1.92->2.1.6-converter"
+        files["pack.json"]["disambiguator"] = DISAMBIGUATOR
+        files["pack.json"]["author"] = DISAMBIGUATOR
         files["pack.json"]["dependencies"] = [{
-            "disambiguator": "1.92->2.1.6-converter",
-            "name": "lib_192",
+            "disambiguator": DISAMBIGUATOR,
+            "name": "192_runtime",
             "author": "Baum",
             "min_version": 1
         }]
@@ -211,9 +213,9 @@ def convert_pack(args):
         log.info("Done")
 
 
-def convert_lib(args):
-    lib_path = os.path.join(os.path.dirname(filepath), "lib_192")
-    shutil.copytree(lib_path, args.destination_folder)
+def convert_runtime(args):
+    runtime_path = os.path.join(os.path.dirname(filepath), "192_runtime")
+    shutil.copytree(runtime_path, args.destination_folder)
 
     def convert_dir(path):
         for filename in os.listdir(path):
@@ -228,6 +230,9 @@ def convert_lib(args):
                                    )
 
     convert_dir(os.path.join(args.destination_folder, "Scripts"))
+    pack = JsonFile(os.path.join(args.destination_folder, "pack.json"))
+    pack["disambiguator"] = DISAMBIGUATOR
+    pack.save(os.path.join(args.destination_folder, "pack.json"))
 
 
 if __name__ == "__main__":
@@ -257,8 +262,8 @@ if __name__ == "__main__":
     pack_parser.add_argument("--quiet", action="store_true", help="with this \
                              option converted packs will not print out error \
                              messages from the original lua")
-    lib_parser = sub_parsers.add_parser("convert-lib", help="converts the \
-                                        lib_192 to use the correct prefix")
+    lib_parser = sub_parsers.add_parser("convert-runtime", help="converts the \
+                                        192_runtime to use the correct prefix")
     lib_parser.add_argument("destination_folder", type=str, help="the path \
                             the converted pack will be created at")
     args = parser.parse_args()
@@ -270,5 +275,5 @@ if __name__ == "__main__":
             log.error("Source pack doesn't exist!")
             exit(1)
         convert_pack(args)
-    elif args.command == "convert-lib":
-        convert_lib(args)
+    elif args.command == "convert-runtime":
+        convert_runtime(args)

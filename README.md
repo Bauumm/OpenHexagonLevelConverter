@@ -6,21 +6,21 @@ A tool to automatically port Open Hexagon 1.92 Levels to the new Open Hexagon
 # Usage
 You may need to set `LD_LIBRARY_PATH` to `/usr/local/lib` for it to find SSVUtilsJson
 ```
-usage: main.py [-h] {convert-pack,convert-lib} ...
+usage: main.py [-h] {convert-pack,convert-runtime} ...
 
 Convert packs for Open Hexagon 1.92 to be compatible with the steam version.
 
 positional arguments:
-  {convert-pack,convert-lib}
+  {convert-pack,convert-runtime}
     convert-pack        converts a pack
-    convert-lib         converts the lib_192 to use the correct prefix
+    convert-runtime     converts the 192_runtime to use the correct prefix
 
 options:
   -h, --help            show this help message and exit
 ```
-To get the 192 lib (dependency of every pack)
+To get the 192 runtime (dependency of every pack)
 ```
-usage: main.py convert-lib [-h] destination_folder
+usage: main.py convert-runtime [-h] destination_folder
 
 positional arguments:
   destination_folder  the path the converted pack will be created at
@@ -30,9 +30,7 @@ options:
 ```
 To convert any 1.92 pack
 ```
-usage: main.py convert-pack [-h]
-                            [--timing-options level performance_level fps_limit_lower fps_limit_upper]
-                            [--default-timing-options performance_level fps_limit_lower fps_limit_upper]
+usage: main.py convert-pack [-h] [--timing-options level performance_level fps_limit_lower fps_limit_upper] [--default-timing-options performance_level fps_limit_lower fps_limit_upper]
                             [--quiet]
                             source_pack destination_folder
 
@@ -46,8 +44,7 @@ options:
                         set timing options for a level that may depend on it (default: None)
   --default-timing-options performance_level fps_limit_lower fps_limit_upper
                         set the default timing options (default: [0.03, 240, 960])
-  --quiet               with this option converted packs will not print out error messages
-                        from the original lua (default: False)
+  --quiet               with this option converted packs will not print out error messages from the original lua (default: False)
 ```
 # Installation
 ## From source

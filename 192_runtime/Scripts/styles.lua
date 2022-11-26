@@ -3,10 +3,10 @@ function prefix_get_style_module()
 	s_setBGTileRadius(4500)
 
 	local Style = {
-		shdr_3D = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "wall3D.frag"),
-		shdr_main = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "main.frag"),
-		shdr_cap = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "cap.frag"),
-		shdr_text = shdr_getDependencyShaderId("1.92->2.1.6-converter", "lib_192", "Baum", "text.frag"),
+		shdr_3D = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "wall3D.frag"),
+		shdr_main = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "main.frag"),
+		shdr_cap = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "cap.frag"),
+		shdr_text = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "text.frag"),
 		pulse3D = 1,
 		pulse3DDirection = 1
 	}
