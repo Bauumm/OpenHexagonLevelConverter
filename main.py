@@ -5,6 +5,7 @@ from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
+import luaparser
 import fix_utils
 import argparse
 import shutil
@@ -33,10 +34,13 @@ def get_files(folder):
         if os.path.isdir(path):
             structure[file] = get_files(path)
         else:
-            if path.endswith(".json"):
+            if path.endswith(".json") or os.path.basename(os.path.dirname(path)) == "Events":
                 structure[file] = JsonFile(path)
             elif path.endswith(".lua"):
-                structure[file] = LuaFile(path)
+                try:
+                    structure[file] = LuaFile(path)
+                except luaparser.builder.SyntaxException:
+                    log.warn("Lua file:", path, "failed to parse.")
     return structure
 
 

@@ -17,11 +17,13 @@ colors3D = ExtendedDict()
 
 
 def ensure_item_count(items, count=4, default=0):
+    if not isinstance(items, list):
+        items = [items]
     length = len(items)
-    if length > 4:
-        return items[:4]
-    elif length < 4:
-        while len(items) < 4:
+    if length > count:
+        return items[:count]
+    elif length < count:
+        while len(items) < count:
             items.append(default)
     return items
 
@@ -59,7 +61,7 @@ def convert_style(style_json):
     no_colors = True
     for i in range(len(style_json.get("colors", []))):
         no_colors = False
-        if style_json["colors"][i] is None:
+        if not isinstance(style_json["colors"][i], dict):
             del style_json["colors"][i]
             has_none = True
         else:
