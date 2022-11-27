@@ -22,6 +22,7 @@ if prefix_was_defined == nil then
 	u_execScript("rotation.lua")
 	u_execScript("perfsim.lua")
 	u_execScript("random.lua")
+	u_execScript("persistent_storage.lua")
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -137,11 +138,22 @@ if prefix_was_defined == nil then
 		prefix_executingEvents = {}
 		prefix_queuedEvents = {}
 		prefix_clear_and_reset_timeline()
+		local old_keys = {}
+		for k, v in pairs(prefix_custom_keys) do
+			old_keys[k] = v
+		end
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
 			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
 		end
+		local data = {}
+		for k, v in pairs(prefix_custom_keys) do
+			if old_keys[k] ~= v then
+				data[k] = v
+			end
+		end
+		prefix_persistent_storage:store(JSON:encode(data))
 	end
 
 	function onUnload()
@@ -157,6 +169,13 @@ if prefix_was_defined == nil then
 			u_setDependencyMessageFont(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "imagine.ttf")
 			u_setMessageFontSize(40)
 
+			prefix_persistent_storage = prefix_get_persistent_storage()
+			if prefix_is_retry then
+				local keys = prefix_persistent_storage:pop()
+				for k, v in pairs(JSON:decode(keys)) do
+					prefix_custom_keys[k] = v
+				end
+			end
 			prefix_wall_module = prefix_get_wall_module()
 			prefix_data_module = prefix_get_data_module()
 			prefix_style_module = prefix_get_style_module()
