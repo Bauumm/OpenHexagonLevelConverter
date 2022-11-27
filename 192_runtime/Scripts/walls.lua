@@ -124,6 +124,10 @@ function prefix_get_wall_module()
 	end
 
 	function wall_module:_wall(side, thickness, speed, acceleration, minSpeed, maxSpeed)
+		if thickness ~= thickness then
+			print("Not spawning wall with NaN thickness!")
+			return
+		end
 		local side_count = l_getSides()
 		local wall_angle_left = l_getWallAngleLeft()
 		local wall_angle_right = l_getWallAngleRight()
