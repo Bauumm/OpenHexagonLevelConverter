@@ -38,7 +38,7 @@ function prefix_get_pulse_module()
 					self.pulse_delay = l_getPulseDelayMax()
 				end
 			end
-			l_setPulse(self.pulse)
+			l_forceSetPulse(self.pulse)
 		end
 		self.pulse_delay = self.pulse_delay - frametime
 		self.pulse_delay_half = self.pulse_delay_half - frametime
@@ -54,7 +54,7 @@ function prefix_get_pulse_module()
 		if self.beatpulse > 0 then
 			self.beatpulse = self.beatpulse - 2 * frametime
 		end
-		l_setBeatPulse(self.beatpulse)
+		l_forceSetBeatPulse(self.beatpulse)
 	end
 
 	return Pulse
