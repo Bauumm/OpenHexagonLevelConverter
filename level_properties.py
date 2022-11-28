@@ -100,5 +100,6 @@ def convert(level_json, level_lua):
     for key in required_defaults.keys():
         function = LEVEL_PROPERTY_MAPPING.get(key)[1]
         code += "\n" + function + "(" + str(LEVEL_PROPERTY_DEFAULTS[key]) + ")"
-    code += "\n" + CONVERTER_PREFIX + "custom_keys=" + custom_keys.to_table()
+    code += "\nif " + CONVERTER_PREFIX + "custom_keys == nil then \n" \
+        + CONVERTER_PREFIX + "custom_keys=" + custom_keys.to_table() + "\nend"
     level_lua.mixin_line(code, "onInit")

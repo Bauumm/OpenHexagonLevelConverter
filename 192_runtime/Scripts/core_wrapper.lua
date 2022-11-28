@@ -23,6 +23,7 @@ if prefix_was_defined == nil then
 	u_execScript("perfsim.lua")
 	u_execScript("random.lua")
 	u_execScript("persistent_storage.lua")
+	prefix_persistent_storage = prefix_get_persistent_storage()
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -138,6 +139,8 @@ if prefix_was_defined == nil then
 		prefix_executingEvents = {}
 		prefix_queuedEvents = {}
 		prefix_clear_and_reset_timeline()
+		prefix_custom_keys = nil
+		onInit()
 		local old_keys = {}
 		for k, v in pairs(prefix_custom_keys) do
 			old_keys[k] = v
@@ -158,6 +161,17 @@ if prefix_was_defined == nil then
 
 	function onUnload()
 		prefix_is_retry = true
+		if not u_inMenu() then
+			print("Ignore errors when going to menu here, they cannot be prevented!")
+			local keys = prefix_persistent_storage:pop()
+			print("Done, now don't ignore it if any follow!")
+			local data = JSON:decode(keys)
+			if data ~= nil then  -- apparently the inMenu check doesn't work here
+				for k, v in pairs(data) do
+					prefix_custom_keys[k] = v
+				end
+			end
+		end
 	end
 
 	function onLoad()
@@ -169,13 +183,6 @@ if prefix_was_defined == nil then
 			u_setDependencyMessageFont(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "imagine.ttf")
 			u_setMessageFontSize(40)
 
-			prefix_persistent_storage = prefix_get_persistent_storage()
-			if prefix_is_retry then
-				local keys = prefix_persistent_storage:pop()
-				for k, v in pairs(JSON:decode(keys)) do
-					prefix_custom_keys[k] = v
-				end
-			end
 			prefix_wall_module = prefix_get_wall_module()
 			prefix_data_module = prefix_get_data_module()
 			prefix_style_module = prefix_get_style_module()
