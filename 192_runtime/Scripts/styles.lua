@@ -30,8 +30,8 @@ function prefix_get_style_module()
 	-- This is quite messy since it's copied from 1.92
 	function Style:get_color_from_hue(hue)
 		hue = prefix_float.round(hue)
-		s,v,r,g,b=1,1,0,0,0
-		i = math.floor(hue * 6)
+		local s,v,r,g,b=1,1,0,0,0
+		local i = math.floor(hue * 6)
 		local f = hue * 6 - i
 		local p,q,t=v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
 		local im
