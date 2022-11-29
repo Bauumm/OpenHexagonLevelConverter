@@ -163,12 +163,14 @@ if prefix_was_defined == nil then
 		prefix_is_retry = true
 		if not u_inMenu() then
 			print("Ignore errors when going to menu here, they cannot be prevented!")
-			local keys = prefix_persistent_storage:pop()
+			local success, keys = pcall(prefix_persistent_storage.pop, prefix_persistent_storage)
 			print("Done, now don't ignore it if any follow!")
-			local data = JSON:decode(keys)
-			if data ~= nil then  -- apparently the inMenu check doesn't work here
-				for k, v in pairs(data) do
-					prefix_custom_keys[k] = v
+			if success then
+				local data = JSON:decode(keys)
+				if data ~= nil then  -- apparently the inMenu check doesn't work here
+					for k, v in pairs(data) do
+						prefix_custom_keys[k] = v
+					end
 				end
 			end
 		end
