@@ -99,6 +99,7 @@ if prefix_was_defined == nil then
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function prefix_call_onUpdate(frametime)
+		prefix_calls_this_tick = 0
 		if frametime > 4 then
 			frametime = 4
 		end
