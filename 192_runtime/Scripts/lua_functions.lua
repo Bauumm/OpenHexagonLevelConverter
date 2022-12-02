@@ -128,6 +128,7 @@ end
 -- make os.clock work as expected, even if the os module worked it would be windows specific
 os = {}
 os.clock = prefix_get_actual_time
+os.exit = e_kill  -- levels that close the game in 1.92 should kill the player
 
 -- make config appear the same as in 1.92 in case a script reads it
 prefix_config_keys = {
