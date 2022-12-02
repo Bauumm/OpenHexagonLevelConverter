@@ -24,6 +24,7 @@ if prefix_was_defined == nil then
 	u_execScript("random.lua")
 	u_execScript("persistent_storage.lua")
 	prefix_persistent_storage = prefix_get_persistent_storage()
+	prefix_load_storage = true
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -162,23 +163,18 @@ if prefix_was_defined == nil then
 
 	function onUnload()
 		prefix_is_retry = true
-		if not u_inMenu() then
-			print("Ignore errors when going to menu here, they cannot be prevented!")
-			local success, keys = pcall(prefix_persistent_storage.pop, prefix_persistent_storage)
-			print("Done, now don't ignore it if any follow!")
-			if success then
-				local data = JSON:decode(keys)
-				if data ~= nil then  -- apparently the inMenu check doesn't work here
-					for k, v in pairs(data) do
-						prefix_custom_keys[k] = v
-					end
-				end
+		if prefix_load_storage then
+			local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
+			local data = JSON:decode(keys)
+			for k, v in pairs(data) do
+				prefix_custom_keys[k] = v
 			end
 		end
 	end
 
 	function onLoad()
 		if not u_inMenu() then
+			prefix_load_storage = false
 			u_haltTime(-6)  -- undo timehalt the steam version adds by default
 			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * (math.random(0, 1) * 2 - 1))
 
