@@ -28,6 +28,27 @@ class JsonFile(ExtendedDict):
         for key in json_dict:
             self[key] = json_dict[key]
 
+    def copy(self):
+        def copy_value(value):
+            if isinstance(value, dict):
+                value = recursive_dict_copy(value)
+            elif isinstance(value, list):
+                value = recursive_list_copy(value)
+            return value
+
+        def recursive_list_copy(obj):
+            copy = []
+            for value in obj:
+                copy.append(copy_value(value))
+            return copy
+
+        def recursive_dict_copy(obj):
+            copy = {}
+            for key in obj.keys():
+                copy[key] = copy_value(obj[key])
+            return copy
+        return recursive_dict_copy(self)
+
     def save(self, path):
         if self.saved:
             log.warn("Saving", os.path.basename(self.path), "twice!")

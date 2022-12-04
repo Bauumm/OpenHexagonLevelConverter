@@ -2,6 +2,7 @@ from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 from base_file import BaseFile
 from lua_file import LuaFile
+import json
 import os
 
 
@@ -105,10 +106,18 @@ def convert_style(style_json):
     lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" + style_json["id"] + ".lua")
 
     # Save it now for use in menu
-    style_json["id"] += "-menu"
-    style_json.save("Styles/" + os.path.basename(style_json.path)[:-5] + "-menu.json")
-    style_json.saved = False
-    style_json["id"] = style_json["id"][:-5]
+    menu_style = style_json.copy()
+    # Make styles with weird hues look correct most of the time (workaround for menu)
+    if menu_style["hue_min"] < 0 and menu_style["hue_max"] <= 0:
+        for color in [*menu_style.get("colors", []), menu_style["main"]]:
+            if color["dynamic"] and color["hue_shift"] == 0:
+                color["dynamic"] = False
+                color["value"] = [0, 0, 0, 0]
+    menu_style["id"] += "-menu"
+    os.makedirs("Styles", exist_ok=True)
+    with open("Styles/" + os.path.basename(style_json.path)[:-5] + "-menu.json", "w") \
+            as menu_style_file:
+        json.dump(menu_style, menu_style_file, indent=4)
 
     # Set some properties to fixed values in order to remake them with lua
     style_json["3D_override_color"] = [0, 0, 0, 255]
