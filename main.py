@@ -108,10 +108,13 @@ def convert_level(files, args):
                             str(60 / float(options[1])) + "," +
                             str(60 / float(options[2])) + "}\n" +
                             CONVERTER_PREFIX + "perf_const=" + str(options[0]))
+        pack_name = os.path.basename(args.source_pack)
+        level_json["id"] = CONVERTER_PREFIX + pack_name + "_" + level_json["id"]
         if level_json.get("selectable", True):
             level_json.save("Levels/" + level)
         else:
             level_json.save("Levels/" + level + ".notselectable")
+        level_json["id"] = level_json["id"][len(CONVERTER_PREFIX) + len(pack_name) + 1:]
         lua_file.save(lua_path)
     return level_luas
 
