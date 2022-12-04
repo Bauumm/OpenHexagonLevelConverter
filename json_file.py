@@ -22,6 +22,8 @@ class JsonFile(ExtendedDict):
                 .replace(":-inf", ":-Infinity") \
                 .replace(",inf", ",Infinity") \
                 .replace(",-inf", ",-Infinity")
+        if "}" not in content:
+            content = "{}"
         while content[-1] != "}":
             content = content[:-1]
         json_dict = json.loads(content)

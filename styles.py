@@ -3,6 +3,7 @@ from config import CONVERTER_PREFIX
 from base_file import BaseFile
 from lua_file import LuaFile
 import json
+import log
 import os
 
 
@@ -55,6 +56,9 @@ def convert_color(color):
 
 
 def convert_style(style_json):
+    if style_json.get("id") is None:
+        log.error("Style file", style_json.path, "has no id!")
+        return
     for color in COLOR_OBJECTS:
         if color in style_json:
             style_json[color] = convert_color(style_json[color])
