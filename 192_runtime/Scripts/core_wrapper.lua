@@ -152,10 +152,10 @@ if prefix_was_defined == nil then
 		if not u_inMenu() and prefix_level_changed then
 			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
 		end
-		local data = {}
+		local data = {level_values = {}, files = prefix_dump_files()}
 		for k, v in pairs(prefix_custom_keys) do
 			if old_keys[k] ~= v then
-				data[k] = v
+				data.level_values[k] = v
 			end
 		end
 		prefix_persistent_storage:store(JSON:encode(data))
@@ -166,7 +166,8 @@ if prefix_was_defined == nil then
 		if prefix_load_storage then
 			local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
 			local data = JSON:decode(keys)
-			for k, v in pairs(data) do
+			prefix_load_files(data.files)
+			for k, v in pairs(data.level_values) do
 				prefix_custom_keys[k] = v
 			end
 		end

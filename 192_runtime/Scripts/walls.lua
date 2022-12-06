@@ -33,7 +33,7 @@ function prefix_float:new(value)
 end
 
 
-function insert_path(t, keys, value)
+function prefix_insert_path(t, keys, value)
 	local directory = t
 	for i=1,#keys do
 		local key = keys[i]
@@ -49,7 +49,7 @@ function insert_path(t, keys, value)
 end
 
 
-function lookup_path(t, keys)
+function prefix_lookup_path(t, keys)
 	local directory = t
 	for _, key in pairs(keys) do
 		if directory[key] == nil then
@@ -133,7 +133,7 @@ function prefix_get_wall_module()
 		local wall_angle_right = l_getWallAngleRight()
 		local wall_skew_left = l_getWallSkewLeft()
 		local wall_skew_right = l_getWallSkewRight()
-		local cw_handle = lookup_path(self.tmp_wall_data, {side_count, wall_angle_left, wall_angle_right, wall_skew_left, wall_skew_right, side, thickness, speed, acceleration, minSpeed, maxSpeed})
+		local cw_handle = prefix_lookup_path(self.tmp_wall_data, {side_count, wall_angle_left, wall_angle_right, wall_skew_left, wall_skew_right, side, thickness, speed, acceleration, minSpeed, maxSpeed})
 		if cw_handle ~= nil then
 			if self.duplicate_walls[cw_handle] == nil then
 				self.duplicate_walls[cw_handle] = {}
@@ -144,7 +144,7 @@ function prefix_get_wall_module()
 			self.duplicate_wall_count = self.duplicate_wall_count + 1
 		else
 			local wall = {cw=cw_createNoCollision()}
-			insert_path(self.tmp_wall_data, {side_count, wall_angle_left, wall_angle_right, wall_skew_left, wall_skew_right, side, thickness, speed, acceleration, minSpeed, maxSpeed}, wall.cw)
+			prefix_insert_path(self.tmp_wall_data, {side_count, wall_angle_left, wall_angle_right, wall_skew_left, wall_skew_right, side, thickness, speed, acceleration, minSpeed, maxSpeed}, wall.cw)
 			local div = prefix_float:new(360 / side_count)
 			local angle = div * side
 			cw_setVertexPos(wall.cw, 3, self._getOrbit(angle - div * 0.5, self.WALL_SPAWN_DIST))

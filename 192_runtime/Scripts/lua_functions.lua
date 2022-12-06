@@ -238,6 +238,28 @@ if not prefix_init_fs then
 			return t.file[k]
 		end
 	end}
+	function prefix_dump_files()
+		local files = {}
+		for path, file in pairs(prefix_virtual_filesystem) do
+			file:seek("set", 0)
+			files[path] = file:read("*a")
+			file:close()
+		end
+		return files
+	end
+	function prefix_load_files(files)
+		for path, contents in pairs(files) do
+			local file = setmetatable({
+				file = io.tmpfile(),
+				close = function(self)
+					self.file:seek("set", 0)
+					return true
+				end}, prefix_fake_file)
+			file:write(contents)
+			file:seek("set", 0)
+			prefix_virtual_filesystem[path] = file
+		end
+	end
 	prefix_virtual_filesystem = {}
 	prefix_io_open = prefix_original_io.open
 	io.open = function(path, mode)
