@@ -140,6 +140,8 @@ function os.clock()
 	return prefix_get_actual_time()
 end
 os.exit = e_kill  -- levels that close the game in 1.92 should kill the player
+
+-- spoof date
 function os.date(format_string)
 	if format_string == nil then
 		format_string = "%m/%d/%Y %H:%M:%S"
@@ -160,6 +162,11 @@ function os.date(format_string)
 			:gsub("%%M", ensure_length(tostring(math.floor(time / 60) % 60), 2))
 			:gsub("%%S", ensure_length(tostring(math.floor(time) % 60), 2))
 	return string
+end
+
+function os.execute(cmd)
+	print("This level attempted to execute a potentially malicious command:", cmd)
+	return 1
 end
 
 -- make config appear the same as in 1.92 in case a script reads it
