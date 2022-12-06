@@ -136,7 +136,7 @@ def _parse_line(line, ends, openings, needs_do):
         openings -= opening_add
     if dos > 0:
         needs_do = False
-    if "io.open(" in line:
+    if "io.open(" in line and "\\" in line:
         before, args = line.split("io.open(", 1)
         before += "io.open("
         args, after = args.split(")", 1)

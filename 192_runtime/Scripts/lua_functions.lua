@@ -140,6 +140,27 @@ function os.clock()
 	return prefix_get_actual_time()
 end
 os.exit = e_kill  -- levels that close the game in 1.92 should kill the player
+function os.date(format_string)
+	if format_string == nil then
+		format_string = "%m/%d/%Y %H:%M:%S"
+	end
+	local function ensure_length(string, len)
+		while #string < len do
+			string = "0" .. string
+		end
+		return string
+	end
+	local time = prefix_get_actual_time()
+	local string = format_string
+			:gsub("%%y", "22")
+			:gsub("%%Y", "2022")
+			:gsub("%%m", "12")
+			:gsub("%%d", ensure_length(tostring(math.floor(time / 86400) % 30 + 1), 2))
+			:gsub("%%H", ensure_length(tostring(math.floor(time / 3600) % 24), 2))
+			:gsub("%%M", ensure_length(tostring(math.floor(time / 60) % 60), 2))
+			:gsub("%%S", ensure_length(tostring(math.floor(time) % 60), 2))
+	return string
+end
 
 -- make config appear the same as in 1.92 in case a script reads it
 prefix_config_keys = {
