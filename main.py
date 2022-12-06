@@ -29,19 +29,25 @@ def all_dict_values(dictionary):
 
 def get_files(folder):
     structure = {}
+    misc = []
     for file in os.listdir(folder):
         path = os.path.join(folder, file)
         if os.path.isdir(path):
-            structure[file] = get_files(path)
+            structure[file], extra = get_files(path)
+            for path in extra:
+                misc.append(path)
         else:
-            if path.endswith(".json") or os.path.basename(os.path.dirname(path)) == "Events":
+            if path.endswith(".json") or os.path.basename(os.path.dirname(path)) == \
+                    "Events":
                 structure[file] = JsonFile(path)
             elif path.endswith(".lua"):
                 try:
                     structure[file] = LuaFile(path)
                 except luaparser.builder.SyntaxException:
                     log.warn("Lua file:", path, "failed to parse.")
-    return structure
+            else:
+                misc.append(path)
+    return structure, misc
 
 
 def get_lua_file(files, level_json, lua_path, args):
@@ -173,7 +179,7 @@ def convert_music(music_files, path):
 def convert_pack(args):
     args.source_pack = os.path.abspath(args.source_pack)
     log.info("Parsing files in", args.source_pack + "...")
-    files = get_files(args.source_pack)
+    files, misc_files = get_files(args.source_pack)
     os.makedirs(args.destination_folder, exist_ok=True)
     os.chdir(args.destination_folder)
     if files.get("pack.json") is None:
@@ -195,8 +201,11 @@ def convert_pack(args):
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)
             file.save(os.path.relpath(file.path, args.source_pack))
-        log.info("Copying Music and pack.json...")
+        log.info("Copying Music and misc files...")
         convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
+        for path in misc_files:
+            shutil.copyfile(path, os.path.relpath(path, args.source_pack))
+        log.info("Adjusting pack.json...")
         for key in files["pack.json"]:
             str_val = str(files["pack.json"][key])
             if str_val.endswith("inf"):
@@ -213,10 +222,6 @@ def convert_pack(args):
         }]
         files["pack.json"].save(os.path.relpath(files["pack.json"].path,
                                                 args.source_pack))
-        for file in os.listdir(os.path.join(args.source_pack, "Music")):
-            if file.endswith(".ogg"):
-                shutil.copyfile(os.path.join(args.source_pack, "Music", file),
-                                "Music/" + file)
         log.info("Done")
 
 
