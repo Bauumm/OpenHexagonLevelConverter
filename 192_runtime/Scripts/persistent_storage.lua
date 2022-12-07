@@ -28,6 +28,11 @@ function prefix_get_persistent_storage()
 	end
 
 	function storage:pop()
+		local test = cw_create()
+		if test == 31 then
+			cw_destroy(test)
+			return "{level_values: {}, files: {}}"
+		end
 		local len, space = cw_getVertexPos(0, 0)
 		local nums = {}
 		for i=1,space - 1 do
