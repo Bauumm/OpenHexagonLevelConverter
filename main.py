@@ -204,7 +204,10 @@ def convert_pack(args):
         log.info("Copying Music and misc files...")
         convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
         for path in misc_files:
-            shutil.copyfile(path, os.path.relpath(path, args.source_pack))
+            dst_path = os.path.relpath(path, args.source_pack)
+            if os.path.dirname(dst_path) != "":
+                os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+            shutil.copyfile(path, dst_path)
         log.info("Adjusting pack.json...")
         for key in files["pack.json"]:
             str_val = str(files["pack.json"][key])
