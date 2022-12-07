@@ -37,14 +37,15 @@ def get_files(folder):
             for path in extra:
                 misc.append(path)
         else:
-            if path.endswith(".json") or os.path.basename(os.path.dirname(path)) == \
-                    "Events":
+            parent_folder = os.path.basename(os.path.dirname(path))
+            if (path.endswith(".json") or parent_folder == "Events") and \
+                    parent_folder != "Scripts":
                 structure[file] = JsonFile(path)
             elif path.endswith(".lua"):
                 try:
                     structure[file] = LuaFile(path)
-                except luaparser.builder.SyntaxException:
-                    log.warn("Lua file:", path, "failed to parse.")
+                except Exception as error:
+                    log.warn("Lua file:", path, "failed to parse:", error)
             else:
                 misc.append(path)
     return structure, misc
@@ -169,7 +170,7 @@ def convert_custom_lua(name):
 def convert_music(music_files, path):
     for music in music_files:
         for i in range(len(music.get("segments", []))):
-            if music["segments"][i] is None:
+            if music["segments"][i] is None or "time" not in music["segments"][i]:
                 del music["segments"][i]
                 continue
             music["segments"][i]["time"] = int(music["segments"][i]["time"])
