@@ -81,6 +81,7 @@ function getLevelValueBool(field)
 	return prefix_getField("level", field, false)
 end
 function setLevelValueInt(field, value)
+	value = math.floor(value)
 	return prefix_setField("level", field, value)
 end
 function setLevelValueFloat(field, value)
@@ -105,6 +106,7 @@ function getStyleValueBool(field)
 	return prefix_getField("style", field, false)
 end
 function setStyleValueInt(field, value)
+	value = math.floor(value)
 	return prefix_setField("style", field, value)
 end
 function setStyleValueFloat(field, value)
