@@ -79,7 +79,7 @@ int getIndex(vec4 color, float mult) {
 
 
 void main() {
-	float mult = (gl_Color.r * 255.0 == 10.0 ? 1.4f : 1.0);
+	float mult = (gl_Color.r * 255.0 == 10.0 ? 1.4 : 1.0);
 	int index = (getIndex(gl_Color, mult) + swap) % colors.length();
 	vec4 color = calculateColor(colors[index]) / mult;
 	gl_FragColor = color;
