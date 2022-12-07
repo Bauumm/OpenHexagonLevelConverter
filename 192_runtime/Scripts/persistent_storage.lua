@@ -31,7 +31,7 @@ function prefix_get_persistent_storage()
 		local test = cw_create()
 		if test == 31 then
 			cw_destroy(test)
-			return "{level_values: {}, files: {}}"
+			return "{\"level_values\": {}, \"files\": {}}"
 		end
 		local len, space = cw_getVertexPos(0, 0)
 		local nums = {}
