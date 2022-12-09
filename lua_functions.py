@@ -2,6 +2,7 @@ from level_properties import LEVEL_PROPERTY_MAPPING
 from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
 import fix_utils
+import log
 import os
 
 
@@ -60,6 +61,11 @@ def convert_lua(lua_file):
                 new = "execScript(\"" + os.path.relpath(path, script_path) + \
                     "\")"
                 lua_file.replace(old, new)
+    onInit = lua_file.get_function("onInit")
+    if onInit is not None:
+        log.warn(lua_file.path, "overwrites onInit, renaming...")
+        lua_file.replace(onInit, "function " + CONVERTER_PREFIX + "old_onInit()\n" +
+                         lua_file.get_function("onInit", False) + "\nend")
     rename_core_functions(lua_file)
 
 
