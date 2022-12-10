@@ -5,7 +5,6 @@ from lua_file import LuaFile
 import level_properties
 import lua_functions
 import dpath.util
-import luaparser
 import fix_utils
 import argparse
 import shutil
@@ -216,7 +215,8 @@ def convert_pack(args):
                 files["pack.json"][key] = int(str_val.replace(
                     "inf", "9999999999999999999999999999999999999999"
                 ))
-        files["pack.json"]["disambiguator"] = DISAMBIGUATOR
+        files["pack.json"]["disambiguator"] = DISAMBIGUATOR + "_" + os.path.basename(
+            args.source_pack)
         files["pack.json"]["author"] = DISAMBIGUATOR
         files["pack.json"]["dependencies"] = [{
             "disambiguator": DISAMBIGUATOR,
