@@ -86,7 +86,7 @@ function prefix_get_timeline_module()
 	Wait.__index = Wait
 
 	function Wait:new(timeline, time)
-		return setmetatable({timeline = timeline, time = time, current_time = time}, Wait)
+		return setmetatable({timeline = timeline, time = time or 0, current_time = time}, Wait)
 	end
 
 	function Wait:update(frametime)
