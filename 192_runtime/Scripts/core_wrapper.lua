@@ -1,3 +1,4 @@
+u_execScript("lua_functions.lua")
 if prefix_was_defined == nil then
 	onInit()
 	l_setShowPlayerTrail(false)
@@ -15,7 +16,6 @@ if prefix_was_defined == nil then
 	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
 	u_execScript("styles.lua")
 	u_execScript("main_timeline.lua")
-	u_execScript("lua_functions.lua")
 	u_execScript("events.lua")
 	u_execScript("walls.lua")
 	u_execScript("pulse.lua")
