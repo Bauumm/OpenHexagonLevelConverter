@@ -5,7 +5,6 @@ getSpeedMult = u_getSpeedMultDM
 getDelayMult = u_getDelayMultDM
 getDifficultyMult = u_getDifficultyMult
 execScript = u_execScript
-forceIncrement = prefix_increment_difficulty
 
 
 function prefix_resolve_function(func)

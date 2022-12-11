@@ -63,3 +63,5 @@ function prefix_side_change(sides)
 		l_setSides(sides)
 	end
 end
+
+forceIncrement = prefix_increment_difficulty
