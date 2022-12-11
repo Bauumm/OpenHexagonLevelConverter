@@ -49,6 +49,9 @@ function prefix_getField(file, field, default)
 		functions = prefix_LEVEL_PROPERTY_MAPPING[field]
 	elseif file == "style" then
 		functions = prefix_STYLE_PROPERTY_MAPPING[field]
+		if prefix_style[field] ~= nil then
+			return prefix_style[field]
+		end
 	end
 	if functions == nil then
 		local value
@@ -60,9 +63,6 @@ function prefix_getField(file, field, default)
 		end
 		return value
 	else
-		if file == "style" and prefix_style[field] ~= nil then
-			return prefix_style[field]
-		end
 		return prefix_resolve_function(functions[1])()
 	end
 end
