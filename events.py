@@ -91,6 +91,8 @@ def convert_event(event_json, pack_path):
         if event["type"] == "level_change":
             event["id"] = os.path.basename(event["id"])
         elif event["type"] == "script_exec":
+            while event["value_name"].endswith(" "):
+                event["value_name"] = event["value_name"][:-1]
             real_path = fix_utils.match_capitalization(
                 os.path.join(pack_path, "Scripts", event["value_name"]))
             if real_path is None:

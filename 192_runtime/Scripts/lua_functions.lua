@@ -305,6 +305,7 @@ if not prefix_init_fs then
 
 				local new_file = io.tmpfile()
 				new_file:write(JSON:encode_pretty(new_config))
+				new_file:seek("set", 0)
 				return new_file
 			end
 			if prefix_virtual_filesystem[path] == nil then
@@ -315,6 +316,13 @@ if not prefix_init_fs then
 			end
 		else
 			return prefix_io_open(path, mode)
+		end
+	end
+	function io.lines(filename)
+		if filename == nil then
+			return prefix_original_io.lines()
+		else
+			return io.open(filename):lines()
 		end
 	end
 end
