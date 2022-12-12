@@ -74,10 +74,10 @@ if prefix_was_defined == nil then
 			prefix_level_time = l_getLevelTime()
 			prefix_remainder = 0
 			prefix_next_calls = prefix_next_calls + 0.25 / prefix_perfsim:get_target()
+			if prefix_skip_divider ~= 0 then
+				prefix_skipped_time = 0
+			end
 			if math.floor(prefix_next_calls) == 0 then
-				if prefix_skip_divider ~= 0 then
-					prefix_skipped_time = 0
-				end
 				prefix_skipped_time = prefix_skipped_time + frametime
 				prefix_next_time = 0
 				prefix_last_skip_divider = prefix_skip_divider
@@ -107,6 +107,7 @@ if prefix_was_defined == nil then
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function prefix_call_onUpdate(frametime)
+		prefix_overwrite_target_ft = nil
 		prefix_calls_this_tick = 0
 		if frametime > 4 then
 			frametime = 4
@@ -128,6 +129,9 @@ if prefix_was_defined == nil then
 		prefix_style_module:update3D(frametime)
 		prefix_update_rotation(frametime)
 		prefix_style_module:compute_colors()
+		if prefix_calls_this_tick > prefix_call_threshold then
+			prefix_overwrite_target_ft = prefix_calls_this_tick / prefix_call_threshold - 1
+		end
 	end
 
 	function onUpdate(frametime)

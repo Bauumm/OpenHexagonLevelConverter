@@ -153,7 +153,7 @@ end
 
 -- make os.clock work as expected, even if the os module worked it would be windows specific
 os = {}
-prefix_call_threshold = 100000
+prefix_call_threshold = 1000000
 prefix_calls_this_tick = 0
 function os.clock()
 	-- make code like
@@ -161,7 +161,7 @@ function os.clock()
 	-- not freeze the game
 	prefix_calls_this_tick = prefix_calls_this_tick + 1
 	if prefix_calls_this_tick >= prefix_call_threshold then
-		return prefix_get_actual_time() + prefix_calls_this_tick - prefix_call_threshold
+		return prefix_get_actual_time() + prefix_calls_this_tick / prefix_call_threshold - 1
 	end
 	return prefix_get_actual_time()
 end
