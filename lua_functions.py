@@ -98,7 +98,9 @@ def save(packdata, sounds, level_jsons, quiet):
                         STYLE_PROPERTY_MAPPING.to_table() + "\n")
     code = ""
     for level_json in level_jsons:
+        lua_file = level_json["luaFile"][8:]
         level_json.reset()
+        level_json[CONVERTER_PREFIX + "lua_file"] = lua_file
         # Trust levels not to check for this cuz strings are pain
         level_json.delete("events")
         for prop in level_json:

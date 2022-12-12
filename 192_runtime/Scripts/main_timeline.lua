@@ -14,8 +14,7 @@ function prefix_update_initial_timestop(frametime)
 	prefix_actual_time = prefix_actual_time + frametime
 	prefix_update_increment(frametime)
 	if prefix_actual_time < 0 then
-		l_resetTime()
-		u_haltTime(-6)
+		u_haltTime(frametime)
 	end
 end
 

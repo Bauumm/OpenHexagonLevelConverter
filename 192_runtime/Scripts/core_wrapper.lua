@@ -63,6 +63,7 @@ if prefix_was_defined == nil then
 
 	function onInput(frametime, movement, focus, swap)
 		if prefix_finished_timehalt then
+			prefix_update_initial_timestop(frametime)
 			while prefix_next_calls >= 1 do
 				prefix_call_onUpdate(prefix_next_time)
 				prefix_next_calls = prefix_next_calls - 1
@@ -126,8 +127,9 @@ if prefix_was_defined == nil then
 	function onUpdate(frametime)
 		if not prefix_finished_timehalt then
 			prefix_finished_timehalt = true
+			l_resetTime()
+			u_haltTime(-6)
 		end
-		prefix_update_initial_timestop(frametime)
 		if prefix_must_kill and prefix_kill_wall == nil then
 			prefix_must_kill = false
 			prefix_kill_wall = cw_create()
@@ -221,7 +223,7 @@ if prefix_was_defined == nil then
 			prefix_shown_message = nil
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.style_id)
-			u_execScript(level_json.lua_file)
+			u_execScript(level_json.prefix_lua_file)
 			a_playSound("go.ogg")
 			a_setMusic(level_json.music_id)
 			l_resetTime()
