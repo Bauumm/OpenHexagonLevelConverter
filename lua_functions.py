@@ -98,12 +98,14 @@ def save(packdata, sounds, level_jsons, quiet):
                         STYLE_PROPERTY_MAPPING.to_table() + "\n")
     code = ""
     for level_json in level_jsons:
+        level_json.reset()
+        # Trust levels not to check for this cuz strings are pain
+        level_json.delete("events")
         for prop in level_json:
             if type(level_json[prop]) == str:
                 level_json[prop] = level_json[prop].replace("\\", "\\\\") \
                     .replace("\n", "\\n").replace("\t", "\\t") \
                     .replace("\r", "\\r")
-        level_json["luaFile"] = level_json["luaFile"][8:]
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"
     code += CONVERTER_PREFIX + "quiet=" + str(quiet).lower() + "\n"

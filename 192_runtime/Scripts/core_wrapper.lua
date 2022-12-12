@@ -220,10 +220,10 @@ if prefix_was_defined == nil then
 			prefix_message_timeline:reset()
 			prefix_shown_message = nil
 			local level_json = _G["prefix_level_json_" .. id]
-			s_setStyle(level_json.styleId)
-			u_execScript(level_json.luaFile)
+			s_setStyle(level_json.style_id)
+			u_execScript(level_json.lua_file)
 			a_playSound("go.ogg")
-			a_setMusic(level_json.musicId)
+			a_setMusic(level_json.music_id)
 			l_resetTime()
 			onLoad()
 		end

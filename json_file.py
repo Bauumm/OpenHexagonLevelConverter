@@ -26,7 +26,14 @@ class JsonFile(ExtendedDict):
             content = "{}"
         while content[-1] != "}":
             content = content[:-1]
-        json_dict = json.loads(content)
+        self.final_json_string = content
+        self.reset()
+
+    def reset(self):
+        keys = list(self.keys())
+        for key in keys:
+            del self[key]
+        json_dict = json.loads(self.final_json_string)
         for key in json_dict:
             self[key] = json_dict[key]
 

@@ -43,7 +43,7 @@ function prefix_setField(file, field, value)
 	end
 end
 
-function prefix_getField(file, field, default)
+function prefix_getField(file, field, default, converter)
 	local functions
 	if file == "level" then
 		functions = prefix_LEVEL_PROPERTY_MAPPING[field]
@@ -53,28 +53,44 @@ function prefix_getField(file, field, default)
 			return prefix_style[field]
 		end
 	end
+	local value
 	if functions == nil then
-		local value
 		if file == "level" then
 			value = prefix_custom_keys[field]
+			if value == nil then
+				value = _G["prefix_level_json_" .. prefix_level_id][field]
+			end
 		end
 		if value == nil then
 			value = default
 		end
+	else
+		value = prefix_resolve_function(functions[1])()
+	end
+	if converter == nil then
 		return value
 	else
-		return prefix_resolve_function(functions[1])()
+		return converter(value)
 	end
 end
 
 function getLevelValueInt(field)
-	return prefix_getField("level", field, 0)
+	return prefix_getField("level", field, 0, function(value)
+		return math.floor(tonumber(value))
+	end)
 end
 function getLevelValueFloat(field)
-	return prefix_getField("level", field, 0)
+	return prefix_getField("level", field, 0, tonumber)
 end
 function getLevelValueString(field)
-	return prefix_getField("level", field, "")
+	return prefix_getField("level", field, "", function(value)
+		local str = tostring(value)
+		if type(value) == "number" and str:match("[.]") then
+			return str .. "0"
+		else
+			return str
+		end
+	end)
 end
 function getLevelValueBool(field)
 	return prefix_getField("level", field, false)
@@ -93,13 +109,22 @@ function setLevelValueBool(field, value)
 	return prefix_setField("level", field, value)
 end
 function getStyleValueInt(field)
-	return prefix_getField("style", field, 0)
+	return prefix_getField("style", field, 0, function(value)
+		return math.floor(tonumber(value))
+	end)
 end
 function getStyleValueFloat(field)
-	return prefix_getField("style", field, 0)
+	return prefix_getField("style", field, 0, tonumber)
 end
 function getStyleValueString(field)
-	return prefix_getField("style", field, "")
+	return prefix_getField("style", field, "", function(value)
+		local str = tostring(value)
+		if type(value) == "number" and str:match("[.]") then
+			return str .. "0"
+		else
+			return str
+		end
+	end)
 end
 function getStyleValueBool(field)
 	return prefix_getField("style", field, false)

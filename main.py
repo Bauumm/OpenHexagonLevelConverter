@@ -120,7 +120,6 @@ def convert_level(files, args):
             level_json.save("Levels/" + level)
         else:
             level_json.save("Levels/" + level + ".notselectable")
-        level_json["id"] = level_json["id"][len(CONVERTER_PREFIX) + len(pack_name) + 1:]
         lua_file.save(lua_path)
     return level_luas
 
