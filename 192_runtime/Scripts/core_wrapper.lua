@@ -94,6 +94,12 @@ if prefix_was_defined == nil then
 				prefix_next_calls = prefix_next_calls - 1
 			end
 		end
+		if prefix_must_kill and prefix_kill_wall == nil then
+			prefix_must_kill = false
+			prefix_kill_wall = cw_create()
+			cw_setDeadly(prefix_kill_wall, true)
+			cw_setVertexPos4(prefix_kill_wall, -1600, 1600, -1600, -1600, 1600, -1600, 1600, 1600)
+		end
 		if movement ~= 0 then
 			return true
 		end
@@ -129,12 +135,6 @@ if prefix_was_defined == nil then
 			prefix_finished_timehalt = true
 			l_resetTime()
 			u_haltTime(-6)
-		end
-		if prefix_must_kill and prefix_kill_wall == nil then
-			prefix_must_kill = false
-			prefix_kill_wall = cw_create()
-			cw_setDeadly(prefix_kill_wall, true)
-			cw_setVertexPos4(prefix_kill_wall, -1600, 1600, -1600, -1600, 1600, -1600, 1600, 1600)
 		end
 	end
 
