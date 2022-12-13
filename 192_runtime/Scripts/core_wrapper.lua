@@ -87,7 +87,7 @@ if prefix_was_defined == nil then
 		end
 	end
 
-	onInit()
+	onInit(prefix_skip_storage)
 
 	function onDeath()
 		prefix_died = true
@@ -241,6 +241,7 @@ if prefix_was_defined == nil then
 			prefix_shown_message = nil
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.style_id)
+			prefix_skip_storage = true
 			u_execScript(level_json.prefix_lua_file)
 			a_playSound("go.ogg")
 			a_setMusic(level_json.music_id)
