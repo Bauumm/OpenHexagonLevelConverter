@@ -6,11 +6,11 @@ function prefix_get_data_module()
 	local data = {}
 
 	function data:loadEvent(event_id)
-		u_execScript("prefix_Events/" .. event_id .. ".lua")
+		u_execScript("prefix_Events/" .. prefix_EVENT_ID_FILE_MAPPING[event_id] .. ".lua")
 	end
 
 	function data:loadStyle(style_id)
-		u_execScript("prefix_Styles/" .. style_id .. ".lua")
+		u_execScript("prefix_Styles/" .. prefix_STYLE_ID_FILE_MAPPING[style_id] .. ".lua")
 	end
 
 	return data

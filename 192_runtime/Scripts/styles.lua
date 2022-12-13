@@ -95,7 +95,7 @@ function prefix_get_style_module()
 
 	function Style:init()
 		shdr_resetAllActiveFragmentShaders()
-		self.shdr_back = shdr_getShaderId(prefix_style_id .. "-background.frag")
+		self.shdr_back = shdr_getShaderId(prefix_STYLE_ID_FILE_MAPPING[prefix_style_id] .. "-background.frag")
 		prefix_data_module:loadStyle(prefix_style_id)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0

@@ -196,11 +196,13 @@ def convert_pack(args):
         lua_functions.save(packdata, sounds, all_dict_values(files["Levels"]),
                            args.quiet)
         convert_event(files)
+        events.save(packdata)
         convert_lua(files, level_luas, args.source_pack)
         log.info("Converting styles...")
         for file in all_dict_values(files.get("Styles", {})):
             styles.convert_style(file)
             file.save(os.path.relpath(file.path, args.source_pack))
+        styles.save(packdata)
         log.info("Copying Music and misc files...")
         convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
         for path in misc_files:

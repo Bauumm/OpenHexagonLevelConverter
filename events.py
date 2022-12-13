@@ -67,6 +67,9 @@ getLevelValueFloat(\"<value_name>\") / <value>)",
 }
 
 
+id_file_mapping = ExtendedDict()
+
+
 def convert_event(event_json, pack_path):
     # set default values
     event = {
@@ -129,13 +132,15 @@ def convert_external(json_file):
     while not os.path.exists(os.path.join(pack_path, "pack.json")):
         pack_path = os.path.dirname(pack_path)
     if "id" in json_file:
+        filename = os.path.basename(json_file.path)[:-5]
+        id_file_mapping[json_file["id"]] = filename
         new_event_lua = LuaFile()
         new_event_lua.set_text("_G[\"" + CONVERTER_PREFIX + json_file["id"] +
                                "_EVENTS\"]=" + convert_events(
                                    json_file.get("events", []), pack_path)
                                .to_table() + "\n")
         new_event_lua.save("Scripts/" + CONVERTER_PREFIX + "Events/" +
-                           json_file["id"] + ".lua")
+                           filename + ".lua")
     else:
         log.error("Event file", json_file.path, "has no id!")
 
@@ -151,3 +156,8 @@ def convert_level(level_json, level_lua):
                                         pack_path)
                          .to_table(), CONVERTER_PREFIX + "onInit")
     level_json.delete("events")
+
+
+def save(packdata):
+    packdata.mixin_line(CONVERTER_PREFIX + "EVENT_ID_FILE_MAPPING=" + id_file_mapping
+                        .to_table())

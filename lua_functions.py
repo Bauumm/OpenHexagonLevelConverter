@@ -114,4 +114,3 @@ def save(packdata, sounds, level_jsons, quiet):
             + "\"]=" + level_json.to_table() + "\n"
     code += CONVERTER_PREFIX + "quiet=" + str(quiet).lower() + "\n"
     packdata.mixin_line(code)
-    packdata.save("Scripts/" + CONVERTER_PREFIX + "packdata.lua")

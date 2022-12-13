@@ -16,6 +16,7 @@ COLOR_OBJECTS = [
 
 filepath = os.path.realpath(__file__)
 colors3D = ExtendedDict()
+id_file_mapping = ExtendedDict()
 
 
 def ensure_item_count(items, count=4, default=0):
@@ -104,10 +105,12 @@ def convert_style(style_json):
     style_json["hue_increment"] = style_json.get("hue_increment", 0)
 
     # Save style for use in lua
+    filename = os.path.basename(style_json.path)[:-5]
+    id_file_mapping[style_json["id"]] = filename
     os.makedirs("Scripts/" + CONVERTER_PREFIX + "Styles", exist_ok=True)
     lua_file = LuaFile()
     lua_file.set_text(CONVERTER_PREFIX + "style=" + style_json.to_table())
-    lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" + style_json["id"] + ".lua")
+    lua_file.save("Scripts/" + CONVERTER_PREFIX + "Styles/" + filename + ".lua")
 
     # Save it now for use in menu
     menu_style = style_json.copy()
@@ -119,8 +122,7 @@ def convert_style(style_json):
                 color["value"] = [0, 0, 0, 0]
     menu_style["id"] += "-menu"
     os.makedirs("Styles", exist_ok=True)
-    with open("Styles/" + os.path.basename(style_json.path)[:-5] + "-menu.json", "w") \
-            as menu_style_file:
+    with open("Styles/" + filename + "-menu.json", "w") as menu_style_file:
         json.dump(menu_style, menu_style_file, indent=4)
 
     # Set some properties to fixed values in order to remake them with lua
@@ -190,10 +192,16 @@ def convert_style(style_json):
     background_shader = BaseFile(os.path.join(os.path.dirname(filepath),
                                               "background.frag"))
     background_shader.mixin_line(code, 19)
-    background_shader.save("Shaders/" + style_json["id"] + "-background.frag")
+    background_shader.save("Shaders/" + filename + "-background.frag")
 
 
 def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" + level_json["styleId"] +
                          "\"", CONVERTER_PREFIX + "onInit")
     level_json["styleId"] += "-menu"
+
+
+def save(packdata):
+    packdata.mixin_line(CONVERTER_PREFIX + "STYLE_ID_FILE_MAPPING=" + id_file_mapping
+                        .to_table())
+    packdata.save("Scripts/" + CONVERTER_PREFIX + "packdata.lua")
