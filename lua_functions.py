@@ -71,6 +71,8 @@ def convert_lua(lua_file):
 
 def rename_core_functions(lua_file):
     for function in CORE_FUNCTIONS:
+        lua_file.replace_assigns(function, CONVERTER_PREFIX + function)
+        lua_file.replace_function_calls(function, CONVERTER_PREFIX + function)
         function_source = lua_file.get_function(function)
         if function_source is None:
             continue

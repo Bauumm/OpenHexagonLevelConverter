@@ -195,5 +195,5 @@ def convert_style(style_json):
 
 def convert_lua(level_lua, level_json):
     level_lua.mixin_line(CONVERTER_PREFIX + "style_id=\"" + level_json["styleId"] +
-                         "\"", "onInit")
+                         "\"", CONVERTER_PREFIX + "onInit")
     level_json["styleId"] += "-menu"

@@ -49,6 +49,18 @@ class LuaFile(BaseFile):
         if self.rebuild_ast:
             self._ast_tree = ast.parse(self._text)
 
+    def _get_assign_nodes(self, name):
+        nodes = []
+        for node in ast.walk(self._ast_tree):
+            if isinstance(node, astnodes.Assign):
+                for target in node.targets:
+                    if isinstance(target, astnodes.Name) and target.id == name:
+                        nodes.append(target)
+                for value in node.values:
+                    if isinstance(value, astnodes.Name) and value.id == name:
+                        nodes.append(value)
+        return nodes
+
     def _get_function_node(self, name):
         if name is None:
             return
@@ -107,6 +119,16 @@ class LuaFile(BaseFile):
                     if node.func.id in name:
                         nodes.append(node)
         return nodes
+
+    def replace_assigns(self, variable, new_variable):
+        nodes = self._get_assign_nodes(variable)
+        if len(nodes) > 0:
+            nodes.reverse()
+            for node in nodes:
+                self._text = self._text[:node.start_char] + new_variable + \
+                    self._text[node.stop_char + 1:]
+        if self.rebuild_ast:
+            self._ast_tree = ast.parse(self._text)
 
     def replace_function_calls_multiple(self, function_dict):
         nodes = self._get_function_call_nodes(function_dict.keys())

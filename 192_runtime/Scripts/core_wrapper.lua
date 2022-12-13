@@ -1,6 +1,27 @@
 u_execScript("lua_functions.lua")
 if prefix_was_defined == nil then
-	onInit()
+	prefix_LEVEL_PROPERTY_DEFAULTS = {
+		pulse_min = 75,
+		pulse_max = 80,
+		pulse_speed = 0,
+		pulse_speed_r = 0,
+		pulse_delay_max = 0,
+		beatpulse_max = 0,
+		beatpulse_delay_max = 0,
+		radius_min = 72
+	}
+	prefix_NOT_SET_IN_ONINIT = {
+		id = true,
+		name = true,
+		description = true,
+		author = true,
+		menu_priority = true,
+		selectable = true,
+		difficulty_multipliers = true,
+		style_id = true,
+		music_id = true,
+		lua_file = true
+	}
 	l_setShowPlayerTrail(false)
 	l_setShadersRequired(true)
 	prefix_was_defined = true
@@ -24,7 +45,6 @@ if prefix_was_defined == nil then
 	u_execScript("random.lua")
 	u_execScript("persistent_storage.lua")
 	prefix_persistent_storage = prefix_get_persistent_storage()
-	prefix_load_storage = true
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -36,6 +56,40 @@ if prefix_was_defined == nil then
 			end
 		end
 	end
+
+	function onInit()
+		if not prefix_persistent_storage.popped then
+			local level_json = _G["prefix_level_json_" .. prefix_level_id]
+			prefix_style_id = level_json.style_id
+			a_syncMusicToDM(false)
+			l_setIncEnabled(false)
+			prefix_custom_keys = {}
+			local ignore_defaults = {}
+			for key, value in pairs(level_json) do
+				if prefix_LEVEL_PROPERTY_DEFAULTS[key] ~= nil then
+					ignore_defaults[key] = true
+				end
+				if not prefix_NOT_SET_IN_ONINIT[key] then
+					prefix_setField("level", key, value)
+				end
+			end
+			for key, value in pairs(prefix_LEVEL_PROPERTY_DEFAULTS) do
+				if not ignore_defaults[key] then
+					prefix_setField("level", key, value)
+				end
+			end
+			-- load the last attempts custom keys if they exist
+			local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
+			local data = JSON:decode(keys)
+			prefix_load_files(data.files)
+			for k, v in pairs(data.level_values) do
+				prefix_custom_keys[k] = v
+			end
+			prefix_onInit()
+		end
+	end
+
+	onInit()
 
 	function onDeath()
 		prefix_died = true
@@ -169,19 +223,10 @@ if prefix_was_defined == nil then
 
 	function onUnload()
 		prefix_is_retry = true
-		if prefix_load_storage then
-			local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
-			local data = JSON:decode(keys)
-			prefix_load_files(data.files)
-			for k, v in pairs(data.level_values) do
-				prefix_custom_keys[k] = v
-			end
-		end
 	end
 
 	function onLoad()
 		if not u_inMenu() then
-			prefix_load_storage = false
 			u_haltTime(-6)  -- undo timehalt the steam version adds by default
 			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * (math.random(0, 1) * 2 - 1))
 

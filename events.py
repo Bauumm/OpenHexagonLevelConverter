@@ -144,10 +144,10 @@ def convert_level(level_json, level_lua):
     pack_path = os.path.dirname(level_json.path)
     while not os.path.exists(os.path.join(pack_path, "pack.json")):
         pack_path = os.path.dirname(pack_path)
-    if level_lua.get_function("onInit") is None:
-        level_lua.mixin_line("function onInit()\nend")
+    if level_lua.get_function(CONVERTER_PREFIX + "onInit") is None:
+        level_lua.mixin_line("function " + CONVERTER_PREFIX + "onInit()\nend")
     level_lua.mixin_line(CONVERTER_PREFIX + "MAIN_EVENTS=" +
                          convert_events(level_json.get("events", []),
                                         pack_path)
-                         .to_table(), "onInit")
+                         .to_table(), CONVERTER_PREFIX + "onInit")
     level_json.delete("events")

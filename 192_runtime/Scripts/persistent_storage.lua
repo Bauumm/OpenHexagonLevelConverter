@@ -1,5 +1,5 @@
 function prefix_get_persistent_storage()
-	local storage = {}
+	local storage = {popped = false}
 
 	function storage:allocate(size)
 		cw_clear()
@@ -45,6 +45,7 @@ function prefix_get_persistent_storage()
 		end
 		local str = self:decode_str(nums)
 		cw_clear()
+		self.popped = true
 		return str
 	end
 
