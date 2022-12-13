@@ -27,13 +27,7 @@ if prefix_was_defined == nil then
 	prefix_was_defined = true
 	prefix_level_time = 0
 	prefix_died = false
-	prefix_next_calls = 0
-	prefix_next_time = 0
-	prefix_remainder = 0
 	prefix_call_depth = 0
-	prefix_skipped_time = 0
-	prefix_skip_divider = 0
-	prefix_last_skip_divider = 1
 	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
 	u_execScript("styles.lua")
 	u_execScript("main_timeline.lua")
@@ -43,8 +37,10 @@ if prefix_was_defined == nil then
 	u_execScript("rotation.lua")
 	u_execScript("perfsim.lua")
 	u_execScript("random.lua")
+	u_execScript("timing_system.lua")
 	u_execScript("persistent_storage.lua")
 	prefix_persistent_storage = prefix_get_persistent_storage()
+	prefix_timing_system = prefix_get_timing_system()
 
 	-- wrap core functions to ignore errors and call custom event/timeline/style handlers
 	function prefix_function_wrapper(func, arg)
@@ -57,7 +53,7 @@ if prefix_was_defined == nil then
 		end
 	end
 
-	function onInit()
+	function onInit(skip_storage)
 		if not prefix_persistent_storage.popped then
 			local level_json = _G["prefix_level_json_" .. prefix_level_id]
 			prefix_style_id = level_json.style_id
@@ -78,12 +74,14 @@ if prefix_was_defined == nil then
 					prefix_setField("level", key, value)
 				end
 			end
-			-- load the last attempts custom keys if they exist
-			local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
-			local data = JSON:decode(keys)
-			prefix_load_files(data.files)
-			for k, v in pairs(data.level_values) do
-				prefix_custom_keys[k] = v
+			if not skip_storage then
+				-- load the last attempts custom keys if they exist
+				local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
+				local data = JSON:decode(keys)
+				prefix_load_files(data.files)
+				for k, v in pairs(data.level_values) do
+					prefix_custom_keys[k] = v
+				end
 			end
 			prefix_onInit()
 		end
@@ -102,51 +100,20 @@ if prefix_was_defined == nil then
 			cw_destroy(prefix_kill_wall)
 			prefix_kill_wall = nil
 		end
-		if render_stage == 0 and prefix_next_calls >= 1 then
-			prefix_remainder = prefix_remainder + frametime
-			local calls = math.floor(prefix_remainder / prefix_next_time)
-			prefix_remainder = prefix_remainder - calls * prefix_next_time
-			for i=1,calls do
-				if prefix_next_calls >= 1 then
-					prefix_next_calls = prefix_next_calls - 1
-					prefix_call_onUpdate(prefix_next_time)
-				end
-			end
+		if render_stage == 0 then
+			prefix_timing_system:random_update(frametime)
 		end
 	end
 
 	function onInput(frametime, movement, focus, swap)
 		if prefix_finished_timehalt then
 			prefix_update_initial_timestop(frametime)
-			while prefix_next_calls >= 1 do
-				prefix_call_onUpdate(prefix_next_time)
-				prefix_next_calls = prefix_next_calls - 1
-			end
+			prefix_timing_system:run_missing()
 			prefix_movement = movement
 			prefix_focus = focus
 			prefix_swap = swap
 			prefix_level_time = l_getLevelTime()
-			prefix_remainder = 0
-			prefix_next_calls = prefix_next_calls + 0.25 / prefix_perfsim:get_target()
-			if prefix_skip_divider ~= 0 then
-				prefix_skipped_time = 0
-			end
-			if math.floor(prefix_next_calls) == 0 then
-				prefix_skipped_time = prefix_skipped_time + frametime
-				prefix_next_time = 0
-				prefix_last_skip_divider = prefix_skip_divider
-				if prefix_last_skip_divider < 1 then
-					prefix_last_skip_divider = 1
-				end
-				prefix_skip_divider = 0
-			else
-				prefix_next_time = prefix_skipped_time / prefix_last_skip_divider + frametime / math.floor(prefix_next_calls)
-				prefix_skip_divider = prefix_skip_divider + 1
-			end
-			if prefix_next_calls >= 1 then
-				prefix_call_onUpdate(prefix_next_time)
-				prefix_next_calls = prefix_next_calls - 1
-			end
+			prefix_timing_system:fixed_update(frametime)
 		end
 		if prefix_must_kill and prefix_kill_wall == nil then
 			prefix_must_kill = false
@@ -197,12 +164,14 @@ if prefix_was_defined == nil then
 	end
 
 	function onPreUnload()
+		prefix_message_clear_timeline = ct_create()
 		prefix_is_unloading = true
 		prefix_executingEvents = {}
 		prefix_queuedEvents = {}
 		prefix_clear_and_reset_timeline()
 		prefix_custom_keys = nil
-		onInit()
+		prefix_persistent_storage.popped = false
+		onInit(true)
 		local old_keys = {}
 		for k, v in pairs(prefix_custom_keys) do
 			old_keys[k] = v
