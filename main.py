@@ -116,7 +116,7 @@ def convert_level(files, args):
                             str(60 / float(options[2])) + "}\n" +
                             CONVERTER_PREFIX + "perf_const=" + str(options[0]))
         pack_name = os.path.basename(args.source_pack)
-        level_json["id"] = CONVERTER_PREFIX + pack_name + "_" + level_json["id"]
+        level_json["id"] = pack_name + "_" + level_json["id"]
         if level_json.get("selectable", True):
             level_json.save("Levels/" + level)
         else:
@@ -199,9 +199,10 @@ def convert_pack(args):
         events.save(packdata)
         convert_lua(files, level_luas, args.source_pack)
         log.info("Converting styles...")
-        for file in all_dict_values(files.get("Styles", {})):
-            styles.convert_style(file)
-            file.save(os.path.relpath(file.path, args.source_pack))
+        for file in files.get("Styles", {}).values():
+            if isinstance(file, JsonFile):
+                styles.convert_style(file)
+                file.save(os.path.relpath(file.path, args.source_pack))
         styles.save(packdata)
         log.info("Copying Music and misc files...")
         convert_music(all_dict_values(files.get("Music", {})), args.source_pack)
