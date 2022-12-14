@@ -1,5 +1,5 @@
 u_execScript("lua_functions.lua")
-if prefix_was_defined == nil then
+if prefix_was_defined == nil or u_inMenu() then
 	prefix_LEVEL_PROPERTY_DEFAULTS = {
 		pulse_min = 75,
 		pulse_max = 80,
@@ -54,7 +54,7 @@ if prefix_was_defined == nil then
 	end
 
 	function onInit(skip_storage)
-		if not prefix_persistent_storage.popped then
+		if not prefix_persistent_storage.popped or u_inMenu() then
 			local level_json = _G["prefix_level_json_" .. prefix_level_id]
 			prefix_style_id = level_json.style_id
 			a_syncMusicToDM(false)
@@ -74,7 +74,7 @@ if prefix_was_defined == nil then
 					prefix_setField("level", key, value)
 				end
 			end
-			if not skip_storage then
+			if not skip_storage and not u_inMenu() then
 				-- load the last attempts custom keys if they exist
 				local keys = prefix_persistent_storage.pop(prefix_persistent_storage)
 				local data = JSON:decode(keys)
