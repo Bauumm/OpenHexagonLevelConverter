@@ -1,66 +1,3 @@
--- small utility class to automatically round numbers like exactly like floats in c++
-prefix_float = {}
-prefix_float.round = function(num)
-	local speedMult = l_getSpeedMult()
-	l_setSpeedMult(num)
-	local num = l_getSpeedMult()
-	l_setSpeedMult(speedMult)
-	return num
-end
-prefix_float.make_float = function(num)
-	if type(num) == "number" then
-		return prefix_float:new(num)
-	end
-	return num
-end
-prefix_float.__add = function(a, b)
-	return prefix_float:new(prefix_float.make_float(a).value + prefix_float.make_float(b).value)
-end
-prefix_float.__sub = function(a, b)
-	return prefix_float:new(prefix_float.make_float(a).value - prefix_float.make_float(b).value)
-end
-prefix_float.__mul = function(a, b)
-	return prefix_float:new(prefix_float.make_float(a).value * prefix_float.make_float(b).value)
-end
-prefix_float.__div = function(a, b)
-	return prefix_float:new(prefix_float.make_float(a).value / prefix_float.make_float(b).value)
-end
-prefix_float.__tostring = function(o)
-	return o.value
-end
-function prefix_float:new(value)
-	return setmetatable({value=prefix_float.round(value or 0)}, prefix_float)
-end
-
-
-function prefix_insert_path(t, keys, value)
-	local directory = t
-	for i=1,#keys do
-		local key = keys[i]
-		if directory[key] == nil then
-			if i == #keys then
-				directory[key] = value
-				return
-			end
-			directory[key] = {}
-		end
-		directory = directory[key]
-	end
-end
-
-
-function prefix_lookup_path(t, keys)
-	local directory = t
-	for _, key in pairs(keys) do
-		if directory[key] == nil then
-			return
-		end
-		directory = directory[key]
-	end
-	return directory
-end
-
-
 function prefix_get_wall_module()
 	local wall_module = {
 		-- wall spawn distance in 1.92 cannot be changed
@@ -124,7 +61,7 @@ function prefix_get_wall_module()
 	end
 
 	function wall_module:_wall(side, thickness, speed, acceleration, minSpeed, maxSpeed)
-		side = math.floor(side)
+		side = round_to_even(side)
 		if thickness ~= thickness then
 			print("Not spawning wall with NaN thickness!")
 			return

@@ -29,6 +29,7 @@ if prefix_was_defined == nil or u_inMenu() then
 	prefix_died = false
 	prefix_call_depth = 0
 	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
+	u_execScript("utils.lua")
 	u_execScript("styles.lua")
 	u_execScript("main_timeline.lua")
 	u_execScript("events.lua")
