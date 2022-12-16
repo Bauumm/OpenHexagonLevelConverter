@@ -108,7 +108,7 @@ def convert_event(event_json, pack_path):
                     pack_path, "Scripts"))
         for prop in event:
             function = function.replace("<" + prop + ">", str(event[prop]))
-        return function.replace("\n", "\\n").replace("\\", "\\\\")
+        return function.replace("\\", "\\\\\\\\").replace("\n", "\\\\n")
     else:
         return "u_log(\"unkown event type: " + event["type"] + "\")"
 
