@@ -178,11 +178,12 @@ function os.date(format_string)
 		end
 		return string
 	end
-	local time = prefix_get_actual_time()
+	local time = prefix_get_actual_time() + 100000
 	local string = format_string
 			:gsub("%%y", "22")
 			:gsub("%%Y", "2022")
 			:gsub("%%m", "12")
+			:gsub("%%I", ensure_length(tostring(math.floor(time / 86400) % 7 + 1), 2))
 			:gsub("%%d", ensure_length(tostring(math.floor(time / 86400) % 30 + 1), 2))
 			:gsub("%%H", ensure_length(tostring(math.floor(time / 3600) % 24), 2))
 			:gsub("%%M", ensure_length(tostring(math.floor(time / 60) % 60), 2))
