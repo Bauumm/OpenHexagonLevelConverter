@@ -31,6 +31,48 @@ def fix_lua(code):
     return _parse_code(code)
 
 
+def fix_block_loops(lua_file):
+    if "while" in lua_file._text:
+        comments = []
+        for node in ast.walk(lua_file._ast_tree):
+            for comment in node.comments:
+                comments.append([comment.start_char, comment.stop_char])
+        for sep in " ", "\n", "\t":
+            results = [i for i in range(len(lua_file._text))
+                       if lua_file._text.startswith("while" + sep, i)]
+            loops = lua_file._text.split("while" + sep)
+            new_text = loops[0]
+            count = 0
+            for loop in loops[1:]:
+                result = results[count]
+                count += 1
+                in_comment = False
+                for comment in comments:
+                    if comment[0] <= result and comment[1] + 1 >= result:
+                        in_comment = True
+                if in_comment:
+                    rest = ""
+                else:
+                    for subsep in " ", "\n", "\t":
+                        rests = loop.split(subsep + "do", 1)
+                        if len(rests) > 1:
+                            break
+                    rest = rests[1]
+                if rest.split("end", 1)[0] \
+                        .replace("\n", "") \
+                        .replace("\t", "") \
+                        .replace("\r", "") \
+                        .replace(" ", "") == "" and not in_comment:
+                    condition = loop.split(subsep + "do", 1)[0]
+                    log.info("Replacing blocking loop with condition:", condition)
+                    new_text += "if " + condition + " then\n" + \
+                        CONVERTER_PREFIX + "stop_game(function() return " + \
+                        condition + " end)\n" + rest
+                else:
+                    new_text += "while " + loop
+            lua_file.set_text(new_text)
+
+
 def fix_recursion(lua_file):
     functions = []
     for node in ast.walk(lua_file._ast_tree):

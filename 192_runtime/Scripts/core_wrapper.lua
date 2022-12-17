@@ -29,6 +29,9 @@ if prefix_was_defined == nil or u_inMenu() then
 	prefix_died = false
 	prefix_call_depth = 0
 	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
+	prefix_game_stopped = false
+	prefix_stopped_time = 0
+	prefix_block_offset = 0
 	u_execScript("utils.lua")
 	u_execScript("styles.lua")
 	u_execScript("main_timeline.lua")
@@ -101,13 +104,18 @@ if prefix_was_defined == nil or u_inMenu() then
 			cw_destroy(prefix_kill_wall)
 			prefix_kill_wall = nil
 		end
-		if render_stage == 0 then
+		if render_stage == 0 and not prefix_game_stopped then
 			prefix_timing_system:random_update(frametime)
 		end
 	end
 
+	function prefix_stop_game(condition_func)
+		prefix_block_condition = condition_func
+		prefix_game_stopped = true
+	end
+
 	function onInput(frametime, movement, focus, swap)
-		if prefix_finished_timehalt then
+		if prefix_finished_timehalt and not prefix_game_stopped then
 			prefix_update_initial_timestop(frametime)
 			prefix_timing_system:run_missing()
 			prefix_movement = movement
@@ -115,6 +123,17 @@ if prefix_was_defined == nil or u_inMenu() then
 			prefix_swap = swap
 			prefix_level_time = l_getLevelTime()
 			prefix_timing_system:fixed_update(frametime)
+		elseif prefix_game_stopped then
+			prefix_movement = movement
+			prefix_focus = focus
+			prefix_swap = swap
+			if not prefix_block_condition() then
+				prefix_game_stopped = false
+			else
+				prefix_stopped_time = prefix_stopped_time + frametime
+				prefix_block_offset = prefix_block_offset + frametime
+				u_haltTime(frametime)
+			end
 		end
 		if prefix_must_kill and prefix_kill_wall == nil then
 			prefix_must_kill = false
@@ -129,8 +148,10 @@ if prefix_was_defined == nil or u_inMenu() then
 
 	-- onStep should not be called by the game but by the custom timeline, so it isn't included here
 	function prefix_call_onUpdate(frametime)
-		prefix_overwrite_target_ft = nil
-		prefix_calls_this_tick = 0
+		if prefix_stopped_time > 0 then
+			frametime = frametime + prefix_stopped_time
+			prefix_stopped_time = 0
+		end
 		if frametime > 4 then
 			frametime = 4
 		end
@@ -151,9 +172,6 @@ if prefix_was_defined == nil or u_inMenu() then
 		prefix_style_module:update3D(frametime)
 		prefix_update_rotation(frametime)
 		prefix_style_module:compute_colors()
-		if prefix_calls_this_tick > prefix_call_threshold then
-			prefix_overwrite_target_ft = prefix_calls_this_tick / prefix_call_threshold - 1
-		end
 	end
 
 	function onUpdate(frametime)

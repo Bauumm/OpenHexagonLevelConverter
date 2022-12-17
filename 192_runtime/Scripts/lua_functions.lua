@@ -153,17 +153,8 @@ end
 
 -- make os.clock work as expected, even if the os module worked it would be windows specific
 os = {}
-prefix_call_threshold = 1000000
-prefix_calls_this_tick = 0
 function os.clock()
-	-- make code like
-	-- while os.clock() < 100 do...
-	-- not freeze the game
-	prefix_calls_this_tick = prefix_calls_this_tick + 1
-	if prefix_calls_this_tick >= prefix_call_threshold then
-		return prefix_get_actual_time() + prefix_calls_this_tick / prefix_call_threshold - 1
-	end
-	return prefix_get_actual_time()
+	return prefix_get_actual_time() + prefix_block_offset / 60
 end
 os.exit = e_kill  -- levels that close the game in 1.92 should kill the player
 

@@ -67,6 +67,7 @@ def convert_lua(lua_file):
         lua_file.replace(onInit, "function " + CONVERTER_PREFIX + "old_onInit()\n" +
                          lua_file.get_function("onInit", False) + "\nend")
     rename_core_functions(lua_file)
+    fix_utils.fix_block_loops(lua_file)
 
 
 def rename_core_functions(lua_file):
