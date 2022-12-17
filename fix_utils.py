@@ -33,11 +33,11 @@ def fix_lua(code):
 
 def fix_block_loops(lua_file):
     if "while" in lua_file._text:
-        comments = []
-        for node in ast.walk(lua_file._ast_tree):
-            for comment in node.comments:
-                comments.append([comment.start_char, comment.stop_char])
         for sep in " ", "\n", "\t":
+            comments = []
+            for node in ast.walk(lua_file._ast_tree):
+                for comment in node.comments:
+                    comments.append([comment.start_char, comment.stop_char])
             results = [i for i in range(len(lua_file._text))
                        if lua_file._text.startswith("while" + sep, i)]
             loops = lua_file._text.split("while" + sep)
@@ -69,7 +69,7 @@ def fix_block_loops(lua_file):
                         CONVERTER_PREFIX + "stop_game(function() return " + \
                         condition + " end)\n" + rest
                 else:
-                    new_text += "while " + loop
+                    new_text += "while" + sep + loop
             lua_file.set_text(new_text)
 
 
