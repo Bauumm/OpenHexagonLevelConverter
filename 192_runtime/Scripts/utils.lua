@@ -36,6 +36,9 @@ function round_to_even(num)
 	if num == nil then
 		return 0
 	end
+	if prefix_NO_ROUND_EVEN then
+		return math.floor(num)
+	end
 	local decimal = num % 1
 	if decimal ~= 0.5 then
 		return math.floor(num + 0.5)

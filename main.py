@@ -192,7 +192,8 @@ def convert_pack(args):
                                         "packdata.lua"))
         packdata.replace("prefix_", CONVERTER_PREFIX)
         packdata.mixin_line(CONVERTER_PREFIX + "DISAMBIGUATOR=\"" + DISAMBIGUATOR +
-                            "\"", line=1)
+                            "\"\n" + CONVERTER_PREFIX + "NO_ROUND_EVEN=" +
+                            str(args.no_round_even).lower() + "\n", line=1)
         lua_functions.save(packdata, sounds, all_dict_values(files["Levels"]),
                            args.quiet)
         convert_event(files)
@@ -278,6 +279,9 @@ if __name__ == "__main__":
                                 "fps_limit_upper"
                             ), help="set the default timing options",
                             default=[0.03, 240, 960])
+    pack_parser.add_argument("--no-round-even", action="store_true", help="This option \
+                             changes rounding behaviour to truncate instead of choosing\
+                             the closest even number")
     pack_parser.add_argument("--quiet", action="store_true", help="with this \
                              option converted packs will not print out error \
                              messages from the original lua")
