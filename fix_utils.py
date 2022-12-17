@@ -35,6 +35,21 @@ def fix_block_loops(lua_file):
     if "while" in lua_file._text:
         for sep in " ", "\n", "\t":
             comments = []
+            comment_types = {"--[[": ["]]", "]]--"], "--[===[": "]===]--", "--": "\n"}
+            looking_for = None
+            current_comment = []
+            for i in range(len(lua_file._text)):
+                if looking_for is None:
+                    for comment_type in comment_types:
+                        if lua_file._text.startswith(comment_type, i):
+                            current_comment.append(i)
+                            break
+                else:
+                    if lua_file._text.startswith(comment_types[comment_type], i):
+                        looking_for = None
+                        current_comment.append(i)
+                        comments.append(current_comment)
+                        current_comment = []
             for node in ast.walk(lua_file._ast_tree):
                 for comment in node.comments:
                     comments.append([comment.start_char, comment.stop_char])
