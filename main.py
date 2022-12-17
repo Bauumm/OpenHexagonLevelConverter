@@ -192,7 +192,7 @@ def convert_pack(args):
                                         "packdata.lua"))
         packdata.replace("prefix_", CONVERTER_PREFIX)
         packdata.mixin_line(CONVERTER_PREFIX + "DISAMBIGUATOR=\"" + DISAMBIGUATOR +
-                            "\"")
+                            "\"", line=1)
         lua_functions.save(packdata, sounds, all_dict_values(files["Levels"]),
                            args.quiet)
         convert_event(files)

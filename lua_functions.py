@@ -98,7 +98,7 @@ def save(packdata, sounds, level_jsons, quiet):
                         + CONVERTER_PREFIX + "LEVEL_PROPERTY_MAPPING=" +
                         LEVEL_PROPERTY_MAPPING.to_table() + "\n" +
                         CONVERTER_PREFIX + "STYLE_PROPERTY_MAPPING=" +
-                        STYLE_PROPERTY_MAPPING.to_table() + "\n")
+                        STYLE_PROPERTY_MAPPING.to_table() + "\n", line=1)
     code = ""
     for level_json in level_jsons:
         lua_file = level_json["luaFile"][8:]
@@ -114,4 +114,4 @@ def save(packdata, sounds, level_jsons, quiet):
         code += "_G[\"" + CONVERTER_PREFIX + "level_json_" + level_json["id"] \
             + "\"]=" + level_json.to_table() + "\n"
     code += CONVERTER_PREFIX + "quiet=" + str(quiet).lower() + "\n"
-    packdata.mixin_line(code)
+    packdata.mixin_line(code, line=1)

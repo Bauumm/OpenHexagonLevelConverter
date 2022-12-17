@@ -160,4 +160,4 @@ def convert_level(level_json, level_lua):
 
 def save(packdata):
     packdata.mixin_line(CONVERTER_PREFIX + "EVENT_ID_FILE_MAPPING=" + id_file_mapping
-                        .to_table())
+                        .to_table(), line=1)

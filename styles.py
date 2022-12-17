@@ -203,5 +203,5 @@ def convert_lua(level_lua, level_json):
 
 def save(packdata):
     packdata.mixin_line(CONVERTER_PREFIX + "STYLE_ID_FILE_MAPPING=" + id_file_mapping
-                        .to_table())
+                        .to_table(), line=1)
     packdata.save("Scripts/" + CONVERTER_PREFIX + "packdata.lua")

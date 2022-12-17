@@ -1,3 +1,4 @@
+inf = 1 / 0
 u_execDependencyScript(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "core_wrapper.lua")
 
 
