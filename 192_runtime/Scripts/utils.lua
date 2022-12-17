@@ -33,8 +33,8 @@ function prefix_float:new(value)
 end
 
 function round_to_even(num)
-	if type(num) ~= "number" then
-		return num
+	if num == nil then
+		return 0
 	end
 	local decimal = num % 1
 	if decimal ~= 0.5 then
