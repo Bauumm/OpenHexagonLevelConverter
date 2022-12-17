@@ -31,28 +31,38 @@ def fix_lua(code):
     return _parse_code(code)
 
 
+def _find_comments(lua_file):
+    comments = []
+    comment_types = {"--[[": ["]]", "]]--"], "--[===[": "]===]--", "--": "\n"}
+    looking_for = None
+    current_comment = []
+    i = 0
+    while i < len(lua_file._text):
+        i += 1
+        if looking_for is None:
+            for comment_type in comment_types:
+                if lua_file._text.startswith(comment_type, i):
+                    looking_for = comment_type
+                    current_comment.append(i)
+                    break
+        else:
+            find = comment_types[looking_for]
+            if isinstance(find, str):
+                find = [find]
+            for comment_type in find:
+                if lua_file._text.startswith(comment_type, i):
+                    i += len(comment_type) - 1
+                    looking_for = None
+                    current_comment.append(i)
+                    comments.append(current_comment)
+                    current_comment = []
+    return comments
+
+
 def fix_block_loops(lua_file):
     if "while" in lua_file._text:
         for sep in " ", "\n", "\t":
-            comments = []
-            comment_types = {"--[[": ["]]", "]]--"], "--[===[": "]===]--", "--": "\n"}
-            looking_for = None
-            current_comment = []
-            for i in range(len(lua_file._text)):
-                if looking_for is None:
-                    for comment_type in comment_types:
-                        if lua_file._text.startswith(comment_type, i):
-                            current_comment.append(i)
-                            break
-                else:
-                    if lua_file._text.startswith(comment_types[comment_type], i):
-                        looking_for = None
-                        current_comment.append(i)
-                        comments.append(current_comment)
-                        current_comment = []
-            for node in ast.walk(lua_file._ast_tree):
-                for comment in node.comments:
-                    comments.append([comment.start_char, comment.stop_char])
+            comments = _find_comments(lua_file)
             results = [i for i in range(len(lua_file._text))
                        if lua_file._text.startswith("while" + sep, i)]
             loops = lua_file._text.split("while" + sep)
