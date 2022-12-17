@@ -223,6 +223,7 @@ function prefix_get_style_module()
 	end
 
 	function Style:set_3D_spacing(spacing)
+		spacing = spacing or 0
 		s_set3dSpacing(spacing / 1.4)
 	end
 
