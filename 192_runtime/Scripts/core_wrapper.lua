@@ -265,6 +265,8 @@ if prefix_was_defined == nil or u_inMenu() then
 			a_playSound("go.ogg")
 			a_setMusic(level_json.music_id)
 			l_resetTime()
+			prefix_level_id = id
+			onInit(false)
 			onLoad()
 		end
 	end
