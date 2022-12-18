@@ -76,7 +76,8 @@ end
 
 function getLevelValueInt(field)
 	return prefix_getField("level", field, 0, function(value)
-		return round_to_even(tonumber(value))
+		local value = round_to_even(tonumber(value))
+		return u_rndInt(value, value)
 	end)
 end
 function getLevelValueFloat(field)
@@ -97,7 +98,7 @@ function getLevelValueBool(field)
 end
 function setLevelValueInt(field, value)
 	value = round_to_even(value)
-	return prefix_setField("level", field, value)
+	return prefix_setField("level", field, u_rndInt(value, value))
 end
 function setLevelValueFloat(field, value)
 	return prefix_setField("level", field, value)
@@ -110,7 +111,8 @@ function setLevelValueBool(field, value)
 end
 function getStyleValueInt(field)
 	return prefix_getField("style", field, 0, function(value)
-		return round_to_even(tonumber(value))
+		local value = round_to_even(tonumber(value))
+		return u_rndInt(value, value)
 	end)
 end
 function getStyleValueFloat(field)
@@ -131,7 +133,7 @@ function getStyleValueBool(field)
 end
 function setStyleValueInt(field, value)
 	value = round_to_even(value)
-	return prefix_setField("style", field, value)
+	return prefix_setField("style", field, u_rndInt(value, value))
 end
 function setStyleValueFloat(field, value)
 	return prefix_setField("style", field, value)
