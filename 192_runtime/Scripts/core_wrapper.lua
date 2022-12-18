@@ -261,12 +261,11 @@ if prefix_was_defined == nil or u_inMenu() then
 			local level_json = _G["prefix_level_json_" .. id]
 			s_setStyle(level_json.style_id)
 			prefix_skip_storage = true
+			prefix_level_id = nil
 			u_execScript(level_json.prefix_lua_file)
 			a_playSound("go.ogg")
 			a_setMusic(level_json.music_id)
 			l_resetTime()
-			prefix_level_id = id
-			onInit(false)
 			onLoad()
 		end
 	end
