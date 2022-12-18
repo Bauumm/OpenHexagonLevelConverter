@@ -135,10 +135,9 @@ def convert_external(json_file):
         filename = os.path.basename(json_file.path)[:-5]
         id_file_mapping[json_file["id"]] = filename
         new_event_lua = LuaFile()
-        new_event_lua.set_text("_G[\"" + CONVERTER_PREFIX + json_file["id"] +
-                               "_EVENTS\"]=" + convert_events(
-                                   json_file.get("events", []), pack_path)
-                               .to_table() + "\n")
+        new_event_lua.set_text(CONVERTER_PREFIX + "EVENT_FILES[\"" + json_file["id"] +
+                               "\"]=" + convert_events(json_file.get("events", []),
+                                                       pack_path).to_table() + "\n")
         new_event_lua.save("Scripts/" + CONVERTER_PREFIX + "Events/" +
                            filename + ".lua")
     else:
@@ -151,10 +150,10 @@ def convert_level(level_json, level_lua):
         pack_path = os.path.dirname(pack_path)
     if level_lua.get_function(CONVERTER_PREFIX + "onInit") is None:
         level_lua.mixin_line("function " + CONVERTER_PREFIX + "onInit()\nend")
-    level_lua.mixin_line(CONVERTER_PREFIX + "MAIN_EVENTS=" +
-                         convert_events(level_json.get("events", []),
-                                        pack_path)
-                         .to_table(), CONVERTER_PREFIX + "onInit")
+    main_events = ExtendedDict({"events": convert_events(level_json.get("events", []),
+                                                         pack_path)})
+    level_lua.mixin_line(CONVERTER_PREFIX + "MAIN_EVENTS=" + main_events.to_table(),
+                         CONVERTER_PREFIX + "onInit")
     level_json.delete("events")
 
 
