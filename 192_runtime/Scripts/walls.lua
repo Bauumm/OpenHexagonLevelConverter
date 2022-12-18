@@ -61,7 +61,7 @@ function prefix_get_wall_module()
 	end
 
 	function wall_module:_wall(side, thickness, speed, acceleration, minSpeed, maxSpeed)
-		side = round_to_even(side)
+		side = prefix_round_to_even(side)
 		if thickness ~= thickness then
 			print("Not spawning wall with NaN thickness!")
 			return

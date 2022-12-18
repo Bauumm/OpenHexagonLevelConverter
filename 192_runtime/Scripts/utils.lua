@@ -32,7 +32,7 @@ function prefix_float:new(value)
 	return setmetatable({value=prefix_float.round(value or 0)}, prefix_float)
 end
 
-function round_to_even(num)
+function prefix_round_to_even(num)
 	if num == nil then
 		return 0
 	end
