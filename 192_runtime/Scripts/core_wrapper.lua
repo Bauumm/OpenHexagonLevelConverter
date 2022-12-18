@@ -122,6 +122,21 @@ if prefix_was_defined == nil or u_inMenu() then
 			prefix_focus = focus
 			prefix_swap = swap
 			prefix_level_time = l_getLevelTime()
+			if prefix_must_kill and prefix_kill_wall == nil then
+				prefix_must_kill = false
+				prefix_kill_wall = cw_create()
+				cw_setDeadly(prefix_kill_wall, true)
+				cw_setVertexPos4(prefix_kill_wall, -1600, 1600, -1600, -1600, 1600, -1600, 1600, 1600)
+			end
+			if next_music ~= nil then
+				if next_music.segment_index ~= nil then
+					a_setMusicSegment(next_music.id, next_music.segment_index)
+				elseif next_music.seconds ~= nil then
+					a_setMusicSeconds(next_music.id, next_music.seconds)
+				else
+					a_setMusic(next_music.id)
+				end
+			end
 			prefix_timing_system:fixed_update(frametime)
 		elseif prefix_game_stopped then
 			prefix_movement = movement
@@ -134,12 +149,6 @@ if prefix_was_defined == nil or u_inMenu() then
 				prefix_block_offset = prefix_block_offset + frametime
 				u_haltTime(frametime)
 			end
-		end
-		if prefix_must_kill and prefix_kill_wall == nil then
-			prefix_must_kill = false
-			prefix_kill_wall = cw_create()
-			cw_setDeadly(prefix_kill_wall, true)
-			cw_setVertexPos4(prefix_kill_wall, -1600, 1600, -1600, -1600, 1600, -1600, 1600, 1600)
 		end
 		if movement ~= 0 then
 			return true

@@ -52,9 +52,11 @@ getLevelValueFloat(\"<value_name>\") - <value>)",
 getLevelValueFloat(\"<value_name>\") * <value>)",
     "style_int_divide": "setStyleValueInt(\"<value_name>\", \
 getLevelValueFloat(\"<value_name>\") / <value>)",
-    "music_set": "a_setMusic(\"<id>\")",
-    "music_set_segment": "a_setMusicSegment(\"<id>\", \"<segment_index>\")",
-    "music_set_seconds": "a_setMusicSeconds(\"<id>\", \"<seconds>\")",
+    "music_set": CONVERTER_PREFIX + "next_music={id=\"<id>\"}",
+    "music_set_segment": CONVERTER_PREFIX + "next_music={id=\"<id>\", segment_index=\
+<segment_index>)",
+    "music_set_seconds": CONVERTER_PREFIX + "next_music={id=\"<id>\", seconds=\
+<seconds>}",
     "style_set": CONVERTER_PREFIX + "style_module:set_style(\"<id>\")",
     "side_changing_stop": CONVERTER_PREFIX + "enable_rnd_side_changes = false",
     "side_changing_start": CONVERTER_PREFIX + "enable_rnd_side_changes = true",
