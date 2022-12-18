@@ -3,12 +3,22 @@ prefix_queuedEvents = {}
 
 function execEvent(event_id)
 	prefix_data_module:loadEvent(event_id)
-	table.insert(prefix_executingEvents, {["events"] = prefix_EVENT_FILES[event_id]})
+	local event = prefix_EVENT_FILES[event_id]
+	if event ~= nil then
+		table.insert(prefix_executingEvents, {["events"] = event})
+	else
+		print("Trying to load non-existing event: " .. event_id)
+	end
 end
 
 function enqueueEvent(event_id)
 	prefix_data_module:loadEvent(event_id)
-	table.insert(prefix_queuedEvents, {["events"] = prefix_EVENT_FILES[event_id]})
+	local event = prefix_EVENT_FILES[event_id]
+	if event ~= nil then
+		table.insert(prefix_queuedEvents, {["events"] = event})
+	else
+		print("Trying to load non-existing event: " .. event_id)
+	end
 end
 
 function prefix_execute_events(event_table, current_time)
