@@ -1,5 +1,9 @@
 u_execScript("JSON.lua")
-log = u_log
+if prefix_quiet then
+	log = function(...) end
+else
+	log = u_log
+end
 getSides = l_getSides
 getSpeedMult = u_getSpeedMultDM
 getDelayMult = u_getDelayMultDM
