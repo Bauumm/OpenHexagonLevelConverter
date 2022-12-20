@@ -24,7 +24,7 @@ end
 function prefix_execute_events(event_table, current_time)
 	for time, events in pairs(event_table.events) do
 		if type(time) == "number" then
-			if (event_table.done == nil) or not (time <= event_table.done) and time <= current_time then
+			if ((event_table.done == nil) or not (time <= event_table.done)) and time <= current_time then
 				event_table.done = current_time
 				for i = 1, #events, 1 do
 					loadstring(events[i])()
