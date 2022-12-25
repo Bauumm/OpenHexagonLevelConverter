@@ -112,7 +112,10 @@ class LuaFile(BaseFile):
         for node in ast.walk(self._ast_tree):
             if isinstance(node, astnodes.Call) and \
                     isinstance(node.func, astnodes.Name):
-                if type(name) == str:
+                if callable(name):
+                    if name(node.func.id):
+                        nodes.append(node)
+                elif type(name) == str:
                     if node.func.id == name:
                         nodes.append(node)
                 else:

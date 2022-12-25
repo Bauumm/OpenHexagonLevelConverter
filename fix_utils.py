@@ -87,7 +87,7 @@ def fix_block_loops(lua_file):
                         .replace("\n", "") \
                         .replace("\t", "") \
                         .replace("\r", "") \
-                        .replace(" ", "") == "" and not in_comment:
+                        .replace(" ", "") == "" and "end" in rest and not in_comment:
                     condition = loop.split(subsep + "do", 1)[0]
                     log.info("Replacing blocking loop with condition:", condition)
                     new_text += "if " + condition + " then\n" + \

@@ -1,6 +1,5 @@
 from extended_dict import ExtendedDict
 from config import CONVERTER_PREFIX
-from base_file import BaseFile
 from lua_file import LuaFile
 import json
 import log
@@ -126,7 +125,7 @@ def convert_style(style_json):
         json.dump(menu_style, menu_style_file, indent=4)
 
     # Set some properties to fixed values in order to remake them with lua
-    style_json["3D_override_color"] = [0, 0, 0, 255]
+    style_json["3D_override_color"] = [0, 0, 0, 0]
     style_json["pulse_increment"] = 0
     style_json["pulse_min"] = 0
     style_json["pulse_max"] = 0
@@ -134,16 +133,17 @@ def convert_style(style_json):
     style_json["hue_min"] = 0
     style_json["hue_max"] = 0
     style_json["max_swap_time"] = 0
-    style_json["text_color"] = {
-        "dynamic": False,
-        "dynamic_offset": False,
-        "dynamic_darkness": 1,
-        "offset": 0,
-        "main": False,
-        "hue_shift": 0,
-        "value": [0, 0, 0, 0],
-        "pulse": [0, 0, 0, 0]
-    }
+    for name in "text_color", "main":
+        style_json[name] = {
+            "dynamic": False,
+            "dynamic_offset": False,
+            "dynamic_darkness": 1,
+            "offset": 0,
+            "main": False,
+            "hue_shift": 0,
+            "value": [0, 0, 0, 0],
+            "pulse": [0, 0, 0, 0]
+        }
     style_json["cap_color"] = {
         "legacy": False,
         "dynamic": False,
@@ -171,28 +171,10 @@ def convert_style(style_json):
             "value": [0, 0, 0, 0],
             "pulse": [0, 0, 0, 0]
         }]
-    code = "const ColorData colors[] = ColorData[" + str(i + 1) + "](\n"
     for i in range(len(style_json.get("colors", []))):
-        color_data = style_json["colors"][i]
-        code += "\tColorData(" + ", ".join([
-            str(color_data["dynamic"]).lower(),
-            str(color_data["dynamic_darkness"]),
-            str(color_data["dynamic_offset"]).lower(),
-            str(color_data["offset"]),
-            str(color_data["main"]).lower(),
-            "vec4" + "(" + ", ".join([str(f / 255) for f in color_data["value"]]) + ")",
-            "vec4" + "(" + ", ".join([str(f / 255) for f in color_data["pulse"]]) + ")",
-            str(color_data["hue_shift"])
-        ]) + "),\n"
-        style_json["colors"][i]["value"] = [14, *i.to_bytes(3, 'big')]
+        style_json["colors"][i]["value"] = [0, 0, 0, 0]
         style_json["colors"][i]["pulse"] = [0, 0, 0, 0]
         style_json["colors"][i]["dynamic"] = False
-    code = code[:-2] + "\n);\n\n"
-    os.makedirs("Shaders", exist_ok=True)
-    background_shader = BaseFile(os.path.join(os.path.dirname(filepath),
-                                              "background.frag"))
-    background_shader.mixin_line(code, 19)
-    background_shader.save("Shaders/" + filename + "-background.frag")
 
 
 def convert_lua(level_lua, level_json):

@@ -3,12 +3,9 @@ function prefix_get_style_module()
 	s_setBGTileRadius(4500)
 
 	local Style = {
-		shdr_3D = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "wall3D.frag"),
-		shdr_main = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "main.frag"),
-		shdr_cap = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "cap.frag"),
-		shdr_text = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "text.frag"),
 		pulse3D = 1,
-		pulse3DDirection = 1
+		pulse3DDirection = 1,
+		wall_shader = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "solid.frag")
 	}
 
 	function Style:darken_color(r, g, b, a)
@@ -53,10 +50,6 @@ function prefix_get_style_module()
 		return {r,g,b,255}
 	end
 
-	function Style:shader_scaling(color)
-		return color[1] / 255, color[2] / 255, color[3] / 255, color[4] / 255
-	end
-
 	function Style:component_clamp(component)
 		if component > 255 then
 			return 255
@@ -94,8 +87,8 @@ function prefix_get_style_module()
 	end
 
 	function Style:init()
-		shdr_resetAllActiveFragmentShaders()
-		self.shdr_back = shdr_getShaderId(prefix_STYLE_ID_FILE_MAPPING[prefix_style_id] .. "-background.frag")
+		shdr_resetActiveFragmentShader(4)
+		shdr_setActiveFragmentShader(4, self.wall_shader)
 		prefix_data_module:loadStyle(prefix_style_id)
 		self.hue = prefix_style.hue_min
 		self.pulse_factor = 0
@@ -105,32 +98,6 @@ function prefix_get_style_module()
 		else
 			s_set3dDepth(self.depth)
 		end
-		-- 3D alpha fixes
-		for i=1,3 do  -- 1,2,3 are the RenderStages for the 3D layers
-			shdr_setActiveFragmentShader(i, self.shdr_3D)
-		end
-		if prefix_style["3D_override_color"] ~= nil then
-			local override_color = self:darken_color(unpack(prefix_style["3D_override_color"]))
-			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
-		end
-		self:set_3D_alpha_mult(s_get3dAlphaMult())
-		self:set_3D_alpha_falloff(s_get3dAlphaFalloff())
-		s_set3dAlphaMult(1)
-		s_set3dAlphaFalloff(1)
-
-		-- set main color
-		shdr_setActiveFragmentShader(4, self.shdr_main)
-		shdr_setActiveFragmentShader(6, self.shdr_main)
-		shdr_setActiveFragmentShader(7, self.shdr_main)
-
-		-- set cap color
-		shdr_setActiveFragmentShader(5, self.shdr_cap)
-
-		-- set text color
-		shdr_setActiveFragmentShader(8, self.shdr_text)
-
-		-- set background color
-		shdr_setActiveFragmentShader(0, self.shdr_back)
 
 		-- DM adjust negations
 		local mult = u_getDifficultyMult() ^ 0.8
@@ -138,30 +105,64 @@ function prefix_get_style_module()
 	end
 
 	function Style:compute_colors()
+		-- main
 		self.main_color = self:calculate_color(prefix_style.main)
-		if prefix_style["3D_override_color"] == nil then
-			local override_color = self:darken_color(unpack(self.main_color))
-			shdr_setUniformFVec4(self.shdr_3D, "color", self:shader_scaling(override_color))
-		end
+		shdr_setUniformFVec4(self.wall_shader, "color", unpack(self.main_color))
+		s_setMainOverrideColor(unpack(self.main_color))
+		s_setPlayerOverrideColor(unpack(self.main_color))
+		s_setTextOverrideColor(unpack(self.main_color))
+
+		-- background
 		local swap_offset
 		if prefix_style.max_swap_time == 0 then
 			swap_offset = 0
 		else
 			swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
 		end
+		local calculated_colors = {}
+		for i=0,l_getSides() - 1 do
+			local index = (i + swap_offset) % #prefix_style.colors + 1
+			local color
+			if calculated_colors[index] == nil then
+				local color_obj = prefix_style.colors[index]
+				color = self:calculate_color(color_obj)
+				calculated_colors[index] = color
+			else
+				color = calculated_colors[index]
+			end
+			if i % 2 == 0 and i == l_getSides() - 1 then
+				color = self:darken_color(color, 1.4)
+			end
+			s_setOverrideColor(i % #prefix_style.colors, unpack(color))
+		end
+
+		-- cap
 		if #prefix_style.colors < 2 then
 			cap_color = {0, 0, 0, 0}
 		else
-			local cap_index = (1 + swap_offset) % (#prefix_style.colors) + 1
-			cap_color = self:calculate_color(prefix_style.colors[cap_index])
+			local cap_index = (1 + swap_offset) % #prefix_style.colors + 1
+			cap_color = calculated_colors[cap_index]
 		end
-		shdr_setUniformFVec4(self.shdr_main, "color", self:shader_scaling(self.main_color))
-		shdr_setUniformFVec4(self.shdr_cap, "color", self:shader_scaling(cap_color))
-		shdr_setUniformFVec4(self.shdr_text, "offset_color", self:shader_scaling(cap_color))
-		shdr_setUniformFVec4(self.shdr_text, "text_color", self:shader_scaling(self.main_color))
-		shdr_setUniformF(self.shdr_back, "hue", self.hue)
-		shdr_setUniformF(self.shdr_back, "pulse_factor", self.pulse_factor)
-		shdr_setUniformI(self.shdr_back, "swap", swap_offset)
+		s_setCapOverrideColor(unpack(cap_color))
+
+		-- 3d
+		local override_color = prefix_style["3D_override_color"]
+		if override_color == nil then
+			override_color = self:darken_color(unpack(self.main_color))
+		else
+			override_color = self:darken_color(unpack(override_color))
+		end
+		local alpha_mult = s_get3dAlphaMult()
+		if alpha_mult == 0 then
+			override_color[4] = 0
+		else
+			override_color[4] = override_color[4] / alpha_mult
+		end
+		local alpha_falloff = s_get3dAlphaFalloff()
+		for i=0, s_get3dDepth() - 1 do
+			s_set3dLayerOverrideColor(i, unpack(override_color))
+			override_color[4] = (override_color[4] - alpha_falloff) % 256
+		end
 	end
 
 	function Style:update(frametime)
@@ -229,24 +230,6 @@ function prefix_get_style_module()
 
 	function Style:get_3D_spacing()
 		return s_get3dSpacing() * 1.4
-	end
-
-	function Style:set_3D_alpha_mult(mult)
-		self.alpha_mult = mult
-		shdr_setUniformF(self.shdr_3D, "alpha_mult", mult)
-	end
-
-	function Style:get_3D_alpha_mult()
-		return self.alpha_mult
-	end
-
-	function Style:set_3D_alpha_falloff(falloff)
-		self.alpha_falloff = falloff
-		shdr_setUniformF(self.shdr_3D, "alpha_falloff", falloff)
-	end
-
-	function Style:get_3D_alpha_falloff()
-		return self.alpha_falloff
 	end
 
 	return Style

@@ -99,6 +99,8 @@ if prefix_was_defined == nil or u_inMenu() then
 		setLevelValueFloat("rotation_speed", 0)
 	end
 
+	-- ensure onRenderStage is called at 0
+	shdr_setActiveFragmentShader(0, shdr_getShaderId("nothing.frag"))
 	function onRenderStage(render_stage, frametime)
 		if prefix_kill_wall ~= nil then
 			cw_destroy(prefix_kill_wall)

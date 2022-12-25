@@ -246,8 +246,7 @@ def convert_runtime(args):
                 with open(filename, "r") as lua_file:
                     content = lua_file.read()
                 with open(filename, "w") as lua_file:
-                    lua_file.write(content.replace("prefix_", CONVERTER_PREFIX)
-                                   )
+                    lua_file.write(content.replace("prefix_", CONVERTER_PREFIX))
 
     convert_dir(os.path.join(args.destination_folder, "Scripts"))
     pack = JsonFile(os.path.join(args.destination_folder, "pack.json"))
