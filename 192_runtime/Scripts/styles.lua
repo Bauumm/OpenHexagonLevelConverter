@@ -1,3 +1,6 @@
+u_execScript("color_calculations.lua")
+
+
 function prefix_get_style_module()
 	l_setManual3dPulseControl(true)
 	s_setBGTileRadius(4500)
@@ -18,7 +21,7 @@ function prefix_get_style_module()
 		if copy then
 			color = {unpack(color)}
 		end
-		darken_mult = darken_mult or s_get3dDarkenMult()
+		darken_mult = darken_mult or (prefix_style["3D_darken_multiplier"] or 1.5)
 		if darken_mult == 0 then
 			color[1], color[2], color[3] = 0,0,0
 		else
@@ -65,35 +68,6 @@ function prefix_get_style_module()
 		end
 	end
 
-	function Style:calculate_color(color, result)
-		result = result or {}
-		for i=1,4 do
-			result[i] = color.value[i]
-		end
-		if color.dynamic then
-			local dynamic_color = {unpack(self.hue_colors[(self.hue + color.hue_shift) / 360])}
-			if color.main then
-				result = dynamic_color
-			else
-				if color.dynamic_offset then
-					if color.offset ~= 0 then
-						for i=1,3 do
-							result[i] = result[i] + dynamic_color[i] / color.offset
-						end
-					end
-					result[4] = result[4] + dynamic_color[4]
-				else
-					result = self:darken_color(dynamic_color, color.dynamic_darkness, true)
-				end
-			end
-		end
-		for i=1,4 do
-			result[i] = result[i] % 256
-			result[i] = self:component_clamp(result[i] + color.pulse[i] * self.pulse_factor)
-		end
-		return result
-	end
-
 	function Style:init()
 		shdr_resetActiveFragmentShader(4)
 		shdr_setActiveFragmentShader(4, self.wall_shader)
@@ -107,6 +81,10 @@ function prefix_get_style_module()
 			s_set3dDepth(self.depth)
 		end
 
+		s_set3dDarkenMult(1)
+		s_set3dAlphaMult(1)
+		s_set3dAlphaFalloff(0)
+
 		-- DM adjust negations
 		local mult = u_getDifficultyMult() ^ 0.8
 		s_setMaxSwapTime(s_getMaxSwapTime() * mult)
@@ -114,7 +92,7 @@ function prefix_get_style_module()
 
 	function Style:compute_colors()
 		-- main
-		self.main_color = self:calculate_color(prefix_style.main, self.main_color)
+		self.main_color = self.calculation_methods[prefix_style.main.calculation_method](prefix_style.main, self.main_color)
 		shdr_setUniformFVec4(self.wall_shader, "color", unpack(self.main_color))
 		s_setMainOverrideColor(unpack(self.main_color))
 		s_setPlayerOverrideColor(unpack(self.main_color))
@@ -129,7 +107,7 @@ function prefix_get_style_module()
 		end
 		local limit = l_getSides() > #prefix_style.colors and #prefix_style.colors or l_getSides()
 		for i=1, limit do
-			local color = self:calculate_color(prefix_style.colors[i], self.background_colors[i])
+			local color = self.calculation_methods[prefix_style.colors[i].calculation_method](prefix_style.colors[i], self.background_colors[i])
 			self.background_colors[i] = color
 			if i % 2 == 0 and i == l_getSides() - 1 then
 				self:darken_color(color, 1.4)
@@ -153,13 +131,13 @@ function prefix_get_style_module()
 		else
 			override_color = self:darken_color(override_color, nil, true)
 		end
-		local alpha_mult = s_get3dAlphaMult()
+		local alpha_mult = prefix_style["3D_alpha_multiplier"] or 0.5
 		if alpha_mult == 0 then
 			override_color[4] = 0
 		else
 			override_color[4] = override_color[4] / alpha_mult
 		end
-		local alpha_falloff = s_get3dAlphaFalloff()
+		local alpha_falloff = prefix_style["3D_alpha_falloff"] or 3
 		for i=0, s_get3dDepth() - 1 do
 			s_set3dLayerOverrideColor(i, unpack(override_color))
 			override_color[4] = (override_color[4] - alpha_falloff) % 256
@@ -232,6 +210,8 @@ function prefix_get_style_module()
 	function Style:get_3D_spacing()
 		return s_get3dSpacing() * 1.4
 	end
+
+	Style.calculation_methods = prefix_get_calculation_methods(Style)
 
 	return Style
 end

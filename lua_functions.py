@@ -27,10 +27,7 @@ STYLE_PROPERTY_MAPPING = ExtendedDict({
         [CONVERTER_PREFIX + "style_module", "set_3D_spacing"]
     ],
     "3D_perspective_multiplier": ["s_get3dPerspectiveMult",
-                                  "s_set3dPerspectiveMult"],
-    "3D_darken_multiplier": ["s_get3dDarkenMult", "s_set3dDarkenMult"],
-    "3D_alpha_multiplier": ["s_get3dAlphaMult", "s_set3dAlphaMult"],
-    "3D_alpha_falloff": ["s_get3dAlphaFalloff", "s_set3dAlphaFalloff"],
+                                  "s_set3dPerspectiveMult"]
 })
 CORE_FUNCTIONS = [
     "onUnload",

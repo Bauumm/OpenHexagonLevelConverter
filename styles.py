@@ -13,6 +13,15 @@ COLOR_OBJECTS = [
     "wall_color"
 ]
 
+CALCULATION_METHODS = [
+    {"dynamic": False},
+    {"dynamic": True, "main": True},
+    {"dynamic": True, "main": False, "dynamic_offset": True, "offset": 0},
+    {"dynamic": True, "main": False, "dynamic_offset": True},
+    {"dynamic": True, "main": False, "dynamic_offset": False, "dynamic_darkness": 0},
+    {"dynamic": True, "main": False, "dynamic_offset": False}
+]
+
 filepath = os.path.realpath(__file__)
 colors3D = ExtendedDict()
 id_file_mapping = ExtendedDict()
@@ -41,6 +50,17 @@ def convert_color(color):
     color["pulse"] = ensure_item_count(color.get("pulse", [0, 0, 0, 0]))
     color["hue_shift"] = color.get("hue_shift", 0)
 
+    calculation_method = 0
+    for method in CALCULATION_METHODS:
+        calculation_method += 1
+        got_match = True
+        for key in method:
+            if method[key] != color[key]:
+                got_match = False
+        if got_match:
+            break
+    color["calculation_method"] = calculation_method
+
     if color["dynamic"] and color["dynamic_offset"] and not color["main"] and \
        color["offset"] == 0:
         # If these values are set this way the original color is due to division by 0
@@ -52,6 +72,8 @@ def convert_color(color):
     if color.get("pulse") is not None:
         for i in range(4):
             color["pulse"][i] %= 256
+    for i in range(4):
+        color["value"][i] %= 256
     return color
 
 
