@@ -5,23 +5,28 @@ function prefix_get_style_module()
 	local Style = {
 		pulse3D = 1,
 		pulse3DDirection = 1,
-		wall_shader = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "solid.frag")
+		wall_shader = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "solid.frag"),
+		hue_colors = setmetatable({}, {__index = function(self, k)
+			local v = prefix_style_module:get_color_from_hue(k)
+			self[k] = v
+			return v
+		end}),
+		background_colors = {}
 	}
 
-	function Style:darken_color(r, g, b, a)
-		local darken_mult = s_get3dDarkenMult()
-		if type(r) == "table" then
-			darken_mult = g
-			r,g,b,a = unpack(r)
+	function Style:darken_color(color, darken_mult, copy)
+		if copy then
+			color = {unpack(color)}
 		end
+		darken_mult = darken_mult or s_get3dDarkenMult()
 		if darken_mult == 0 then
-			r,g,b = 0,0,0
+			color[1], color[2], color[3] = 0,0,0
 		else
-			r = r / darken_mult
-			g = g / darken_mult
-			b = b / darken_mult
+			for i=1,3 do
+				color[i] = color[i] / darken_mult
+			end
 		end
-		return {r % 256, g % 256, b % 256, a % 256}
+		return color
 	end
 
 	-- This is quite messy since it's copied from 1.92
@@ -60,10 +65,13 @@ function prefix_get_style_module()
 		end
 	end
 
-	function Style:calculate_color(color)
-		local result = {unpack(color.value)}
+	function Style:calculate_color(color, result)
+		result = result or {}
+		for i=1,4 do
+			result[i] = color.value[i]
+		end
 		if color.dynamic then
-			local dynamic_color = self:get_color_from_hue((self.hue + color.hue_shift) / 360)
+			local dynamic_color = {unpack(self.hue_colors[(self.hue + color.hue_shift) / 360])}
 			if color.main then
 				result = dynamic_color
 			else
@@ -75,7 +83,7 @@ function prefix_get_style_module()
 					end
 					result[4] = result[4] + dynamic_color[4]
 				else
-					result = self:darken_color(dynamic_color, color.dynamic_darkness)
+					result = self:darken_color(dynamic_color, color.dynamic_darkness, true)
 				end
 			end
 		end
@@ -106,7 +114,7 @@ function prefix_get_style_module()
 
 	function Style:compute_colors()
 		-- main
-		self.main_color = self:calculate_color(prefix_style.main)
+		self.main_color = self:calculate_color(prefix_style.main, self.main_color)
 		shdr_setUniformFVec4(self.wall_shader, "color", unpack(self.main_color))
 		s_setMainOverrideColor(unpack(self.main_color))
 		s_setPlayerOverrideColor(unpack(self.main_color))
@@ -119,21 +127,14 @@ function prefix_get_style_module()
 		else
 			swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
 		end
-		local calculated_colors = {}
-		for i=0,l_getSides() - 1 do
-			local index = (i + swap_offset) % #prefix_style.colors + 1
-			local color
-			if calculated_colors[index] == nil then
-				local color_obj = prefix_style.colors[index]
-				color = self:calculate_color(color_obj)
-				calculated_colors[index] = color
-			else
-				color = calculated_colors[index]
-			end
+		local limit = l_getSides() > #prefix_style.colors and #prefix_style.colors or l_getSides()
+		for i=1, limit do
+			local color = self:calculate_color(prefix_style.colors[i], self.background_colors[i])
+			self.background_colors[i] = color
 			if i % 2 == 0 and i == l_getSides() - 1 then
-				color = self:darken_color(color, 1.4)
+				self:darken_color(color, 1.4)
 			end
-			s_setOverrideColor(i % #prefix_style.colors, unpack(color))
+			s_setOverrideColor((i - 1 + swap_offset) % #prefix_style.colors, unpack(color))
 		end
 
 		-- cap
@@ -141,16 +142,16 @@ function prefix_get_style_module()
 			cap_color = {0, 0, 0, 0}
 		else
 			local cap_index = (1 + swap_offset) % #prefix_style.colors + 1
-			cap_color = calculated_colors[cap_index]
+			cap_color = self.background_colors[cap_index]
 		end
 		s_setCapOverrideColor(unpack(cap_color))
 
 		-- 3d
 		local override_color = prefix_style["3D_override_color"]
 		if override_color == nil then
-			override_color = self:darken_color(unpack(self.main_color))
+			override_color = self:darken_color(self.main_color, nil, true)
 		else
-			override_color = self:darken_color(unpack(override_color))
+			override_color = self:darken_color(override_color, nil, true)
 		end
 		local alpha_mult = s_get3dAlphaMult()
 		if alpha_mult == 0 then
