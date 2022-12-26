@@ -188,8 +188,6 @@ function prefix_get_wall_module()
 				end
 				if abs_x < radius and abs_y < radius then
 					points_on_center = points_on_center + 1
-				elseif abs_x > self.WALL_DESPAWN_DIST and abs_y > self.WALL_DESPAWN_DIST then
-					points_out_of_bg = points_out_of_bg + 1
 				else
 					local magnitude = math.sqrt(x ^ 2 + y ^ 2)
 					local move_dist = wall.speed * 5 * frametime
@@ -200,6 +198,9 @@ function prefix_get_wall_module()
 					wall_verts[i] = new_x
 					wall_verts[i + 1] = new_y
 					moved = true
+					if abs_x > self.WALL_DESPAWN_DIST and abs_y > self.WALL_DESPAWN_DIST then
+						points_out_of_bg = points_out_of_bg + 1
+					end
 				end
 			end
 			self:update_duplicates(wall.cw, unpack(wall_verts))
