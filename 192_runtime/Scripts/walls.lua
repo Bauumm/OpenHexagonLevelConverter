@@ -2,6 +2,7 @@ function prefix_get_wall_module()
 	local wall_module = {
 		-- wall spawn distance in 1.92 cannot be changed
 		WALL_SPAWN_DIST = 1600,
+		WALL_DESPAWN_DIST = 1600,
 		walls = {},
 		duplicate_walls = {},
 		duplicate_wall_count = 0,
@@ -187,7 +188,7 @@ function prefix_get_wall_module()
 				end
 				if abs_x < radius and abs_y < radius then
 					points_on_center = points_on_center + 1
-				elseif abs_x > 4500 and abs_y > 4500 then
+				elseif abs_x > self.WALL_DESPAWN_DIST and abs_y > self.WALL_DESPAWN_DIST then
 					points_out_of_bg = points_out_of_bg + 1
 				else
 					local magnitude = math.sqrt(x ^ 2 + y ^ 2)
@@ -238,7 +239,7 @@ function prefix_get_wall_module()
 					local abs_x, abs_y = math.abs(x), math.abs(y)
 					if abs_x < radius and abs_y < radius then
 						points_on_center = points_on_center + 1
-					elseif abs_x > 4500 and abs_y > 4500 then
+					elseif abs_x > self.WALL_DESPAWN_DIST and abs_y > self.WALL_DESPAWN_DIST then
 						points_out_of_bg = points_out_of_bg + 1
 					end
 					self.stopped_wall_radius = math.min(abs_x, abs_y, self.stopped_wall_radius)
@@ -266,7 +267,7 @@ function prefix_get_wall_module()
 
 		-- delete walls that were deleted for performance optimization when radius exceeds BGTileRadius
 		-- may cause issues if far distant walls are not supposed to be deleted
-		if self.radius > 4500 then
+		if self.radius > self.WALL_DESPAWN_DIST then
 			self.imaginary_walls = 0
 		end
 	end
