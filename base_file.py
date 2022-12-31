@@ -32,7 +32,7 @@ class BaseFile:
     def set_text(self, text):
         self._text = text
 
-    def mixin_line(self, text, line):
+    def mixin_line(self, text, line=0):
         self.mixin(text + "\n", self._get_pos_from_line(line, self._text))
 
     def replace(self, text, newtext):

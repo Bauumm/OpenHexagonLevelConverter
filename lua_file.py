@@ -11,6 +11,7 @@ import os
 class LuaFile(BaseFile):
     def __init__(self, path=None):
         super().__init__(path)
+        self.rebuild_ast = True
         parse_error_split = self._text.split("^-")
         if len(parse_error_split) == 1:
             parse_error_split = self._text.split("^ -")
@@ -38,6 +39,27 @@ class LuaFile(BaseFile):
                 self.mixin_line("end", line=line)
             else:
                 raise error
+        fix_utils.fix_recursion(self)
+
+    def build_ast(self):
+        self._ast_tree = ast.parse(self._text)
+
+    def set_text(self, text):
+        self._text = text
+        if self.rebuild_ast:
+            self._ast_tree = ast.parse(self._text)
+
+    def _get_assign_nodes(self, name):
+        nodes = []
+        for node in ast.walk(self._ast_tree):
+            if isinstance(node, astnodes.Assign):
+                for target in node.targets:
+                    if isinstance(target, astnodes.Name) and target.id == name:
+                        nodes.append(target)
+                for value in node.values:
+                    if isinstance(value, astnodes.Name) and value.id == name:
+                        nodes.append(value)
+        return nodes
 
     def _get_function_node(self, name):
         if name is None:
@@ -72,7 +94,8 @@ class LuaFile(BaseFile):
                 start_pos = node.start_char + \
                     len(self.get_function(function).split(")")[0]) + 1
         super().mixin(code, start_pos + pos)
-        self._ast_tree = ast.parse(self._text)
+        if self.rebuild_ast:
+            self._ast_tree = ast.parse(self._text)
 
     def mixin_line(self, code, function=None, line=0):
         if function is None:
@@ -89,13 +112,26 @@ class LuaFile(BaseFile):
         for node in ast.walk(self._ast_tree):
             if isinstance(node, astnodes.Call) and \
                     isinstance(node.func, astnodes.Name):
-                if type(name) == str:
+                if callable(name):
+                    if name(node.func.id):
+                        nodes.append(node)
+                elif type(name) == str:
                     if node.func.id == name:
                         nodes.append(node)
                 else:
                     if node.func.id in name:
                         nodes.append(node)
         return nodes
+
+    def replace_assigns(self, variable, new_variable):
+        nodes = self._get_assign_nodes(variable)
+        if len(nodes) > 0:
+            nodes.reverse()
+            for node in nodes:
+                self._text = self._text[:node.start_char] + new_variable + \
+                    self._text[node.stop_char + 1:]
+        if self.rebuild_ast:
+            self._ast_tree = ast.parse(self._text)
 
     def replace_function_calls_multiple(self, function_dict):
         nodes = self._get_function_call_nodes(function_dict.keys())
@@ -105,7 +141,8 @@ class LuaFile(BaseFile):
                 self._text = self._text[:node.func.start_char] + \
                     function_dict[node.func.id] + \
                     self._text[node.func.stop_char + 1:]
-            self._ast_tree = ast.parse(self._text)
+            if self.rebuild_ast:
+                self._ast_tree = ast.parse(self._text)
 
     def replace_function_calls(self, function, new_function):
         nodes = self._get_function_call_nodes(function)
@@ -114,12 +151,13 @@ class LuaFile(BaseFile):
             for node in nodes:
                 self._text = self._text[:node.func.start_char] + \
                     new_function + self._text[node.func.stop_char + 1:]
-            self._ast_tree = ast.parse(self._text)
+            if self.rebuild_ast:
+                self._ast_tree = ast.parse(self._text)
 
     def replace(self, text, newtext):
         old_text = self._text
         super().replace(text, newtext)
-        if old_text != self._text:
+        if old_text != self._text and self.rebuild_ast:
             self._ast_tree = ast.parse(self._text)
 
     def save(self, path):

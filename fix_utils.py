@@ -1,3 +1,6 @@
+from luaparser import astnodes
+from luaparser import ast
+from config import CONVERTER_PREFIX
 import log
 import os
 
@@ -28,7 +31,103 @@ def fix_lua(code):
     return _parse_code(code)
 
 
-OPENING_KEYWORDS = ["if", "for", "while", "function"]
+def _find_comments(lua_file):
+    comments = []
+    comment_types = {"--[[": ["]]", "]]--"], "--[===[": "]===]--", "--": "\n"}
+    looking_for = None
+    current_comment = []
+    i = 0
+    while i < len(lua_file._text):
+        i += 1
+        if looking_for is None:
+            for comment_type in comment_types:
+                if lua_file._text.startswith(comment_type, i):
+                    looking_for = comment_type
+                    current_comment.append(i)
+                    break
+        else:
+            find = comment_types[looking_for]
+            if isinstance(find, str):
+                find = [find]
+            for comment_type in find:
+                if lua_file._text.startswith(comment_type, i):
+                    i += len(comment_type) - 1
+                    looking_for = None
+                    current_comment.append(i)
+                    comments.append(current_comment)
+                    current_comment = []
+    return comments
+
+
+def fix_block_loops(lua_file):
+    if "while" in lua_file._text:
+        for sep in " ", "\n", "\t":
+            comments = _find_comments(lua_file)
+            results = [i for i in range(len(lua_file._text))
+                       if lua_file._text.startswith("while" + sep, i)]
+            loops = lua_file._text.split("while" + sep)
+            new_text = loops[0]
+            count = 0
+            for loop in loops[1:]:
+                result = results[count]
+                count += 1
+                in_comment = False
+                for comment in comments:
+                    if comment[0] <= result and comment[1] + 1 >= result:
+                        in_comment = True
+                if in_comment:
+                    rest = ""
+                else:
+                    for subsep in " ", "\n", "\t":
+                        rests = loop.split(subsep + "do", 1)
+                        if len(rests) > 1:
+                            break
+                    rest = rests[1]
+                if rest.split("end", 1)[0] \
+                        .replace("\n", "") \
+                        .replace("\t", "") \
+                        .replace("\r", "") \
+                        .replace(" ", "") == "" and "end" in rest and not in_comment:
+                    condition = loop.split(subsep + "do", 1)[0]
+                    log.info("Replacing blocking loop with condition:", condition)
+                    new_text += "if " + condition + " then\n" + \
+                        CONVERTER_PREFIX + "stop_game(function() return " + \
+                        condition + " end)\n" + rest
+                else:
+                    new_text += "while" + sep + loop
+            lua_file.set_text(new_text)
+
+
+def fix_recursion(lua_file):
+    functions = []
+    for node in ast.walk(lua_file._ast_tree):
+        if isinstance(node, astnodes.Function):
+            if isinstance(node.name, astnodes.Index):
+                continue
+            func_code = lua_file._text[node.start_char:node.stop_char + 1]
+            func_ast = ast.parse(func_code)
+            for sub_node in ast.walk(func_ast):
+                if isinstance(sub_node, astnodes.Call) and \
+                        isinstance(sub_node.func, astnodes.Name):
+                    if sub_node.func.id == node.name.id and \
+                            func_code[sub_node.stop_char - 1:
+                                      sub_node.stop_char + 1] == "()":
+                        functions.append([node, sub_node])
+    functions.reverse()
+    for func in functions:
+        log.warn("Limiting recursion depth approximately in", func[0].name.id)
+        lua_file.mixin_line("if " + CONVERTER_PREFIX +
+                            "call_depth >= 16381 then u_haltTime(16) \
+                            error(\"stack overflow\") end " +
+                            CONVERTER_PREFIX + "call_depth = " +
+                            CONVERTER_PREFIX + "call_depth + 1",
+                            func[0].name.id)
+        lua_file.mixin_line(CONVERTER_PREFIX + "call_depth = " +
+                            CONVERTER_PREFIX + "call_depth - 1",
+                            func[0].name.id, -1)
+
+
+OPENING_KEYWORDS = ["if", "do", "function"]
 SEPERATORS = [" ", "\t", "\n", ";", ",", "(", ")"]
 
 
@@ -66,7 +165,7 @@ def _count_keyword(code, keyword):
     return matches
 
 
-def _parse_line(line, ends, openings, needs_do):
+def _parse_line(line, ends, openings):
     # Counting openings and end keywords
     end_add = _count_keyword(line, "end")
     opening_add = 0
@@ -74,10 +173,6 @@ def _parse_line(line, ends, openings, needs_do):
         opening_add += _count_keyword(line, keyword)
     ends += end_add
     openings += opening_add
-    has_loop = False
-    for loop in "for", "while":
-        if _count_keyword(line, loop) > 0:
-            has_loop = True
     # Replace elseif without prior opening with if
     if _count_keyword(line, "elseif") > 0 and ends == openings and \
             line.find("end") < line.find("elseif"):
@@ -85,22 +180,26 @@ def _parse_line(line, ends, openings, needs_do):
         line = line.replace("elseif", "if")
         openings += 1
         opening_add += 1
-    dos = _count_keyword(line, "do")
-    if has_loop and dos == 0:
-        needs_do = True
-    # Remove lines without loop but with do,
-    #              with "elseif >",
+    function = _count_keyword(line, "function") > 0
+    if function and "(" not in line:
+        log.warn("Adding missing brackets to line:", line)
+        line = line + "()"
+    # Remove lines with "elseif >",
     #              with ", )" or
     #              with more ends than openings
-    if (not has_loop and not needs_do and dos > 0) \
-            or "elseif >" in line or ", )" in line or ends > openings:
+    if "elseif >" in line or ", )" in line or ends > openings:
         log.warn("Removing wrong line of lua:", line)
         line = ""
         ends -= end_add
         openings -= opening_add
-    if dos > 0:
-        needs_do = False
-    return line, ends, openings, needs_do
+    if "io.open(" in line and "\\" in line:
+        before, args = line.split("io.open(", 1)
+        before += "io.open("
+        args, after = args.split(")", 1)
+        after = ")" + after
+        line = before + args.replace("\\", "/") + after
+        log.warn("Fixed \\ in file path")
+    return line, ends, openings
 
 
 def _parse_code(code):
@@ -110,7 +209,6 @@ def _parse_code(code):
     lines = code.split("\n")
     code = ""
     is_comment = False
-    needs_do = False
     for i in range(len(lines)):
         # Ignoring but readding comments
         swap = False
@@ -128,7 +226,7 @@ def _parse_code(code):
                 swap = True
                 is_comment = False
         if not is_comment:
-            line, ends, openings, needs_do = _parse_line(line, ends, openings, needs_do)
+            line, ends, openings = _parse_line(line, ends, openings)
         if comment[:4] == "--[[" or comment[:7] == "--[===[":
             is_comment = True
         if swap:
