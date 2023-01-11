@@ -123,7 +123,7 @@ function prefix_get_style_module()
 			if i % 2 == 0 and i == l_getSides() - 1 then
 				self:darken_color(color, 1.4)
 			end
-			s_setOverrideColor((i - 1 + swap_offset) % #prefix_style.colors, unpack(color))
+			s_setOverrideColor((i - 1 + swap_offset) % limit, unpack(color))
 		end
 
 		-- cap
