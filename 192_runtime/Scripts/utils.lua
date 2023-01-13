@@ -78,3 +78,11 @@ function prefix_lookup_path(t, keys)
 	end
 	return directory
 end
+
+function prefix_floor_with_negatives(num)
+	if num < 0 then
+		return -math.floor(-num)
+	else
+		return math.floor(num)
+	end
+end

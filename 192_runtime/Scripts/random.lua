@@ -11,9 +11,11 @@ function math.random(a, b)
 		if a == 0 then
 			return y
 		else
-			return 1 + (y % a)
+			return 1 + (y % prefix_floor_with_negatives(a))
 		end
 	else
+		a = prefix_floor_with_negatives(a)
+		b = prefix_floor_with_negatives(b)
 		return a + (y % (b - a + 1))
 	end
 end
