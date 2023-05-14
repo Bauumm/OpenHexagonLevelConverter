@@ -1,5 +1,5 @@
 function prefix_get_persistent_storage()
-	local storage = {popped = false}
+	local storage = { popped = false }
 
 	function storage:allocate(size)
 		cw_clear()
@@ -18,10 +18,10 @@ function prefix_get_persistent_storage()
 		self:allocate(space)
 		cw_setVertexPos4(0, #str, space, 0, 0, 0, 0, 0, 0)
 		local nums = self:encode_str(str)
-		for i=1,#nums % 8 do
+		for i = 1, #nums % 8 do
 			table.insert(nums, 0)
 		end
-		for i=1,space - 1 do
+		for i = 1, space - 1 do
 			local pos = i - 1
 			cw_setVertexPos4(i, unpack(nums, pos * 8 + 1, pos * 8 + 8))
 		end
@@ -31,12 +31,12 @@ function prefix_get_persistent_storage()
 		local test = cw_create()
 		if test == 31 then
 			cw_destroy(test)
-			return "{\"level_values\": {}, \"files\": {}}"
+			return '{"level_values": {}, "files": {}}'
 		end
 		local len, space = cw_getVertexPos(0, 0)
 		local nums = {}
-		for i=1,space - 1 do
-			for _, num in pairs({cw_getVertexPos4(i)}) do
+		for i = 1, space - 1 do
+			for _, num in pairs({ cw_getVertexPos4(i) }) do
 				table.insert(nums, num)
 				if #nums == len then
 					break
@@ -51,7 +51,7 @@ function prefix_get_persistent_storage()
 
 	function storage:encode_str(str)
 		local result = {}
-		for char in str:gmatch"." do
+		for char in str:gmatch(".") do
 			table.insert(result, string.byte(char))
 		end
 		return result

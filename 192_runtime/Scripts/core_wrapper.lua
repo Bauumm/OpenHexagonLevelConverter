@@ -8,7 +8,7 @@ if prefix_was_defined == nil or u_inMenu() then
 		pulse_delay_max = 0,
 		beatpulse_max = 0,
 		beatpulse_delay_max = 0,
-		radius_min = 72
+		radius_min = 72,
 	}
 	prefix_NOT_SET_IN_ONINIT = {
 		id = true,
@@ -20,7 +20,7 @@ if prefix_was_defined == nil or u_inMenu() then
 		difficulty_multipliers = true,
 		style_id = true,
 		music_id = true,
-		lua_file = true
+		lua_file = true,
 	}
 	l_setShowPlayerTrail(false)
 	l_setShadersRequired(true)
@@ -28,7 +28,7 @@ if prefix_was_defined == nil or u_inMenu() then
 	prefix_level_time = 0
 	prefix_died = false
 	prefix_call_depth = 0
-	prefix_finished_timehalt = false  -- artifical timehalt when stack overflow happens
+	prefix_finished_timehalt = false -- artifical timehalt when stack overflow happens
 	prefix_game_stopped = false
 	prefix_stopped_time = 0
 	prefix_block_offset = 0
@@ -209,9 +209,9 @@ if prefix_was_defined == nil or u_inMenu() then
 		prefix_function_wrapper(prefix_onUnload)
 		prefix_update_events(0)
 		if not u_inMenu() and prefix_level_changed then
-			e_eval("prefix_change_level(\"" .. prefix_level_id .. "\", true)")
+			e_eval('prefix_change_level("' .. prefix_level_id .. '", true)')
 		end
-		local data = {level_values = {}, files = prefix_dump_files()}
+		local data = { level_values = {}, files = prefix_dump_files() }
 		for k, v in pairs(prefix_custom_keys) do
 			if old_keys[k] ~= v then
 				data.level_values[k] = v
@@ -226,7 +226,7 @@ if prefix_was_defined == nil or u_inMenu() then
 
 	function onLoad()
 		if not u_inMenu() then
-			u_haltTime(-6)  -- undo timehalt the steam version adds by default
+			u_haltTime(-6) -- undo timehalt the steam version adds by default
 			setLevelValueFloat("rotation_speed", getLevelValueFloat("rotation_speed") * (math.random(0, 1) * 2 - 1))
 
 			-- make font the same as 1.92

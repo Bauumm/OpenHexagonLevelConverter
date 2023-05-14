@@ -29,7 +29,7 @@ prefix_float.__tostring = function(o)
 	return o.value
 end
 function prefix_float:new(value)
-	return setmetatable({value=prefix_float.round(value or 0)}, prefix_float)
+	return setmetatable({ value = prefix_float.round(value or 0) }, prefix_float)
 end
 
 function prefix_round_to_even(num)
@@ -54,7 +54,7 @@ end
 -- insert a path into a recursive table structure
 function prefix_insert_path(t, keys, value)
 	local directory = t
-	for i=1,#keys do
+	for i = 1, #keys do
 		local key = keys[i]
 		if directory[key] == nil then
 			if i == #keys then

@@ -30,7 +30,10 @@ function prefix_get_pulse_module()
 				pulse_limit = l_getPulseMin()
 			end
 			self.pulse = self.pulse + pulse_add * frametime
-			if (self.pulse_direction > 0 and self.pulse >= pulse_limit) or (self.pulse_direction < 0 and self.pulse <= pulse_limit) then
+			if
+				(self.pulse_direction > 0 and self.pulse >= pulse_limit)
+				or (self.pulse_direction < 0 and self.pulse <= pulse_limit)
+			then
 				self.pulse = pulse_limit
 				self.pulse_direction = -self.pulse_direction
 				self.pulse_delay_half = getLevelValueFloat("pulse_delay_half_max")

@@ -3,7 +3,10 @@ function prefix_get_timeline_module()
 	Timeline.__index = Timeline
 
 	function Timeline:new()
-		return setmetatable({ready = true, finished = false, commands = {}, current_command = nil, current_index = 1}, Timeline)
+		return setmetatable(
+			{ ready = true, finished = false, commands = {}, current_command = nil, current_index = 1 },
+			Timeline
+		)
 	end
 
 	function Timeline:update(frametime)
@@ -66,7 +69,8 @@ function prefix_get_timeline_module()
 		if self.current_command == nil then
 			return
 		end
-		self.current_index = self.current_index + 1
+		--self.current_index = self.current_index + 1
+		table.remove(self.commands, self.current_index)
 		self.current_command = self.commands[self.current_index]
 	end
 
@@ -81,12 +85,11 @@ function prefix_get_timeline_module()
 		end
 	end
 
-
 	local Wait = {}
 	Wait.__index = Wait
 
 	function Wait:new(timeline, time)
-		return setmetatable({timeline = timeline, time = time or 0, current_time = time}, Wait)
+		return setmetatable({ timeline = timeline, time = time or 0, current_time = time }, Wait)
 	end
 
 	function Wait:update(frametime)
@@ -103,12 +106,11 @@ function prefix_get_timeline_module()
 		self.current_time = self.time
 	end
 
-
 	local Do = {}
 	Do.__index = Do
 
 	function Do:new(timeline, action)
-		return setmetatable({timeline = timeline, action = action}, Do)
+		return setmetatable({ timeline = timeline, action = action }, Do)
 	end
 
 	function Do:update()
@@ -116,8 +118,7 @@ function prefix_get_timeline_module()
 		self.timeline:next()
 	end
 
-	function Do:reset()
-	end
+	function Do:reset() end
 
 	return Timeline, Wait, Do
 end

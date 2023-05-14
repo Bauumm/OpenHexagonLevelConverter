@@ -5,7 +5,7 @@ function prefix_get_timing_system()
 		remainder = 0,
 		skipped_time = 0,
 		skip_divider = 0,
-		last_skip_divider = 1
+		last_skip_divider = 1,
 	}
 
 	function timing_sys:random_update(frametime)
@@ -13,7 +13,7 @@ function prefix_get_timing_system()
 			self.remainder = self.remainder + frametime
 			local calls = math.floor(self.remainder / self.next_time)
 			self.remainder = self.remainder - calls * self.next_time
-			for i=1, calls do
+			for i = 1, calls do
 				if self.next_calls >= 1 then
 					self.next_calls = self.next_calls - 1
 					prefix_call_onUpdate(self.next_time)

@@ -1,5 +1,4 @@
-prefix_random_values = {a = 1103515245, c = 12345}
-
+prefix_random_values = { a = 1103515245, c = 12345 }
 
 function math.random(a, b)
 	local t = prefix_random_values.a * prefix_random_values.x + prefix_random_values.c
@@ -23,6 +22,5 @@ function math.randomseed(s)
 	prefix_random_values.c = 12345
 	prefix_random_values.x = s % 0x80000000
 end
-
 
 math.randomseed(u_getAttemptRandomSeed())

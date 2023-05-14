@@ -10,7 +10,6 @@ getDelayMult = u_getDelayMultDM
 getDifficultyMult = u_getDifficultyMult
 execScript = u_execScript
 
-
 function prefix_resolve_function(func)
 	if type(func) == "string" then
 		return _G[func]
@@ -20,7 +19,6 @@ function prefix_resolve_function(func)
 		end
 	end
 end
-
 
 function prefix_setField(file, field, value)
 	local functions
@@ -162,7 +160,7 @@ os = {}
 function os.clock()
 	return prefix_get_actual_time() + prefix_block_offset / 60
 end
-os.exit = e_kill  -- levels that close the game in 1.92 should kill the player
+os.exit = e_kill -- levels that close the game in 1.92 should kill the player
 
 -- spoof date
 function os.date(format_string)
@@ -177,14 +175,14 @@ function os.date(format_string)
 	end
 	local time = prefix_get_actual_time() + 100000
 	local string = format_string
-			:gsub("%%y", "22")
-			:gsub("%%Y", "2022")
-			:gsub("%%m", "12")
-			:gsub("%%I", ensure_length(tostring(math.floor(time / 86400) % 7 + 1), 2))
-			:gsub("%%d", ensure_length(tostring(math.floor(time / 86400) % 30 + 1), 2))
-			:gsub("%%H", ensure_length(tostring(math.floor(time / 3600) % 24), 2))
-			:gsub("%%M", ensure_length(tostring(math.floor(time / 60) % 60), 2))
-			:gsub("%%S", ensure_length(tostring(math.floor(time) % 60), 2))
+		:gsub("%%y", "22")
+		:gsub("%%Y", "2022")
+		:gsub("%%m", "12")
+		:gsub("%%I", ensure_length(tostring(math.floor(time / 86400) % 7 + 1), 2))
+		:gsub("%%d", ensure_length(tostring(math.floor(time / 86400) % 30 + 1), 2))
+		:gsub("%%H", ensure_length(tostring(math.floor(time / 3600) % 24), 2))
+		:gsub("%%M", ensure_length(tostring(math.floor(time / 60) % 60), 2))
+		:gsub("%%S", ensure_length(tostring(math.floor(time) % 60), 2))
 	return string
 end
 
@@ -239,36 +237,40 @@ prefix_config_keys = {
 	"windowed_auto_resolution",
 	"windowed_height",
 	"windowed_width",
-	"zoom_factor"
+	"zoom_factor",
 }
 if not prefix_init_fs then
 	prefix_init_fs = true
 	prefix_original_io = io
-	io = setmetatable({}, {__index = function(t, k)
-		return function(f, ...)
-			if f ~= nil and f[k] ~= nil then
-				return f[k](f, ...)
-			end
-			if type(f) == "table" then
-				return prefix_original_io[k](f.file, ...)
-			else
-				return prefix_original_io[k](f, ...)
-			end
-		end
-	end})
-	prefix_fake_file = {__index = function(t, k)
-		if type(t.file[k]) == "function" then
-			return function(self, ...)
-				if type(self) == "table" then
-					return t.file[k](self.file, ...)
+	io = setmetatable({}, {
+		__index = function(t, k)
+			return function(f, ...)
+				if f ~= nil and f[k] ~= nil then
+					return f[k](f, ...)
+				end
+				if type(f) == "table" then
+					return prefix_original_io[k](f.file, ...)
 				else
-					return t.file[k](self, ...)
+					return prefix_original_io[k](f, ...)
 				end
 			end
-		else
-			return t.file[k]
-		end
-	end}
+		end,
+	})
+	prefix_fake_file = {
+		__index = function(t, k)
+			if type(t.file[k]) == "function" then
+				return function(self, ...)
+					if type(self) == "table" then
+						return t.file[k](self.file, ...)
+					else
+						return t.file[k](self, ...)
+					end
+				end
+			else
+				return t.file[k]
+			end
+		end,
+	}
 	function prefix_dump_files()
 		local files = {}
 		for path, file in pairs(prefix_virtual_filesystem) do
@@ -285,7 +287,8 @@ if not prefix_init_fs then
 				close = function(self)
 					self.file:seek("set", 0)
 					return true
-				end}, prefix_fake_file)
+				end,
+			}, prefix_fake_file)
 			file:write(contents)
 			file:seek("set", 0)
 			prefix_virtual_filesystem[path] = file
@@ -306,7 +309,8 @@ if not prefix_init_fs then
 				close = function(self)
 					self.file:seek("set", 0)
 					return true
-				end}, prefix_fake_file)
+				end,
+			}, prefix_fake_file)
 			prefix_virtual_filesystem[path] = file
 			return file
 		elseif mode == "r" then
@@ -322,9 +326,9 @@ if not prefix_init_fs then
 				end
 
 				-- Set default controls, so onInput can be used to replace isKeyPressed whenever possible
-				new_config.t_rotate_ccw = {{"kLeft"}}
-				new_config.t_rotate_cw = {{"kRight"}}
-				new_config.t_focus = {{"kShift"}}
+				new_config.t_rotate_ccw = { { "kLeft" } }
+				new_config.t_rotate_cw = { { "kRight" } }
+				new_config.t_focus = { { "kShift" } }
 
 				local new_file = io.tmpfile()
 				new_file:write(JSON:encode_pretty(new_config))
@@ -452,12 +456,12 @@ prefix_KEYS = {
 	F13 = 97,
 	F14 = 98,
 	F15 = 99,
-	Pause = 100
+	Pause = 100,
 }
 prefix_key_mapping = {
 	[prefix_KEYS.LShift] = "prefix_focus",
 	[prefix_KEYS.Left] = "prefix_movement == -1",
-	[prefix_KEYS.Right] = "prefix_movement == 1"
+	[prefix_KEYS.Right] = "prefix_movement == 1",
 }
 
 -- use onInput swap to find key if possible

@@ -5,7 +5,7 @@ function execEvent(event_id)
 	prefix_data_module:loadEvent(event_id)
 	local event = prefix_EVENT_FILES[event_id]
 	if event ~= nil then
-		table.insert(prefix_executingEvents, {["events"] = event})
+		table.insert(prefix_executingEvents, { ["events"] = event })
 	else
 		print("Trying to load non-existing event: " .. event_id)
 	end
@@ -15,7 +15,7 @@ function enqueueEvent(event_id)
 	prefix_data_module:loadEvent(event_id)
 	local event = prefix_EVENT_FILES[event_id]
 	if event ~= nil then
-		table.insert(prefix_queuedEvents, {["events"] = event})
+		table.insert(prefix_queuedEvents, { ["events"] = event })
 	else
 		print("Trying to load non-existing event: " .. event_id)
 	end
@@ -52,7 +52,7 @@ end
 
 function prefix_update_events(frametime)
 	local del_queue = {}
-	for i=1, #prefix_executingEvents do
+	for i = 1, #prefix_executingEvents do
 		local done = prefix_update_event(prefix_executingEvents[i], frametime)
 		if #prefix_executingEvents == 0 then
 			-- level changed
@@ -72,6 +72,6 @@ function prefix_update_events(frametime)
 	end
 
 	prefix_update_message_timeline(frametime)
-	
+
 	prefix_execute_events(prefix_MAIN_EVENTS, prefix_level_time)
 end

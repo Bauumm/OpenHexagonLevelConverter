@@ -1,6 +1,5 @@
 u_execScript("color_calculations.lua")
 
-
 function prefix_get_style_module()
 	l_setManual3dPulseControl(true)
 	s_setBGTileRadius(4500)
@@ -9,23 +8,25 @@ function prefix_get_style_module()
 		pulse3D = 1,
 		pulse3DDirection = 1,
 		wall_shader = shdr_getDependencyShaderId(prefix_DISAMBIGUATOR, "192_runtime", "Baum", "solid.frag"),
-		hue_colors = setmetatable({}, {__index = function(self, k)
-			local v = prefix_style_module:get_color_from_hue(k)
-			self[k] = v
-			return v
-		end}),
-		background_colors = {}
+		hue_colors = setmetatable({}, {
+			__index = function(self, k)
+				local v = prefix_style_module:get_color_from_hue(k)
+				self[k] = v
+				return v
+			end,
+		}),
+		background_colors = {},
 	}
 
 	function Style:darken_color(color, darken_mult, copy)
 		if copy then
-			color = {unpack(color)}
+			color = { unpack(color) }
 		end
 		darken_mult = darken_mult or (prefix_style["3D_darken_multiplier"] or 1.5)
 		if darken_mult == 0 then
-			color[1], color[2], color[3] = 0,0,0
+			color[1], color[2], color[3] = 0, 0, 0
 		else
-			for i=1,3 do
+			for i = 1, 3 do
 				color[i] = color[i] / darken_mult
 			end
 		end
@@ -35,27 +36,33 @@ function prefix_get_style_module()
 	-- This is quite messy since it's copied from 1.92
 	function Style:get_color_from_hue(hue)
 		hue = prefix_float.round(hue)
-		local s,v,r,g,b=1,1,0,0,0
+		local s, v, r, g, b = 1, 1, 0, 0, 0
 		local i = math.floor(hue * 6)
 		local f = hue * 6 - i
-		local p,q,t=v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
+		local p, q, t = v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
 		local im
 		if i >= 0 then
 			im = i % 6
 		else
 			im = -(i % 6)
 		end
-		if im == 0 then r,g,b=v,t,p
-		elseif im == 1 then r,g,b=q,v,p
-		elseif im == 2 then r,g,b=p,v,t
-		elseif im == 3 then r,g,b=p,q,v
-		elseif im == 4 then r,g,b=t,p,v
-		elseif im == 5 then r,g,b=v,p,q
+		if im == 0 then
+			r, g, b = v, t, p
+		elseif im == 1 then
+			r, g, b = q, v, p
+		elseif im == 2 then
+			r, g, b = p, v, t
+		elseif im == 3 then
+			r, g, b = p, q, v
+		elseif im == 4 then
+			r, g, b = t, p, v
+		elseif im == 5 then
+			r, g, b = v, p, q
 		end
 		r = math.modf(r * 255)
 		g = math.modf(g * 255)
 		b = math.modf(b * 255)
-		return {r,g,b,255}
+		return { r, g, b, 255 }
 	end
 
 	function Style:component_clamp(component)
@@ -92,7 +99,8 @@ function prefix_get_style_module()
 
 	function Style:compute_colors()
 		-- main
-		self.main_color = self.calculation_methods[prefix_style.main.calculation_method](prefix_style.main, self.main_color)
+		self.main_color =
+			self.calculation_methods[prefix_style.main.calculation_method](prefix_style.main, self.main_color)
 		shdr_setUniformFVec4(self.wall_shader, "color", unpack(self.main_color))
 		s_setMainOverrideColor(unpack(self.main_color))
 		s_setPlayerOverrideColor(unpack(self.main_color))
@@ -106,8 +114,11 @@ function prefix_get_style_module()
 			swap_offset = math.modf(self.swap_time / (prefix_style.max_swap_time / 2))
 		end
 		local limit = l_getSides() > #prefix_style.colors and #prefix_style.colors or l_getSides()
-		for i=1, limit do
-			local color = self.calculation_methods[prefix_style.colors[i].calculation_method](prefix_style.colors[i], self.background_colors[i])
+		for i = 1, limit do
+			local color = self.calculation_methods[prefix_style.colors[i].calculation_method](
+				prefix_style.colors[i],
+				self.background_colors[i]
+			)
 			self.background_colors[i] = color
 			if i % 2 == 0 and i == l_getSides() - 1 then
 				self:darken_color(color, 1.4)
@@ -117,7 +128,7 @@ function prefix_get_style_module()
 
 		-- cap
 		if #prefix_style.colors < 2 then
-			cap_color = {0, 0, 0, 0}
+			cap_color = { 0, 0, 0, 0 }
 		else
 			local cap_index = (1 + swap_offset) % #prefix_style.colors + 1
 			cap_color = self.background_colors[cap_index]
@@ -138,7 +149,7 @@ function prefix_get_style_module()
 			override_color[4] = override_color[4] / alpha_mult
 		end
 		local alpha_falloff = prefix_style["3D_alpha_falloff"] or 3
-		for i=0, s_get3dDepth() - 1 do
+		for i = 0, s_get3dDepth() - 1 do
 			s_set3dLayerOverrideColor(i, unpack(override_color))
 			override_color[4] = (override_color[4] - alpha_falloff) % 256
 		end
