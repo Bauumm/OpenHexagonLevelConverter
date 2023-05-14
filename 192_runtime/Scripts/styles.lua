@@ -130,7 +130,8 @@ function prefix_get_style_module()
 		if #prefix_style.colors < 2 then
 			cap_color = { 0, 0, 0, 0 }
 		else
-			cap_color = self.background_colors[2]
+			local cap_index = (1 + swap_offset) % #prefix_style.colors + 1
+			cap_color = self.background_colors[cap_index]
 		end
 		s_setCapOverrideColor(unpack(cap_color))
 
