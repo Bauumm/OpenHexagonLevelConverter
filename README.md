@@ -1,7 +1,7 @@
 # OpenHexagonLevelConverter
 A tool to automatically port Open Hexagon 1.92 Levels to the new Open Hexagon
 # Known Issues
-- This branch uses my fork of the game to do some things that would be impossible otherwise
+- This tool relies on my fork of the game to do some things that would otherwise be impossible
 - timings may feel different, due to 1.92 being framerate dependant
 # Usage
 You may need to set `LD_LIBRARY_PATH` to `/usr/local/lib` for it to find SSVUtilsJson
